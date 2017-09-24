@@ -1,0 +1,149 @@
+# OSX/Linux (https://github.com/travis-ci-tester/toolchain-table)
+
+# Workaround for https://github.com/travis-ci/travis-ci/issues/8363
+language:
+  - minimal
+
+# Container-based infrastructure (Linux)
+# * https://docs.travis-ci.com/user/migrating-from-legacy/#How-can-I-use-container-based-infrastructure%3F
+sudo:
+  - false
+
+dist:
+  - trusty
+
+# Install packages differs for container-based infrastructure
+# * https://docs.travis-ci.com/user/migrating-from-legacy/#How-do-I-install-APT-sources-and-packages%3F
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      # For Qt
+      - libegl1-mesa-dev
+
+      # For ogles_gpgpu (GL library)
+      - libgl1-mesa-dev
+
+      # Packages for Android development: http://superuser.com/a/360398/252568
+      - libncurses5:i386
+      - libstdc++6:i386
+      - zlib1g:i386
+
+      # Default GCC 4.8 is buggy:
+      # * https://github.com/elucideye/drishti/issues/273#issuecomment-301297286
+      - g++-5
+      - gcc-5
+
+      # pip3
+      - python3-pip
+
+matrix:
+  include:
+    # Linux {
+
+    - os: linux
+      env: CONFIG=Release TOOLCHAIN=gcc-5-pic-hid-sections-lto INSTALL=--strip
+
+    # }
+
+    # OSX {
+
+    - os: osx
+      env: CONFIG=Release TOOLCHAIN=osx-10-11-hid-sections-lto INSTALL=--install
+
+    - os: osx
+      osx_image: xcode8.1
+      env: CONFIG=MinSizeRel TOOLCHAIN=ios-nocodesign-10-1-arm64-dep-9-0-device-libcxx-hid-sections-lto INSTALL=--install
+
+    - os: osx
+      osx_image: xcode8.1
+      env: CONFIG=Release TOOLCHAIN=osx-10-12-sanitize-address-hid-sections INSTALL=--install
+
+    - os: osx
+      env: CONFIG=MinSizeRel TOOLCHAIN=android-ndk-r10e-api-19-armeabi-v7a-neon-hid-sections-lto INSTALL=--strip
+
+    # }
+
+env:
+  global:
+    - secure: "m+dNB+eUPoBGCoHpr4xy2gI+6CpYka1Osy3ZoZ8kaN8ROtatGkr3CKUAWmiA8Hh6nzgGCZEV5VnTbMZXW9IIHItAbueNhi0BTJJRLDUV+I7UvdNbeOypggT39GyI086LGS/dNC3jp/MI6aATE+UxXzrxeCnGgBJb0ytKlE2FR9mUhPfctVDFA+t1eftBxPHRFV9t5iZJIwOQ8V7Aos7EMb5CS8wpwu7KGneaPnspKDM9iyrCoqqPa77acnBCwGijBRtMXmvvnL1tEMU7V97dsHLTqKQef2Aez3T1xxw22Xg5Zk16EfPg3/jPBf93Nms/pl0iaFl5JIvmsqEA3TNYNSY3fG29hXAiOB7/DPB/I7h7LeuLAH1qjFKYD6nzjvJV71RspSgj+yZ6elye+4FvhELEZpBUInRR4fT+Pf9PQFmkqDGlsaezqkzwIELhCej+1FLX+Zy806kwm13Y/5HfSVu7B2YJOM2eX5k7ie9ulRrhR/9+tri2N5bYjYOCFVguWq/jyos41R3IBns6dIP+NYo79sfoCCHsZDb9XorqfgzVVtJQBmRfa6M6y4t+AOyhTs0EBcqps4gnHZyWaKQAMAzUf61DpmRoc4hgPcNdhGV5ba7ekyc4sovLoxZVpAaUcBvz+Eu5k+ereUlK4gEd2r2gul82KDaSfTdHjC9KQyI="
+
+# disable the default submodule logic to support local modification of .gitmodules paths
+git:
+  submodules: false
+
+# See https://docs.travis-ci.com/user/private-dependencies/#API-Token
+# CI_USER_TOKEN is added to .travis.yml settings
+before_install:
+
+  # Add '--quiet' to avoid leaking the token to logs
+  - git submodule update --init --recursive --quiet
+
+install:
+  # Info about OS
+  - uname -a
+
+  # Install Python 3
+  - if [[ "`uname`" == "Darwin" ]]; then travis_retry brew install python3; fi
+
+  # Install Python package 'requests'
+  # 'easy_install3' is not installed by 'brew install python3' on OS X 10.9 Maverick
+  - if [[ "`uname`" == "Darwin" ]]; then pip3 install requests; fi
+  - if [[ "`uname`" == "Linux" ]]; then travis_retry pip3 install --user requests; fi
+
+  # Install latest Polly toolchains and scripts
+  - wget https://github.com/ruslo/polly/archive/master.zip
+  - unzip master.zip
+  - POLLY_ROOT="`pwd`/polly-master"
+  - export PATH="${POLLY_ROOT}/bin:${PATH}"
+
+  # Install dependencies (CMake, Android NDK)
+  - install-ci-dependencies.py
+
+  # Tune locations
+  - export PATH="`pwd`/_ci/cmake/bin:${PATH}"
+
+  # Installed if toolchain is Android (otherwise directory doesn't exist)
+  - export ANDROID_NDK_r10e="`pwd`/_ci/android-ndk-r10e"
+
+script:
+
+    # '--ios-{multiarch,combined}' do nothing for non-iOS builds
+    - >
+      polly.py
+      --toolchain ${TOOLCHAIN}
+      --config ${CONFIG}
+      --verbose
+      --ios-multiarch --ios-combined
+      --fwd
+      ACF_BUILD_TESTS=YES
+      ACF_BUILD_EXAMPLES=YES
+      ACF_COPY_3RDPARTY_LICENSES=ON
+      GAUZE_ANDROID_USE_EMULATOR=YES
+      HUNTER_USE_CACHE_SERVERS=ONLY
+      HUNTER_DISABLE_BUILDS=YES
+      HUNTER_CONFIGURATION_TYPES=${CONFIG}
+      HUNTER_SUPPRESS_LIST_OF_FILES=ON
+      --archive acf
+      --jobs 2
+      --test
+      ${INSTALL}
+
+before_deploy:
+    - gem install mime-types -v 2.6.2 # workaround for https://github.com/travis-ci/travis-ci/issues/5145
+    - export FILE_TO_UPLOAD=$(ls _archives/acf-*.tar.gz)
+
+deploy:
+  provider: releases
+  api_key:
+    - secure: "YKjuO1Xbq9v3u3bGVrzsHcPWHOULiKBxZhyupE+GRXnCngQjlyPFm8JpoayI3y8nVatpF9YcfXfZVykBAgRtSkDliMDwnPyUsiURzUcwW2Ck1JdiBm2M3BHs+usXvcdANQK3SSxGXU43FsghBJZXV0Ck93t8eNuYhqbiuVU0L9y321UO+yYC44BmNLMpld2cD5scZX3CcibtS9FBBAsXkZESRdT1Jy2PgVz9HV+jAN3WFGpoYK4B2uXWmStjbRkyTlxfO4B+XhX77h/KDPXaU31fjW3n1TumA8zGvTQ3UOM012UjlbJCC8T4+G4zk+UD3w/fSS8JEeYU7psleTitqpzmWTeQ4hFmKVs435IV1eJVNgrmyLA9nZHO91uWyFJ4uks+F0sjKTWbzZ1thwJf18gfPP6EwsARqLgb6ZmXCg6ULulGQKfnvrgYmobifssSVkttE2b9fkUmDvZcRtDPixvP5Cr1do0gCdfrCGmqsCWjy3icLrzT7Thr85TcX+UXYbdSR0iDl3tQQ/CX+VyEGd4IxbH1bzinstIopzjHkgjzxWVGZaLy5hM+VeI0amurxixTUlNTBlXsvm6tjinfNiSYSbazHIX1XjoVRM0YS///PlHeRUpcyK67lIq78TVvJJsIb6zQSLkhO6O7gMf2+oO83A24zKRNH1cw1pkYs7I="
+  file_glob: true
+  file: "${FILE_TO_UPLOAD}"
+  skip_cleanup: true
+  on:
+    tags: true
+
+branches:
+  except:
+    - /^pr\..*/

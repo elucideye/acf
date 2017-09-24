@@ -1,0 +1,3 @@
+[submodule "drishti-upload"]
+	path = drishti-upload
+	url = https://github.com/elucideye/drishti-upload

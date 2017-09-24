@@ -10,6 +10,6 @@ ARGS=(
     --jobs 8
 )
 
-build.py --toolchain ${TOOLCHAIN} ${ARGS[@]} --reconfig --install ${*}
+build.py --toolchain ${TOOLCHAIN} ${ARGS[@]} --install ${*}
 
 
