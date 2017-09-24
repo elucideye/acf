@@ -121,5 +121,5 @@ install(
 # }
 
 # unit tests
-#add_subdirectory(ut)
+add_subdirectory(acf/ut)
 
