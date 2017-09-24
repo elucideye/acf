@@ -1,6 +1,3 @@
-# Prerequisites
-*.d
-
 # Compiled Object files
 *.slo
 *.lo
@@ -30,3 +27,31 @@
 *.exe
 *.out
 *.app
+
+# Hunter/polly 
+_logs/*
+_builds/*
+_install/*
+_framework/*
+_os/*
+_archives/*
+_assets/*
+
+# Stored releases
+releases/*
+
+# Mac OS X
+.DS_Store
+
+# Emacs
+*.*~
+*~
+
+# TAGS
+TAGS
+
+# Common backup
+*.orig
+
+# Matlab
+*.mexmaci64
