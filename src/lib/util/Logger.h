@@ -9,8 +9,8 @@
 
 */
 
-#ifndef __drishti_core_Logger_h__
-#define __drishti_core_Logger_h__
+#ifndef __util_core_Logger_h__
+#define __util_core_Logger_h__
 
 #include <spdlog/spdlog.h>
 
@@ -36,14 +36,14 @@ protected:
 };
 
 // Enable only one of these:
-#define DRISHTI_DO_VERBOSE_LOGGING 0
-#define DRISHTI_DO_COMPACT_LOGGING 0
-#define DRISHTI_DO_NO_LOGGING 1
+#define ACF_DO_VERBOSE_LOGGING 0
+#define ACF_DO_COMPACT_LOGGING 0
+#define ACF_DO_NO_LOGGING 1
 
-#if DRISHTI_DO_VERBOSE_LOGGING
+#if ACF_DO_VERBOSE_LOGGING
 // Verbose:
 // clang-format off
-#define DRISHTI_STREAM_LOG_FUNC(0,1,ptr) do                      \
+#define ACF_STREAM_LOG_FUNC(0,1,ptr) do                      \
 {                                                                \
     if(ptr)                                                      \
     {                                                            \
@@ -53,14 +53,14 @@ protected:
 // clang-format on
 #endif
 
-#if DRISHTI_DO_COMPACT_LOGGING
+#if ACF_DO_COMPACT_LOGGING
 // Minimal:
 // clang-format off
-#define DRISHTI_STREAM_LOG_FUNC(FILE_ID,CHECKPOINT,ptr) do   \
+#define ACF_STREAM_LOG_FUNC(FILE_ID,CHECKPOINT,ptr) do   \
 {                                                            \
    if(ptr)                                                   \
    {                                                         \
-       if(drishti::core::Logger::count() < 999999)           \
+       if(util::Logger::count() < 999999)           \
        {                                                     \
            ptr->info("{} : {}", FILE_ID, CHECKPOINT);        \
        }                                                     \
@@ -69,10 +69,10 @@ protected:
 // clang-format on
 #endif
 
-#if DRISHTI_DO_NO_LOGGING
+#if ACF_DO_NO_LOGGING
 // Disable:
 // clang-format off
-#define DRISHTI_STREAM_LOG_FUNC(FILE_ID,CHECKPOINT,ptr)
+#define ACF_STREAM_LOG_FUNC(FILE_ID,CHECKPOINT,ptr)
 // clang-format on
 #endif
 
@@ -108,21 +108,21 @@ inline std::string className(const std::string& prettyFunction)
 
 // clang-format off
 #if _MSC_VER
-#  define __METHOD_NAME__ drishti::core::methodName(__FUNCSIG__)
-#  define __CLASS_NAME__ drishti::core::className(__FUNCSIG__)
+#  define __METHOD_NAME__ util::methodName(__FUNCSIG__)
+#  define __CLASS_NAME__ util::className(__FUNCSIG__)
 #else
-#  define __METHOD_NAME__ drishti::core::methodName(__PRETTY_FUNCTION__)
-#  define __CLASS_NAME__ drishti::core::className(__PRETTY_FUNCTION__)
+#  define __METHOD_NAME__ util::methodName(__PRETTY_FUNCTION__)
+#  define __CLASS_NAME__ util::className(__PRETTY_FUNCTION__)
 #endif
 // clang-format on
 
 // clang-format off
-#define DRISHTI_TO_STR_(x) #x
-#define DRISHTI_TO_STR(x) DRISHTI_TO_STR_(x)
-#define DRISHTI_LOCATION_FULL std::string(__PRETTY_FUNCTION__)
-#define DRISHTI_LOCATION_SIMPLE __CLASS_NAME__ + "::" + __METHOD_NAME__
+#define ACF_TO_STR_(x) #x
+#define ACF_TO_STR(x) ACF_TO_STR_(x)
+#define ACF_LOCATION_FULL std::string(__PRETTY_FUNCTION__)
+#define ACF_LOCATION_SIMPLE __CLASS_NAME__ + "::" + __METHOD_NAME__
 // clang-format on
 
 UTIL_NAMESPACE_END
 
-#endif // __drishti_core_Logger_h__
+#endif // __util_core_Logger_h__

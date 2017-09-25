@@ -8,8 +8,8 @@
 
 */
 
-#ifndef __drishti_acf_gpu_gradhist_h__
-#define __drishti_acf_gpu_gradhist_h__
+#ifndef __acf_gpu_gradhist_h__
+#define __acf_gpu_gradhist_h__
 
 #include "acf/acf_common.h"
 #include "ogles_gpgpu/common/proc/base/filterprocbase.h"
@@ -72,4 +72,4 @@ private:
 
 END_OGLES_GPGPU
 
-#endif // __drishti_acf_gpu_gradhist_h__
+#endif // __acf_gpu_gradhist_h__

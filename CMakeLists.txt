@@ -84,7 +84,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # make sure these are before first hunter_add_package() call
 option(ACF_BUILD_APPS "Build applications" ON)
-option(ACF_SERIALIZE_WITH_CEREAL "Serialize w/ cereal" ON) # hunter update
+option(ACF_SERIALIZE_WITH_CEREAL "Serialize w/ cereal" ON) # always on
 option(ACF_SERIALIZE_WITH_CVMATIO "Build with CVMATIO" ON)
 option(ACF_BUILD_OGLES_GPGPU "Build with OGLES_GPGPU" ON)
 option(ACF_BUILD_TESTS "Build tests" ON)

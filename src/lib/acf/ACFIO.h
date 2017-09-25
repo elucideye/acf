@@ -17,10 +17,12 @@
 
 #include <opencv2/core/core.hpp>
 
-#if DRISHTI_SERIALIZE_WITH_CVMATIO
-#include "cvmatio/MatlabIO.hpp"
-#include "cvmatio/MatlabIOContainer.hpp"
-#endif // DRISHTI_SERIALIZE_WITH_CVMATIO
+// clang-format off
+#if ACF_SERIALIZE_WITH_CVMATIO
+#  include "cvmatio/MatlabIO.hpp"
+#  include "cvmatio/MatlabIOContainer.hpp"
+#endif
+// clang-format on
 
 #include <string>
 #include <iostream>
@@ -82,7 +84,7 @@ std::ostream& operator<<(std::ostream& os, const Field<std::vector<T2>>& src)
 // #################### CVMATIO ##################################################
 // ###############################################################################
 
-#if DRISHTI_SERIALIZE_WITH_CVMATIO
+#if ACF_SERIALIZE_WITH_CVMATIO
 
 typedef std::vector<MatlabIOContainer> VecContainer;
 typedef std::vector<VecContainer> VecVecContainer;
@@ -361,7 +363,7 @@ struct ParserNode
     MatlabIO m_matio;
 };
 
-#endif // DRISHTI_SERIALIZE_WITH_CVMATIO
+#endif // ACF_SERIALIZE_WITH_CVMATIO
 
 ACF_NAMESPACE_END
 

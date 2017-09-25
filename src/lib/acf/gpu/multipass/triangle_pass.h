@@ -11,8 +11,8 @@
 /**
  * GPGPU gaussian smoothing processor.
  */
-#ifndef __drishti_acf_gpu_multipass_triangle_pass_h__
-#define __drishti_acf_gpu_multipass_triangle_pass_h__
+#ifndef __acf_gpu_multipass_triangle_pass_h__
+#define __acf_gpu_multipass_triangle_pass_h__
 
 #include "acf/acf_common.h"
 #include "ogles_gpgpu/common/common_includes.h"

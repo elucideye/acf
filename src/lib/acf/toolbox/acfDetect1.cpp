@@ -19,9 +19,6 @@ using namespace std;
 
 typedef unsigned int uint32;
 
-#define DRISHTI_ACF_DEBUG_CID 0
-#define DRISHTI_ACF_DEBUG_SCANNING 0
-
 ACF_NAMESPACE_BEGIN
 
 /*
@@ -92,33 +89,16 @@ public:
 
     virtual void operator()(const cv::Range& range) const
     {
-#if DEBUG_SCANNING
-        cv::imshow("I", I.base());
-#endif
         for (int c = 0; c < size1.width; c += step1.x)
         {
             for (int r = 0; r < size1.height; r += step1.y)
             {
                 int offset = (r * stride / shrink) + (c * stride / shrink) * rowStride;
                 float h = evaluate(chns, offset);
-#if DEBUG_SCANNING
-                drawScan(r, c, offset);
-#endif
                 if (h > cascThr)
                 {
                     sink->add({ c, r }, h);
                 }
-            }
-        }
-    }
-
-    void drawScan(int r, int c, int offset) const
-    {
-        if (r == c && !(r % 4))
-        {
-            for (int i = 0; i < cids.size(); i++)
-            {
-                const_cast<T&>(chns[offset + cids[i]]) = 255 * float(i % (12 * 12)) / float(12 * 12);
             }
         }
     }

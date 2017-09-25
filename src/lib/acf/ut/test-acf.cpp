@@ -144,7 +144,7 @@ protected:
     // Cleanup
     virtual ~ACFTest()
     {
-        util::Logger::drop("test-drishti-acf");
+        util::Logger::drop("test-acf");
     }
 
     std::shared_ptr<acf::Detector> create(const std::string& filename, bool do10Channel = true)

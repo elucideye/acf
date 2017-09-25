@@ -23,7 +23,7 @@
 #include <vector>
 #include <string>
 
-UTIL_BEGIN_NAMESPACE(util) // namespace drishti {
+UTIL_BEGIN_NAMESPACE(util) // namespace util {
 UTIL_BEGIN_NAMESPACE(cli)  // namespace cli {
 
 // For use with istream_iterator to read complete lines (new line delimiter)
@@ -49,7 +49,7 @@ public:
     }
 };
 
-// drishti::cli::
+// util::cli::
 inline std::vector<std::string>
 expand(const std::string& filename, const std::string& ext = ".txt")
 {
@@ -70,7 +70,7 @@ expand(const std::string& filename, const std::string& ext = ".txt")
     return list;
 }
 
-// drishti::cli::file::
+// util::cli::file::
 UTIL_BEGIN_NAMESPACE(file) // namespace file {
 inline bool exists(const std::string& filename)
 {
@@ -78,7 +78,7 @@ inline bool exists(const std::string& filename)
 }
 UTIL_END_NAMESPACE(file) // }
 
-// drishti::cli::directory
+// util::cli::directory
 UTIL_BEGIN_NAMESPACE(directory) // namespace directory {
 // Options:
 // * c++17 std::filesystem (not adopted yet)
@@ -86,8 +86,8 @@ UTIL_BEGIN_NAMESPACE(directory) // namespace directory {
 // * boost::filesystem::exists()
 // * stat()
 // * create a small test file <= ### FOR NOW
-// Check for writeable directory (will create .drishti file as side-effect)
-inline bool exists(const std::string& dir, const std::string& tag = ".drishti")
+// Check for writeable directory (will create .acf file as side-effect)
+inline bool exists(const std::string& dir, const std::string& tag = ".acf")
 {
     return std::ofstream(dir + "/" + tag).good();
 }
@@ -95,4 +95,4 @@ UTIL_END_NAMESPACE(directory) // }
 UTIL_END_NAMESPACE(cli)       // }
 UTIL_END_NAMESPACE(util)      // }
 
-#endif // drishti_cli_h
+#endif // util_cli_h

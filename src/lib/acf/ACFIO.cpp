@@ -13,7 +13,7 @@
 
 ACF_NAMESPACE_BEGIN
 
-#if DRISHTI_SERIALIZE_WITH_CVMATIO
+#if defined(ACF_SERIALIZE_WITH_CVMATIO)
 
 int Detector::deserialize(const std::string& filename)
 {
@@ -170,7 +170,7 @@ int Detector::deserialize(ParserNodeDetector& detector_)
 
     return 0;
 }
-#else  // DRISHTI_SERIALIZE_WITH_CVMATIO
+#else  // ACF_SERIALIZE_WITH_CVMATIO
 int Detector::deserialize(const char* filename)
 {
     return -1;
@@ -178,7 +178,7 @@ int Detector::deserialize(const char* filename)
 int Detector::deserialize(const std::string& filename) { return -1; }
 int Detector::deserialize(std::istream& is) { return -1; }
 int Detector::deserialize(ParserNodeDetector& detector_) { return -1; }
-#endif // DRISHTI_SERIALIZE_WITH_CVMATIO
+#endif // ACF_SERIALIZE_WITH_CVMATIO
 
 ACF_NAMESPACE_END
 
@@ -195,7 +195,7 @@ int Detector::deserializeAny(const std::string& filename)
         return 0;
     }
 
-#if DRISHTI_SERIALIZE_WITH_CVMATIO
+#if ACF_SERIALIZE_WITH_CVMATIO
     if (filename.find(".mat") != std::string::npos)
     {
         return deserialize(filename);
@@ -210,7 +210,7 @@ int Detector::deserializeAny(std::istream& is, const std::string& hint)
         load_cpb(is, *this);
         return 0;
     }
-#if DRISHTI_SERIALIZE_WITH_CVMATIO
+#if ACF_SERIALIZE_WITH_CVMATIO
     if (hint.empty() || (hint.find(".mat") != std::string::npos))
     {
         return deserialize(is);

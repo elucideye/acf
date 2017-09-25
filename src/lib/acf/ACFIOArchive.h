@@ -25,8 +25,6 @@
 #endif
 // clang-format on
 
-#define ACF_DO_HALF 1
-
 // clang-format off
 #if ACF_DO_HALF
 #  include "half/half.hpp"

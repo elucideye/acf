@@ -1,7 +1,7 @@
 /*! -*-c++-*-
-  @file   drishti_core.h
+  @file   acf_util.h
   @author David Hirvonen
-  @brief  Declaration of internal drishti core namespace.
+  @brief  Declaration of internal util namespace.
 
   \copyright Copyright 2014-2016 Elucideye, Inc. All rights reserved.
   \license{This project is released under the 3 Clause BSD License.}

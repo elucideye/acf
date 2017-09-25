@@ -8,8 +8,8 @@
 
 */
 
-#ifndef __drishti_core_LazyParallelResource_h__
-#define __drishti_core_LazyParallelResource_h__
+#ifndef __util_LazyParallelResource_h__
+#define __util_LazyParallelResource_h__
 
 #include "util/acf_util.h"
 #include <functional>
