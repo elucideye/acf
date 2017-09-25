@@ -67,5 +67,4 @@ add_subdirectory(lib)
 ## Applications ##
 ##################
 
-
 add_subdirectory(app)
