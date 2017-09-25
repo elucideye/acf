@@ -125,7 +125,7 @@ int gauze_main(int argc, char** argv)
     const auto argumentCount = argc;
 
     // Instantiate line logger:
-    auto logger = util::Logger::create("drishti-acf");
+    auto logger = util::Logger::create("acf-detect");
 
     // ############################
     // ### Command line parsing ###
@@ -144,7 +144,7 @@ int gauze_main(int argc, char** argv)
     int minWidth = -1; // minimum object width
     int maxWidth = -1; // maximum object width TODO
 
-    cxxopts::Options options("drishti-acf", "Command line interface for ACF object detection (see Piotr's toolbox)");
+    cxxopts::Options options("acf-detect", "Command line interface for ACF object detection (see Piotr's toolbox)");
 
     // clang-format off
     options.add_options()
@@ -183,9 +183,9 @@ int gauze_main(int argc, char** argv)
         return 1;
     }
 
-    if (util::cli::directory::exists(sOutput, ".drishti-acf"))
+    if (util::cli::directory::exists(sOutput, ".acf-detect"))
     {
-        std::string filename = sOutput + "/.drishti-acf";
+        std::string filename = sOutput + "/.acf-detect";
         remove(filename.c_str());
     }
     else

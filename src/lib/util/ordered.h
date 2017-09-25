@@ -1,5 +1,5 @@
 /*! -*-c++-*-
-  @file   drishti_algorithm.h
+  @file   ordered.h
   @author David Hirvonen
   @brief  Return vector index for sorted array.
 
@@ -8,8 +8,8 @@
 
 */
 
-#ifndef __acf_drishti_algorithm_h__
-#define __acf_drishti_algorithm_h__ 1
+#ifndef __util_ordered_h__
+#define __util_ordered_h__ 1
 
 #include <vector>
 #include <numeric>
@@ -32,4 +32,4 @@ std::vector<size_t> ordered(const std::vector<T>& values, const Comp& C)
 
 UTIL_NAMESPACE_END
 
-#endif // __acf_drishti_algorithm_h__ 1
+#endif // __util_ordered_ 1

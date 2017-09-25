@@ -488,7 +488,6 @@ protected:
 
     double m_detectScorePruneRatio = 0.0;
 
-    //drishti::core::Pyramid m_pyramid;
     bool m_isLuv = false;
     bool m_isTranspose = false;
     bool m_isRowMajor = false;

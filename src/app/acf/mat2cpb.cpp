@@ -1,7 +1,7 @@
 /*! -*-c++-*-
  @file   mat2cpb.cpp
  @author David Hirvonen
- @brief  Convert drishti ACF detection model from MAT (matlab) to CPB (cereal)
+ @brief  Convert ACF detection model from MAT (matlab) to CPB (cereal)
  
  \copyright Copyright 2017 Elucideye, Inc. All rights reserved.
  \license{This project is released under the 3 Clause BSD License.}

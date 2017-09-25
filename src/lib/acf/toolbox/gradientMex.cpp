@@ -16,7 +16,7 @@
 
 #define PI 3.14159265f
 
-#define DRISHTI_DEBUG_ACOS_TABLE 0
+#define ACF_DEBUG_ACOS_TABLE 0
 
 // compute x and y gradients for just one column (uses sse)
 void grad1(float* I, float* Gx, float* Gy, int h, int w, int x)
@@ -105,7 +105,7 @@ void grad2(float* I, float* Gx, float* Gy, int h, int w, int d)
     }
 }
 
-#if DRISHTI_DEBUG_ACOS_TABLE
+#if ACF_DEBUG_ACOS_TABLE
 static bool isValid(const __m128& value)
 {
     for (int i = 0; i < 4; i++)
@@ -130,7 +130,7 @@ public:
 
     float operator[](int i) const
     {
-#if DRISHTI_DEBUG_ACOS_TABLE
+#if ACF_DEBUG_ACOS_TABLE
         CV_Assert(((i + n + b) >= 0) && ((i + n + b) < n * 2 + b * 2));
 #endif
         return a1[i];

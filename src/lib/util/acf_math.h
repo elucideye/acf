@@ -1,5 +1,5 @@
 /*! -*-c++-*-
-  @file   drishti_math.h
+  @file   acf_math.h
   @author David Hirvonen
   @brief  Declaration of common math routines.
 
@@ -8,8 +8,8 @@
 
 */
 
-#ifndef __acf_drishti_math_h__
-#define __acf_drishti_math_h__ 1
+#ifndef __acf_acf_math_h__
+#define __acf_acf_math_h__ 1
 
 #include "util/acf_util.h"
 
@@ -32,4 +32,4 @@ T round(T x);
 
 UTIL_NAMESPACE_END
 
-#endif // drishti_math.h
+#endif // acf_math.h
