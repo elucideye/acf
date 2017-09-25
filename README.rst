@@ -29,3 +29,23 @@ Aggregated Channel Feature object detection in C++ and OpenGL ES 2.0
   :target: http://github.com/ruslo/hunter
 
 
+=====
+HOWTO
+=====
+
+.. code-block:: bash
+
+   
+   $ cd ${HOME}
+   $ wget https://github.com/ruslo/polly/archive/master.zip
+   $ unzip master.zip
+   $ POLLY_ROOT="`pwd`/polly-master"
+   $ export PATH="${POLLY_ROOT}/bin:${PATH}"
+   $ mkdir -p git 
+   $ cd git
+   $ git clone https://github.com/elucideye/acf.git
+   $ cd acf
+   $ git submodule update --init --recursive --quiet)
+   $ polly.py --help # pick a toolchain
+   $ polly.py --toolchain libcxx --install --reconfig --verbose
+   $ ls -R _install/libcxx/
