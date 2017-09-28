@@ -18,7 +18,9 @@ target_compile_definitions(acf PUBLIC _USE_MATH_DEFINES)  # define M_PI_2 for Vi
 if(ACF_SERIALIZE_WITH_CVMATIO)
   target_compile_definitions(acf PUBLIC ACF_SERIALIZE_WITH_CVMATIO=1)
 endif()
-
+if(ACF_ADD_TO_STRING)
+  target_compile_definitions(acf PUBLIC ACF_ADD_TO_STRING=1)
+endif()
 target_include_directories(acf
   PUBLIC
   "$<BUILD_INTERFACE:${ACF_ROOT_DIR}/src/lib/>"

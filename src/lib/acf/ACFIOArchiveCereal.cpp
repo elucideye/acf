@@ -1,4 +1,8 @@
-#include "io/stdlib_string.h"
+// clang-format off
+#if defined(ACF_ADD_TO_STRING)
+#  include "io/stdlib_string.h"
+#endif
+// clang-format on
 #include "io/cereal_pba.h"
 #include "io/cvmat_cereal.h"
 #include "acf/ACFIOArchive.h"

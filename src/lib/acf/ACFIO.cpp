@@ -182,7 +182,11 @@ int Detector::deserialize(ParserNodeDetector& detector_) { return -1; }
 
 ACF_NAMESPACE_END
 
-#include "io/stdlib_string.h"
+// clang-format off
+#if defined(ACF_ADD_TO_STRING)
+#  include "io/stdlib_string.h"
+#endif
+// clang-format on
 #include "io/cereal_pba.h"
 
 ACF_NAMESPACE_BEGIN
