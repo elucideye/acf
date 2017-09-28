@@ -48,7 +48,7 @@ endif()
 #   * <prefix>/lib/
 #   * <prefix>/include/
 set(config_install_dir "lib/cmake/${PROJECT_NAME}")
-set(include_install_dir "include/${PROJECT_NAME}")
+set(include_install_dir "include")
 
 set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
@@ -105,7 +105,7 @@ install(
   FILES
   "${acf_export_header}"
   ${ACF_HDRS_PUBLIC}  
-  DESTINATION "${include_install_dir}"
+  DESTINATION "${include_install_dir}/${PROJECT_NAME}"
 )
 
 # Config
@@ -126,6 +126,8 @@ install(
 
 # }
 
-# unit tests
-add_subdirectory(acf/ut)
+# unit tests:
+if(ACF_BUILD_TESTS)
+    add_subdirectory(acf/ut)
+endif()
 
