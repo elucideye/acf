@@ -39,8 +39,10 @@ HOWTO
    $ cd ${HOME}
    $ wget https://github.com/ruslo/polly/archive/master.zip
    $ unzip master.zip
-   $ POLLY_ROOT="`pwd`/polly-master"
-   $ export PATH="${POLLY_ROOT}/bin:${PATH}"
+   $ POLLY_ROOT="${PWD}/polly-master"
+   $ export PATH="${POLLY_ROOT}/bin:${PATH}" # add to .profile
+   $ install-ci-dependencies.py
+   $ export PATH="${PWD}/_ci/cmake/bin:${PATH}" # add to .profile
    $ mkdir -p git 
    $ cd git
    $ git clone https://github.com/elucideye/acf.git
