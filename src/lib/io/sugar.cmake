@@ -10,5 +10,8 @@ sugar_files(ACF_HDRS
   cereal_pba.h
   cv_cereal.h
   cvmat_cereal.h
-  stdlib_string.h
   )
+
+if(ACF_ADD_TO_STRING)
+  sugar_files(ACF_HDRS stdlib_string.h)
+endif()

@@ -148,6 +148,21 @@ if(ACF_BUILD_TESTS)
 
 endif()
 
+if(ACF_SERIALIZE_WITH_CEREAL)
+  #### std::to_string ####
+  try_compile(ACF_HAVE_TO_STRING "${CMAKE_BINARY_DIR}/compile_tests" "${PROJECT_SOURCE_DIR}/cmake/to_string.cpp")
+  if(ACF_HAVE_TO_STRING)
+    set(ACF_ADD_TO_STRING OFF)
+  else()
+    set(ACF_ADD_TO_STRING ON)
+  endif()
+else(ACF_USE_CEREAL)
+  # This is never needed when CEREAL extensions are disabled
+  set(ACF_ADD_TO_STRING OFF)
+endif(ACF_SERIALIZE_WITH_CEREAL)
+
+message("ACF_ADD_TO_STRING : ${ACF_ADD_TO_STRING}")
+
 ##############
 ## Project ###
 ##############

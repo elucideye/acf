@@ -11,8 +11,6 @@
 #ifndef __io_stdlib_string_h__
 #define __io_stdlib_string_h__
 
-#if ANDROID
-
 #include "acf/acf_common.h"
 
 #include <string>
@@ -95,8 +93,5 @@ inline float strtof(const char* str, char** str_end)
 }
 
 ACF_END_NAMESPACE(std)
-
-#include <cerrno>
-#endif
 
 #endif // __io_stdlib_string_h__
