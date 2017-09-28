@@ -68,7 +68,7 @@ write_basic_package_version_file(
 
 # Configure '<PROJECT-NAME>Config.cmake'
 # Use variables:
-#   * TARGETS_EXPORT_NAME
+#   * targets_export_name
 #   * PROJECT_NAME
 configure_package_config_file(
     "${ACF_ROOT_DIR}/cmake/Config.cmake.in"
@@ -82,7 +82,7 @@ configure_package_config_file(
 #   * headers can be included by C++ code `#include <acf/ACF.h>`
 install(
     TARGETS acf
-    EXPORT "${TARGETS_EXPORT_NAME}"
+    EXPORT "${targets_export_name}"
     LIBRARY DESTINATION "lib"
     ARCHIVE DESTINATION "lib"
     RUNTIME DESTINATION "bin"
@@ -117,7 +117,7 @@ install(
 # Config#
 #   * <prefix>/lib/cmake/acf/acfTargets.cmake
 install(
-    EXPORT "${TARGETS_EXPORT_NAME}"
+    EXPORT "${targets_export_name}"
     NAMESPACE "${namespace}"
     DESTINATION "${config_install_dir}"
 )
