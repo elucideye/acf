@@ -5,6 +5,14 @@ Aggregated Channel Feature object detection in C++ and OpenGL ES 2.0
 
 |TravisCI| |Appveyor| |License| |Hunter|
 
+This module is very well suited to running real time object detection on mobile processors, where recent high performing but GPU needy DNN approaches aren't as suitable.  The ACF pyramids can be computed with the OpenGL ES 2.0 shaders and retrieved more or less for free (< 1 frame time with 1 frame of latency).  For selfie video, the pretrained face detectors (see FACE80_ and FACE64_) run in a few milliseconds on an iPhone 7.  TODO: The Locally Decorrelated Channel Feature addition has not yet been added (see LDCF_), but the 5x5 kernels should map well to OpenGL shaders.  That should make performance very competitive (see Piotr's references for comparisons).
+
+.. _FACE80: https://github.com/elucideye/drishti-assets/blob/master/drishti_face_gray_80x80.cpb
+.. _FACE64: https://github.com/elucideye/drishti-assets/blob/master/drishti_face_gray_64x64.cpb
+.. _LDCF: https://arxiv.org/pdf/1406.1134.pdf
+
+.. image:: https://cloud.githubusercontent.com/assets/554720/21356618/4decbb4c-c6a0-11e6-8d8a-d1a3fc23c742.jpg
+
 - C++ implementation of `Fast Feature Pyramids for Object Detection`_ (see `Piotr's Matlab Toolbox`_)
 - `Hunter`_ package management for cross platform builds: "Organized Freedom!" :)
 - Fast OpenGL ES 2.0 ACF Pyramid computation via `ogles_gpgpu`_
