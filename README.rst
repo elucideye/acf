@@ -11,6 +11,8 @@ This module is very well suited to running real time object detection on mobile 
 .. _FACE64: https://github.com/elucideye/drishti-assets/blob/master/drishti_face_gray_64x64.cpb
 .. _LDCF: https://arxiv.org/pdf/1406.1134.pdf
 
+Sample 10 Channel ACF from GPU: LUV + magnitude (locally normalized) + gradient orientation (6 bins):
+
 .. image:: https://cloud.githubusercontent.com/assets/554720/21356618/4decbb4c-c6a0-11e6-8d8a-d1a3fc23c742.jpg
 
 - C++ implementation of `Fast Feature Pyramids for Object Detection`_ (see `Piotr's Matlab Toolbox`_)
