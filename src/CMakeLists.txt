@@ -24,12 +24,12 @@ if(ACF_SERIALIZE_WITH_CEREAL)
   hunter_add_package(cereal)
   find_package(cereal CONFIG REQUIRED)
   list(APPEND ACF_3RDPARTY_PKG_LIBS cereal::cereal)
-endif()
 
-# half
-hunter_add_package(half)
-find_package(half CONFIG REQUIRED)
-list(APPEND ACF_3RDPARTY_PKG_LIBS half::half)
+  # half
+  hunter_add_package(half)
+  find_package(half CONFIG REQUIRED)
+  list(APPEND ACF_3RDPARTY_PKG_LIBS half::half)  
+endif()
 
 # cvmatio
 if(ACF_SERIALIZE_WITH_CVMATIO)
@@ -67,4 +67,6 @@ add_subdirectory(lib)
 ## Applications ##
 ##################
 
-add_subdirectory(app)
+if (ACF_BUILD_EXAMPLES)
+  add_subdirectory(app)
+endif()

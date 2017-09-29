@@ -15,29 +15,36 @@ list(APPEND CMAKE_MODULE_PATH "${drishti_upload_modules}")
 ### HunterGate and cache ###
 ############################
 
-# drishti specific hunter cache pacakges:
-list(APPEND HUNTER_CACHE_SERVERS "https://github.com/elucideye/hunter-cache")
+# The drishti-upload module provides a common hunter config with 
+# a corresponding binary server cache.  We use this for fast CI
+# builds by default.  It can be disabled with this option in favor
+# of a local cmake/Hunter/config.cmake
+option(ACF_USE_DRISHTI_CACHE "Use the drishti-upload config and cache" ON)
 
-if(EXISTS "${drishti_upload_modules}")
+if(EXISTS "${drishti_upload_modules}" AND ACF_USE_DRISHTI_CACHE)
+  # drishti specific hunter cache pacakges:
+  list(APPEND HUNTER_CACHE_SERVERS "https://github.com/elucideye/hunter-cache")
   include(drishti_set_hunter_gate)
-  drishti_set_hunter_version(DRISHTI_HUNTER_GATE_URL DRISHTI_HUNTER_GATE_SHA1)
+  drishti_set_hunter_version(ACF_HUNTER_GATE_URL ACF_HUNTER_GATE_SHA1)
+  set(DRISHTI_UPLOAD_IGNORE_SUBMODULES YES)  
+  set(ACF_HUNTER_CONFIG "${CMAKE_CURRENT_LIST_DIR}/drishti-upload/config.cmake")
 else()
   # Release archive will not contain submodule 'drishti-upload'.
   # It's a valid case when archive used in Hunter.
   # URL/SHA1 arguments of HunterGate call will not be used while building
-  # in this situation.
-  set(DRISHTI_HUNTER_GATE_URL)
-  set(DRISHTI_HUNTER_GATE_SHA1)
+  # in this situation. One can also set ACF_USE_DRISHTI_CACHE=OFF in order
+  # to build with recent hunter defaults.
+  set(ACF_HUNTER_GATE_URL "https://github.com/ruslo/hunter/archive/v0.19.115.tar.gz")
+  set(ACF_HUNTER_GATE_SHA1 "aeb37c4b667c4201837bcac38702f3ce8b4a9b44")
+  set(ACF_HUNTER_CONFIG "${CMAKE_CURRENT_LIST_DIR}/cmake/Hunter/config.cmake")
 endif()
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-  URL "${DRISHTI_HUNTER_GATE_URL}"
-  SHA1 "${DRISHTI_HUNTER_GATE_SHA1}"
-  FILEPATH "${CMAKE_CURRENT_LIST_DIR}/drishti-upload/config.cmake"
+  URL "${ACF_HUNTER_GATE_URL}"
+  SHA1 "${ACF_HUNTER_GATE_SHA1}"
+  FILEPATH "${ACF_HUNTER_CONFIG}"
   )
-
-set(DRISHTI_UPLOAD_IGNORE_SUBMODULES YES)
 
 ##########################
 ### CI Travis/Appveyor ###
@@ -70,11 +77,6 @@ if(CMAKE_INTERPROCEDURAL_OPTIMIZATION)
 endif()
 
 string(COMPARE EQUAL "${CMAKE_SYSTEM_NAME}" "Linux" is_linux)
-if(IOS OR ANDROID)
-  set(DRISHTI_IS_MOBILE TRUE)
-else()
-  set(DRISHTI_IS_MOBILE FALSE)
-endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -87,7 +89,8 @@ option(ACF_BUILD_APPS "Build applications" ON)
 option(ACF_SERIALIZE_WITH_CEREAL "Serialize w/ cereal" ON) # always on
 option(ACF_SERIALIZE_WITH_CVMATIO "Build with CVMATIO" ON)
 option(ACF_BUILD_OGLES_GPGPU "Build with OGLES_GPGPU" ON)
-option(ACF_BUILD_TESTS "Build tests" ON)
+option(ACF_BUILD_TESTS "Build tests" OFF)
+option(ACF_BUILD_EXAMPLES "Build examples" ON)
 
 ################
 #### Testing ###

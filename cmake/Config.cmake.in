@@ -16,10 +16,10 @@ find_package(spdlog REQUIRED)
 # cereal
 if(@ACF_SERIALIZE_WITH_CEREAL@)
   find_package(cereal CONFIG REQUIRED)
-endif()
 
-# half
-find_package(half CONFIG REQUIRED)
+  # half
+  find_package(half CONFIG REQUIRED)  
+endif()
 
 # cvmatio
 if(@ACF_SERIALIZE_WITH_CVMATIO@)
