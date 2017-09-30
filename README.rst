@@ -59,5 +59,5 @@ HOWTO
    $ cd acf
    $ git submodule update --init --recursive --quiet)
    $ polly.py --help # pick a toolchain
-   $ polly.py --toolchain libcxx --install --reconfig --verbose
+   $ polly.py --toolchain libcxx --install --reconfig --verbose --test
    $ ls -R _install/libcxx/
