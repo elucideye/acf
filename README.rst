@@ -87,3 +87,13 @@ HOWTO
              │       └── acfTargets.cmake
              └── libacf.a
              
+.. code-block:: bash
+
+   $ cd _install/xcode/bin
+   $ wget https://github.com/elucideye/drishti-assets/blob/master/drishti_face_gray_80x80.cpb
+   $ wget https://github.com/elucideye/drishti-faces/blob/master/lena512color.png
+   $ ./acf-detect --input=lena512color.png --output=/tmp/ --model=drishti_face_gray_80x80.cpb --nms --annotate --calibration=0.00001
+   
+:: 
+
+    [16:56:34.092 | thread:8703967691101883897 | acf-detect | info]: 1/1 /Users/dhirvonen/devel/elucideye//drishti-faces/lena512color.png = 1; score = 26.0038
