@@ -59,13 +59,14 @@ HOWTO
    $ cd acf
    $ git submodule update --init --recursive --quiet)
    $ polly.py --help # pick a toolchain
-   $ polly.py --toolchain libcxx --install --reconfig --verbose --test
-   $ tree _install/libcxx/
+   $ export TOOLCHAIN=libcxx
+   $ polly.py --toolchain ${TOOLCHAIN} --install --reconfig --verbose --test
+   $ tree _install/${TOOLCHAIN}
 
 ::
 
     _install/
-    └── xcode
+    └── libcxx
         ├── bin
         │   ├── acf-detect
         │   └── acf-mat2cpb
@@ -89,7 +90,7 @@ HOWTO
              
 .. code-block:: bash
 
-   $ cd _install/xcode/bin
+   $ cd _install/${TOOLCHAIN}/bin
    $ wget https://github.com/elucideye/drishti-assets/blob/master/drishti_face_gray_80x80.cpb
    $ wget https://github.com/elucideye/drishti-faces/blob/master/lena512color.png
    $ ./acf-detect --input=lena512color.png --output=/tmp/ --model=drishti_face_gray_80x80.cpb --nms --annotate --calibration=0.00001
