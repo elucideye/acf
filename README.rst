@@ -60,4 +60,30 @@ HOWTO
    $ git submodule update --init --recursive --quiet)
    $ polly.py --help # pick a toolchain
    $ polly.py --toolchain libcxx --install --reconfig --verbose --test
-   $ ls -R _install/libcxx/
+   $ tree _install/libcxx/
+
+::
+
+    _install/
+    └── xcode
+        ├── bin
+        │   ├── acf-detect
+        │   └── acf-mat2cpb
+        ├── include
+        │   └── acf
+        │       ├── ACF.h
+        │       ├── ACFField.h
+        │       ├── GPUACF.h
+        │       ├── MatP.h
+        │       ├── ObjectDetector.h
+        │       ├── acf_common.h
+        │       └── acf_export.h
+        └── lib
+             ├── cmake
+             │   └── acf
+             │       ├── acfConfig.cmake
+             │       ├── acfConfigVersion.cmake
+             │       ├── acfTargets-release.cmake
+             │       └── acfTargets.cmake
+             └── libacf.a
+             
