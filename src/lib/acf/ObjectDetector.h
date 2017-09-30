@@ -11,8 +11,9 @@
 #ifndef __acf_ObjectDetector_h__
 #define __acf_ObjectDetector_h__
 
-#include "acf/acf_common.h"
-#include "acf/MatP.h"
+#include <acf/acf_export.h>
+#include <acf/acf_common.h>
+#include <acf/MatP.h>
 
 #include <opencv2/core/core.hpp>
 
@@ -21,7 +22,7 @@
 ACF_NAMESPACE_BEGIN
 
 // Specify API
-class ObjectDetector
+class ACF_EXPORT ObjectDetector
 {
 public:
     // TODO: enforce a public non virtual API that calls a virtual detect method

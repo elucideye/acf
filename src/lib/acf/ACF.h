@@ -14,10 +14,11 @@
 
 #include <stdio.h>
 
-#include "acf/acf_common.h"
-#include "acf/ObjectDetector.h" // interface
-#include "acf/ACFField.h"
-#include "acf/MatP.h"
+#include <acf/acf_export.h>
+#include <acf/acf_common.h>
+#include <acf/ObjectDetector.h> // interface
+#include <acf/ACFField.h>
+#include <acf/MatP.h>
 
 #include <spdlog/spdlog.h>
 
@@ -35,7 +36,7 @@ class DetectionParams;
 template <class _T>
 struct ParserNode;
 
-class Detector : public acf::ObjectDetector
+class ACF_EXPORT Detector : public acf::ObjectDetector
 {
 public:
     typedef ParserNode<Detector> ParserNodeDetector;

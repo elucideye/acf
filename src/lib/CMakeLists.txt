@@ -11,7 +11,7 @@ include("${SUGAR_ROOT}/cmake/Sugar")
 include(sugar_include)
 sugar_include(.)
 
-add_library(acf ${ACF_SRCS} ${ACF_HDRS} ${ACF_HDRS_PUBLIC}) 
+add_library(acf ${ACF_SRCS} ${ACF_HDRS} ${ACF_HDRS_PUBLIC})
 target_link_libraries(acf PRIVATE ${ACF_3RDPARTY_PKG_LIBS})
 target_compile_definitions(acf PUBLIC ACF_DO_HALF=1)  # half precision serialization
 target_compile_definitions(acf PUBLIC _USE_MATH_DEFINES)  # define M_PI_2 for Visual Studio
@@ -21,15 +21,18 @@ endif()
 if(ACF_ADD_TO_STRING)
   target_compile_definitions(acf PUBLIC ACF_ADD_TO_STRING=1)
 endif()
-target_include_directories(acf
-  PUBLIC
-  "$<BUILD_INTERFACE:${ACF_ROOT_DIR}/src/lib/>"
-  )
 
 ### Generate the export header
 include(GenerateExportHeader)
-set(acf_export_header "${CMAKE_BINARY_DIR}/lib/acf_export.h")
+set(acf_export_dir "${CMAKE_BINARY_DIR}/lib")
+set(acf_export_header "${acf_export_dir}/acf_export.h")
 generate_export_header(acf EXPORT_FILE_NAME "${acf_export_header}")
+
+target_include_directories(acf
+  PUBLIC
+  "$<BUILD_INTERFACE:${ACF_ROOT_DIR}/src/lib/>"
+  "$<BUILD_INTERFACE:${acf_export_dir}>"
+  )
 
 string(COMPARE EQUAL "${CMAKE_OSX_SYSROOT}" "iphoneos" is_ios)
 if(NOT is_ios)
