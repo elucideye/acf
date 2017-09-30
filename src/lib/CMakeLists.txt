@@ -24,14 +24,14 @@ endif()
 
 ### Generate the export header
 include(GenerateExportHeader)
-set(acf_export_dir "${CMAKE_BINARY_DIR}/lib")
+set(acf_export_dir "${CMAKE_BINARY_DIR}/acf")
 set(acf_export_header "${acf_export_dir}/acf_export.h")
 generate_export_header(acf EXPORT_FILE_NAME "${acf_export_header}")
 
 target_include_directories(acf
   PUBLIC
   "$<BUILD_INTERFACE:${ACF_ROOT_DIR}/src/lib/>"
-  "$<BUILD_INTERFACE:${acf_export_dir}>"
+  "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>"
   )
 
 string(COMPARE EQUAL "${CMAKE_OSX_SYSROOT}" "iphoneos" is_ios)
