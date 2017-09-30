@@ -11,7 +11,8 @@
 #ifndef __acf_ACFField_h__
 #define __acf_ACFField_h__
 
-#include "acf/acf_common.h"
+#include <acf/acf_export.h>
+#include <acf/acf_common.h>
 
 #include <string>
 #include <vector>
@@ -20,7 +21,7 @@
 ACF_NAMESPACE_BEGIN
 
 template <typename T>
-struct Field
+struct ACF_EXPORT Field
 {
     Field()
     {

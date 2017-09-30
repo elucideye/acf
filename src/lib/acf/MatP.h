@@ -11,12 +11,12 @@
 #ifndef __acf_MatP_h__
 #define __acf_MatP_h__
 
-#include <stdio.h>
+#include <acf/acf_export.h>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 
-class MatP
+class ACF_EXPORT MatP
 {
 public:
     typedef cv::Mat value_type;
