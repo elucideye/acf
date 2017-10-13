@@ -32,7 +32,6 @@ int gauze_main(int argc, char** argv)
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #define ACF_TEST_DISPLAY_OUTPUT 0
-#define ACF_TEST_WARM_UP_GPU 0 // for timing only
 
 // clang-format off
 #if defined(ACF_DO_GPU)
@@ -47,6 +46,10 @@ int gauze_main(int argc, char** argv)
 #endif
 // clang-format on
 #include "io/cereal_pba.h"
+
+#include "util/ScopeTimeLogger.h"
+
+#define ACF_LOG_GPU_TIME 0
 
 // http://uscilab.github.io/cereal/serialization_archives.html
 #include <cereal/archives/portable_binary.hpp>
@@ -231,35 +234,32 @@ protected:
         static const bool doGrayscale = false;
         ogles_gpgpu::Size2d inputSize(image.cols, image.rows);
 
-        m_acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, ogles_gpgpu::ACF::kLUVM012345, doGrayscale, false);
+        m_acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, ogles_gpgpu::ACF::kM012345, doGrayscale, false);
         m_acf->setRotation(0);
+        m_acf->setDoLuvTransfer(false);
 
         cv::Mat input = image;
-#if ACF_TEST_WARM_UP_GPU
+        
+#if ACF_LOG_GPU_TIME
+        // Warm up the GPU
         for (int i = 0; i < 10; i++)
         {
             (*m_acf)({ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT);
         }
+        m_acf->fill(Pgpu, Pcpu); // be sure to read and flush all commands            
 #endif
-
-        (*m_acf)({ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT);
-        m_acf->fill(Pgpu, Pcpu);
-
         {
-            // This code block is a place holder for 7 channel ACF output, which conveniently fits in 2 textures
-            // for faster transfers on low performing Android devices.  Currently there is no 7 channel ACF
-            // classifier/detector, so this is used as a place holder to illustrate the raw channel extraction
-            // and pyramid formatting until equivalent CPU formatting is in place.
-            auto acf7 = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, ogles_gpgpu::ACF::kM012345, doGrayscale, false);
-            (*acf7)({ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT);
-
-            acf::Detector::Pyramid Pgpu7;
-            acf7->fill(Pgpu7, Pcpu);
-
-            //cv::imshow("Pgpu7", draw(Pgpu7);
-            //cv::imshow("LM012345", acf7->getChannels());
-            //cv::imshow("LUVM012345", m_acf->getChannels());
-            //cv::waitKey(0);
+            
+#if ACF_LOG_GPU_TIME
+            util::ScopeTimeLogger logger = [&](double elapsed)
+            {
+                std::cout << "ACF::fill(): " << input.cols << " " << elapsed << std::endl;
+            };
+#endif
+            // Fill in the pyramid:
+            (*m_acf)({ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT);
+            glFlush();
+            m_acf->fill(Pgpu, Pcpu);
         }
     }
 
@@ -450,7 +450,15 @@ TEST_F(ACFTest, ACFDetectionGPU10)
 
     std::vector<double> scores;
     std::vector<cv::Rect> objects;
-    (*m_detector)(Pgpu, objects);
+    {
+#if ACF_LOG_GPU_TIME
+        util::ScopeTimeLogger logger = [](double elapsed)
+        {
+            std::cout << "acf::Detector::operator():" << elapsed << std::endl;
+        };
+#endif
+        (*m_detector)(Pgpu, objects);
+    }
 
 #if ACF_TEST_DISPLAY_OUTPUT
     WaitKey waitKey;
