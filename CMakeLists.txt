@@ -23,7 +23,13 @@ option(ACF_USE_DRISHTI_CACHE "Use the drishti-upload config and cache" ON)
 
 if(EXISTS "${drishti_upload_modules}" AND ACF_USE_DRISHTI_CACHE)
   # drishti specific hunter cache pacakges:
-  list(APPEND HUNTER_CACHE_SERVERS "https://github.com/elucideye/hunter-cache")
+  set(
+      HUNTER_CACHE_SERVERS
+      "https://github.com/elucideye/hunter-cache"
+      CACHE
+      STRING
+      "Hunter cache servers"
+  )
   include(drishti_set_hunter_gate)
   drishti_set_hunter_version(ACF_HUNTER_GATE_URL ACF_HUNTER_GATE_SHA1)
   set(DRISHTI_UPLOAD_IGNORE_SUBMODULES YES)  
