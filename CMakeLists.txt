@@ -15,7 +15,7 @@ list(APPEND CMAKE_MODULE_PATH "${drishti_upload_modules}")
 ### HunterGate and cache ###
 ############################
 
-# The drishti-upload module provides a common hunter config with 
+# The drishti-upload module provides a common hunter config with
 # a corresponding binary server cache.  We use this for fast CI
 # builds by default.  It can be disabled with this option in favor
 # of a local cmake/Hunter/config.cmake
@@ -32,7 +32,7 @@ if(EXISTS "${drishti_upload_modules}" AND ACF_USE_DRISHTI_CACHE)
   )
   include(drishti_set_hunter_gate)
   drishti_set_hunter_version(ACF_HUNTER_GATE_URL ACF_HUNTER_GATE_SHA1)
-  set(DRISHTI_UPLOAD_IGNORE_SUBMODULES YES)  
+  set(DRISHTI_UPLOAD_IGNORE_SUBMODULES YES)
   set(ACF_HUNTER_CONFIG "${CMAKE_CURRENT_LIST_DIR}/drishti-upload/config.cmake")
 else()
   # Release archive will not contain submodule 'drishti-upload'.
