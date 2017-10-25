@@ -38,30 +38,86 @@ Sample 10 Channel ACF from GPU: LUV + magnitude (locally normalized) + gradient 
 .. |Hunter| image:: https://img.shields.io/badge/hunter-v0.19.107-blue.svg
   :target: http://github.com/ruslo/hunter
 
+===========
+Quick Start
+===========
+
+ACF is a `CMake <https://github.com/kitware/CMake>`__ based project
+that uses the `Hunter <https://github.com/ruslo/hunter>`__ package
+manager to download and build project dependencies from source as
+needed. Hunter contains `detailed
+documentation <https://docs.hunter.sh/en/latest>`__, but a few high
+level notes and documentation links are provided here to help orient
+first time users. In practice, some working knowledge of CMake may also
+be required. Hunter itself is written in CMake, and is installed as part
+of the build process from a single ``HunterGate()`` macro at the top of
+the root ``CMakeLists.txt`` file (typically
+``cmake/Hunter/HunterGate.cmake``) (you don't have to build or install
+it). Each CMake dependency's ``find_package(FOO)`` call that is paired
+with a ``hunter_add_package(FOO CONFIG REQUIRED)`` will be managed by
+Hunter. In most cases, the only system requirement for building a Hunter
+project is a recent `CMake with
+CURL <https://docs.hunter.sh/en/latest/contributing.html#reporting-bugs>`__
+support and a working compiler correpsonding to the operative toolchain.
+Hunter will maintain all dependencies in a
+`versioned <https://docs.hunter.sh/en/latest/overview/customization.html>`__
+local
+`cache <https://docs.hunter.sh/en/latest/overview/shareable.html>`__ by
+default (typically ``${HOME}/.hunter``) where they can be reused in
+subsequent builds and shared between different projects. They can also
+be stored in a server side `binary
+cache <https://docs.hunter.sh/en/latest/overview/binaries.html>`__ --
+select `toolchains <#Toolchains>`__ will be backed by a server side
+binary cache (https://github.com/elucideye/hunter-cache) and will
+produce faster first time builds (use them if you can!).
+
+The
+`Travis <https://github.com/elucideye/drishti/blob/master/.travis.yml>`__
+(Linux/OSX/iOS/Android) and
+`Appveyor <https://github.com/elucideye/drishti/blob/master/appveyor.yml>`__
+(Windows) CI scripts in the project's root directory can serve as a
+reference for basic setup when building from source. To support cross
+platform builds and testing, the CI scripts make use of
+`Polly <https://github.com/ruslo/polly>`__: a set of common CMake
+toolchains paired with a simple ``polly.py`` CMake build script. Polly
+is used here for convenience to generate ``CMake`` command line
+invocations -- it is not required for building Hunter projects.
+
+To reproduce the CI builds on a local host, the following setup is
+recommended:
+
+-  Install compiler:
+   http://cgold.readthedocs.io/en/latest/first-step.html
+-  Install `CMake <https://github.com/kitware/CMake>`__ (and add to
+   ``PATH``)
+-  Install Python (for Polly)
+-  Clone `Polly <https://github.com/ruslo/polly>`__ and add
+   ``<polly>/bin`` to ``PATH``
+
+Note: Polly is not a build requirement, CMake can always be used
+directly, but it is used here for convenience.
+
+The ``bin/hunter_env.{sh,cmd}`` scripts (used in the CI builds) can be
+used as a fast shortcut to install these tools for you. You may want to
+add the ``PATH`` variables permanently to your ``.bashrc`` file (or
+equivalent) for future sessions.
+
++--------------------------------+--------------------------+
+| Linux/OSX/Android/iOS          | Windows                  |
++================================+==========================+
+| ``source bin/hunter_env.sh``   | ``bin\hunter_env.cmd``   |
++--------------------------------+--------------------------+
+
+After the environment is configured, you can build for any supported
+``Polly`` toolchain (see ``polly.py --help``) with a command like this:
+
+::
+
+    polly.py --toolchain ${TOOLCHAIN} --config ${CONFIG} --fwd HUNTER_CONFIGURATION_TYPES=${CONFIG} --install --verbose
 
 =====
 HOWTO
 =====
-
-.. code-block:: bash
-
-   
-   $ cd ${HOME}
-   $ wget https://github.com/ruslo/polly/archive/master.zip
-   $ unzip master.zip
-   $ POLLY_ROOT="${PWD}/polly-master"
-   $ export PATH="${POLLY_ROOT}/bin:${PATH}" # add to .profile
-   $ install-ci-dependencies.py
-   $ export PATH="${PWD}/_ci/cmake/bin:${PATH}" # add to .profile
-   $ mkdir -p git 
-   $ cd git
-   $ git clone https://github.com/elucideye/acf.git
-   $ cd acf
-   $ git submodule update --init --recursive --quiet)
-   $ polly.py --help # pick a toolchain
-   $ export TOOLCHAIN=libcxx
-   $ polly.py --toolchain ${TOOLCHAIN} --install --reconfig --verbose --test
-   $ tree _install/${TOOLCHAIN}
 
 ::
 
