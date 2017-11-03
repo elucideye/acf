@@ -83,7 +83,7 @@ public:
             for (int r = 0; r < size1.height; r += step1.y)
             {
                 int offset = (r * stride / shrink) + (c * stride / shrink) * rowStride;
-                float h = evaluate(chns, offset);
+                float h = evaluate(chns + offset);
                 if (h > cascThr)
                 {
                     sink->add({ c, r }, h);
@@ -101,28 +101,28 @@ public:
         k += offset;
     }
 
-    void getChild(const T* chns1, uint32_t index, uint32_t offset, uint32_t& k0, uint32_t& k) const
+    void traverse(const T* chns1, uint32_t offset, uint32_t& k0, uint32_t& k) const
     {
         for(int i = 0; i < kDepth; i++)
         {
-            getChild(chns1 + index, offset, k0, k);
+            getChild(chns1, offset, k0, k);
         }
     }
     
     float evaluate(uint32_t row, uint32_t col) const
     {
         int offset = (row * stride / shrink) + (col * stride / shrink) * rowStride;
-        return evaluate(chns, offset);
+        return evaluate(chns + offset);
     }
 
-    float evaluate(const T* chns1, uint32_t index) const
+    float evaluate(const T* chns1) const
     {
         float h = 0.f;
         uint32_t isZero = (kDepth == 0);
         for (int t = 0; t < nTrees; t++)
         {
             uint32 offset = t * nTreeNodes, k = offset, k0 = (k * isZero);
-            getChild(chns1, index, offset, k0, k);
+            traverse(chns1, offset, k0, k);
             h += hs[k];
             if (h <= cascThr)
             {
@@ -138,7 +138,7 @@ public:
 };
 
 template<> void
-ParallelDetectionBody<float, 0>::getChild(const float* chns1, uint32_t, uint32_t offset, uint32_t& k0, uint32_t& k) const
+ParallelDetectionBody<float, 0>::traverse(const float* chns1, uint32_t offset, uint32_t& k0, uint32_t& k) const
 {
     while( child[k] )
     {
@@ -149,7 +149,7 @@ ParallelDetectionBody<float, 0>::getChild(const float* chns1, uint32_t, uint32_t
 }
 
 template<> void
-ParallelDetectionBody<uint8_t, 0>::getChild(const uint8_t* chns1, uint32_t, uint32_t offset, uint32_t& k0, uint32_t& k) const
+ParallelDetectionBody<uint8_t, 0>::traverse(const uint8_t* chns1, uint32_t offset, uint32_t& k0, uint32_t& k) const
 {
     while( child[k] )
     {
