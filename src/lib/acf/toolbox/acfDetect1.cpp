@@ -42,17 +42,6 @@ public:
     std::vector<std::pair<cv::Point, float>> hits;
 };
 
-class DetectionSinkLock : public DetectionSink
-{
-public:
-    virtual void add(const cv::Point& p, float value)
-    {
-        std::lock_guard<std::mutex> lock(mutex);
-        DetectionSink::add(p, value);
-    }
-    std::mutex mutex;
-};
-
 class DetectionParams : public cv::ParallelLoopBody
 {
 public:
@@ -112,6 +101,14 @@ public:
         k += offset;
     }
 
+    void getChild(const T* chns1, uint32_t index, uint32_t offset, uint32_t& k0, uint32_t& k) const
+    {
+        for(int i = 0; i < kDepth; i++)
+        {
+            getChild(chns1 + index, offset, k0, k);
+        }
+    }
+    
     float evaluate(uint32_t row, uint32_t col) const
     {
         int offset = (row * stride / shrink) + (col * stride / shrink) * rowStride;
@@ -121,13 +118,11 @@ public:
     float evaluate(const T* chns1, uint32_t index) const
     {
         float h = 0.f;
+        uint32_t isZero = (kDepth == 0);
         for (int t = 0; t < nTrees; t++)
         {
-            uint32 offset = t * nTreeNodes, k = offset, k0 = 0;
-            for (int i = 0; i < kDepth; i++)
-            {
-                getChild(chns1 + index, offset, k0, k);
-            }
+            uint32 offset = t * nTreeNodes, k = offset, k0 = (k * isZero);
+            getChild(chns1, index, offset, k0, k);
             h += hs[k];
             if (h <= cascThr)
             {
@@ -142,6 +137,28 @@ public:
     DetectionSink* sink = nullptr;
 };
 
+template<> void
+ParallelDetectionBody<float, 0>::getChild(const float* chns1, uint32_t, uint32_t offset, uint32_t& k0, uint32_t& k) const
+{
+    while( child[k] )
+    {
+        float ftr = chns1[cids[fids[k]]];
+        k = (ftr<thrs[k]) ? 1 : 0;
+        k0 = k = child[k0]-k+offset;
+    }
+}
+
+template<> void
+ParallelDetectionBody<uint8_t, 0>::getChild(const uint8_t* chns1, uint32_t, uint32_t offset, uint32_t& k0, uint32_t& k) const
+{
+    while( child[k] )
+    {
+        float ftr = chns1[cids[fids[k]]];
+        k = (ftr<thrs[k]) ? 1 : 0;
+        k0 = k = child[k0]-k+offset;
+    }
+}
+ 
 const cv::Mat& Detector::Classifier::getScaledThresholds(int type) const
 {
     switch (type)
@@ -156,21 +173,42 @@ const cv::Mat& Detector::Classifier::getScaledThresholds(int type) const
     return thrs; // unused: for static analyzer
 }
 
-static std::shared_ptr<DetectionParams> allocDetector(const MatP& I, DetectionSink* sink)
+template <int kDepth>
+std::shared_ptr<DetectionParams> allocDetector(const MatP& I, DetectionSink* sink)
 {
     switch (I.depth())
     {
         case CV_8UC1:
-            return std::make_shared<ParallelDetectionBody<uint8_t, 2>>(I[0].ptr<uint8_t>(), sink);
+            return std::make_shared<ParallelDetectionBody<uint8_t, kDepth>>(I[0].ptr<uint8_t>(), sink);
         case CV_32FC1:
-            return std::make_shared<ParallelDetectionBody<float, 2>>(I[0].ptr<float>(), sink);
+            return std::make_shared<ParallelDetectionBody<float, kDepth>>(I[0].ptr<float>(), sink);
         default:
             assert(false);
     }
     return nullptr; // unused: for static analyzer
 }
 
-auto Detector::createDetector(const MatP& I, const RectVec& rois, int shrink, cv::Size modelDsPad, int stride, DetectionSink* sink) const -> DetectionParamPtr
+std::shared_ptr<DetectionParams> allocDetector(const MatP& I, DetectionSink* sink, int depth)
+{
+    // Enforce compile time constants in inner tree search:
+    switch(depth)
+    {
+        case 0 : return allocDetector<0>(I, sink);
+        case 1 : return allocDetector<1>(I, sink);
+        case 2 : return allocDetector<2>(I, sink);
+        case 3 : return allocDetector<3>(I, sink);
+        case 4 : return allocDetector<4>(I, sink);
+        case 5 : return allocDetector<5>(I, sink);
+        case 6 : return allocDetector<6>(I, sink);
+        case 7 : return allocDetector<7>(I, sink);
+        case 8 : return allocDetector<8>(I, sink);
+        default: CV_Assert(depth <= 8);
+    }
+    return nullptr;
+}
+
+auto Detector::createDetector(const MatP& I, const RectVec& rois, int shrink, cv::Size modelDsPad, int stride, DetectionSink* sink)
+const -> DetectionParamPtr
 {
     int modelHt = modelDsPad.height;
     int modelWd = modelDsPad.width;
@@ -207,11 +245,11 @@ auto Detector::createDetector(const MatP& I, const RectVec& rois, int shrink, cv
     int nTreeNodes = trees.fids.rows; // TODO: check?
     int nTrees = trees.fids.cols;
     std::swap(nTrees, nTreeNodes);
-    assert(trees.treeDepth == 2); // TODO: switch
     cv::Mat thresholds = trees.getScaledThresholds(I.depth());
 
-    std::shared_ptr<DetectionParams> detector = allocDetector(I, sink);
-
+    CV_Assert(trees.treeDepth <= 8);
+    std::shared_ptr<DetectionParams> detector = allocDetector(I, sink, trees.treeDepth);
+    
     // Scanning parameters
     detector->winSize = { modelWd, modelHt };
     detector->size1 = { width1, height1 };
