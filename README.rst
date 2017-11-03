@@ -147,8 +147,8 @@ HOWTO
 .. code-block:: bash
 
    $ cd _install/${TOOLCHAIN}/bin
-   $ wget https://github.com/elucideye/drishti-assets/blob/master/drishti_face_gray_80x80.cpb
-   $ wget https://github.com/elucideye/drishti-faces/blob/master/lena512color.png
+   $ wget https://github.com/elucideye/drishti-assets/raw/master/drishti_face_gray_80x80.cpb
+   $ wget https://github.com/elucideye/drishti-faces/raw/master/lena512color.png
    $ ./acf-detect --input=lena512color.png --output=/tmp/ --model=drishti_face_gray_80x80.cpb --nms --annotate --calibration=0.00001
    
 :: 
