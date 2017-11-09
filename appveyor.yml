@@ -2,10 +2,6 @@ image: Visual Studio 2015
 
 environment:
 
-  global:
-    CI_USER_TOKEN:
-      secure: "iJyVR7z6BkcqxkctwnDldPxLBNLKfO1qD3EchXiH0fimfDx1oq2gGQyfG4/NtfGX"
-
   matrix:
 
     - TOOLCHAIN: "vs-14-2015-sdk-8-1"
@@ -65,7 +61,7 @@ artifacts:
 deploy:
   provider: GitHub
   auth_token:
-    secure: "iJyVR7z6BkcqxkctwnDldPxLBNLKfO1qD3EchXiH0fimfDx1oq2gGQyfG4/NtfGX"
+    secure: "x43zgAFmaHoqWwNDZEVzMvEWQSkHojfRWnVGMnmQziw9ozwrJTEnZdz5QD39bXMv"
   artifact: /acf-.*\.tar.gz/
   draft: false
   prerelease: false
