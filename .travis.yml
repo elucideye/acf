@@ -59,14 +59,15 @@ matrix:
     # OSX {
 
     - os: osx
-      env: CONFIG=Release TOOLCHAIN=osx-10-11-hid-sections-lto INSTALL=--install
+      osx_image: xcode8.3
+      env: CONFIG=Release TOOLCHAIN=osx-10-12-hid-sections INSTALL=--install
 
     - os: osx
-      osx_image: xcode8.1
-      env: CONFIG=MinSizeRel TOOLCHAIN=ios-nocodesign-10-1-arm64-dep-9-0-device-libcxx-hid-sections-lto INSTALL=--install
+      osx_image: xcode8.3
+      env: CONFIG=MinSizeRel TOOLCHAIN=ios-nocodesign-10-3-arm64-dep-9-0-device-libcxx-hid-sections INSTALL=--install
 
     - os: osx
-      osx_image: xcode8.1
+      osx_image: xcode8.3
       env: CONFIG=Release TOOLCHAIN=osx-10-12-sanitize-address-hid-sections INSTALL=--install
 
     - os: osx
