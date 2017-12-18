@@ -40,8 +40,8 @@ else()
   # URL/SHA1 arguments of HunterGate call will not be used while building
   # in this situation. One can also set ACF_USE_DRISHTI_CACHE=OFF in order
   # to build with recent hunter defaults.
-  set(ACF_HUNTER_GATE_URL "https://github.com/ruslo/hunter/archive/v0.19.115.tar.gz")
-  set(ACF_HUNTER_GATE_SHA1 "aeb37c4b667c4201837bcac38702f3ce8b4a9b44")
+  set(ACF_HUNTER_GATE_URL "https://github.com/ruslo/hunter/archive/v0.19.161.tar.gz")
+  set(ACF_HUNTER_GATE_SHA1 "9af482b6a54875bbbb221274f7290324dff29919")
   set(ACF_HUNTER_CONFIG "${CMAKE_CURRENT_LIST_DIR}/cmake/Hunter/config.cmake")
 endif()
 

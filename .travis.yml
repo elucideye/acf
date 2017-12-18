@@ -18,6 +18,7 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - llvm-toolchain-trusty-5.0
     packages:
       # For Qt
       - libegl1-mesa-dev
@@ -35,12 +36,12 @@ addons:
       - g++-5
       - gcc-5
 
-      - clang-3.8
+      - clang-5.0
       - libc++-dev
       - libc++abi-dev
-      - libclang-3.8-dev
-      - libclang-common-3.8-dev
-      - libclang1-3.8
+      - libclang-5.0-dev
+      - libclang-common-5.0-dev
+      - libclang1-5.0
 
       # pip3
       - python3-pip
@@ -51,6 +52,7 @@ matrix:
 
     - os: linux
       env: CONFIG=Release TOOLCHAIN=libcxx INSTALL=--strip
+      
     - os: linux
       env: CONFIG=Release TOOLCHAIN=gcc-5-pic-hid-sections-lto INSTALL=--strip
 
@@ -90,7 +92,7 @@ before_install:
   # Add '--quiet' to avoid leaking the token to logs
   - git submodule update --init --recursive --quiet
 
-  - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then mkdir -p latest-clang-symlinks && ln -s /usr/bin/clang-3.8 latest-clang-symlinks/clang && ln -s /usr/bin/clang++-3.8 latest-clang-symlinks/clang++ && export PATH="$PWD/latest-clang-symlinks:$PATH"; fi
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then mkdir -p latest-clang-symlinks && ln -s /usr/bin/clang-5.0 latest-clang-symlinks/clang && ln -s /usr/bin/clang++-5.0 latest-clang-symlinks/clang++ && export PATH="$PWD/latest-clang-symlinks:$PATH"; fi
 
 install:
   # Info about OS
