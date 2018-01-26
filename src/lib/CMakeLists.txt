@@ -7,8 +7,7 @@
 #
 # Note that requirements propagated automatically, for example:
 
-include("${SUGAR_ROOT}/cmake/Sugar")
-include(sugar_include)
+find_package(sugar CONFIG REQUIRED)
 sugar_include(.)
 
 add_library(acf ${ACF_SRCS} ${ACF_HDRS} ${ACF_HDRS_PUBLIC})

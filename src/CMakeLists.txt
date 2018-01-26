@@ -59,7 +59,7 @@ if(ACF_DO_GPU_TESTING AND ACF_BUILD_OGLES_GPGPU)
   find_package(aglet CONFIG REQUIRED)
 endif()
 
-hunter_add_package(Sugar) 
+hunter_add_package(sugar)
 
 add_subdirectory(lib)
 
