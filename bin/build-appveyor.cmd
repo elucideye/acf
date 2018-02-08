@@ -14,8 +14,7 @@ python %POLLY_ROOT%\bin\polly.py ^
 --config "%1%" ^
 --toolchain "%2%" ^
 --test ^
---fwd HUNTER_USE_CACHE_SERVERS=ONLY ^
-HUNTER_DISABLE_BUILDS=YES ^
+--fwd ^
 ACF_COPY_3RDPARTY_LICENSES=ON ^
 ACF_BUILD_TESTS=ON ^
 ACF_BUILD_EXAMPLES=ON

@@ -46,13 +46,18 @@ addons:
       # pip3
       - python3-pip
 
+env:
+  global:
+    - secure: "j29OsvxfoY4kIKwKNSBuuE9PrOa5asimnrJobfosNlzrmO33xElT3DApd3eatqtOshca5dWWL3yQpoO1oshxgh+0BMujEtUdl/fQNPhPUGEwSe3WfE3IKUBidbpDNQ9QhoGYevHLu99HXrdA0lAA5ZIgiXc5KdTGyyl/DPcnifEVAct0KgqAraHRZqzf+DH4vIHFG6sE9ugrR2KfNfA4nmfn+tAVHqEZ/UABRqJ4RSnJV6P03G1K6bnTDlnsKNczRYSfLUC4F7D1xdCkeVFqhNRUAgcAnSwW3ezip0SNbCekU2u0oj1zp4KvImvQz9zEd4Zf1J/58cbotpbCBoy0PJ++4Ae9xl8bIbiMHeLM1/2PRqItRJPxwYNqZcW0xeISyU6GmtnYVBz2QEAXcBHTDpvCB6XpN81jQosH7xHjlhrge22pXYu8zitf9HKnkc3LieQMIyC/2S3ZUixEyLyEl1U4PvXuGet8JPDHmNIt7yPTlqCuVTE5PeTEYZKU5f74ACz0J6qQicyW9v8WNEvDeJqcrXHluDNtlTsW+SJIXDVeeJ8uzvnHP3U+0n9Cj871fKywzPlshqW1Tlxf7I2ilzYRlIPcBf1CB+aNJmduF8KzQ+RIx6B4iVjIA9cTe+whq85WemUoaeQedf5tkl5hWCkLfwO2FjhfOJKfHqaJdbM="
+
+
 matrix:
   include:
     # Linux {
 
     - os: linux
       env: CONFIG=Release TOOLCHAIN=libcxx-fpic-hid-sections INSTALL=--strip
-      
+
     - os: linux
       env: CONFIG=Release TOOLCHAIN=gcc-5-pic-hid-sections-lto INSTALL=--strip
 
@@ -76,10 +81,6 @@ matrix:
       env: CONFIG=MinSizeRel TOOLCHAIN=android-ndk-r10e-api-19-armeabi-v7a-neon-hid-sections INSTALL=--strip
 
     # }
-
-env:
-  global:
-    - secure: "m+dNB+eUPoBGCoHpr4xy2gI+6CpYka1Osy3ZoZ8kaN8ROtatGkr3CKUAWmiA8Hh6nzgGCZEV5VnTbMZXW9IIHItAbueNhi0BTJJRLDUV+I7UvdNbeOypggT39GyI086LGS/dNC3jp/MI6aATE+UxXzrxeCnGgBJb0ytKlE2FR9mUhPfctVDFA+t1eftBxPHRFV9t5iZJIwOQ8V7Aos7EMb5CS8wpwu7KGneaPnspKDM9iyrCoqqPa77acnBCwGijBRtMXmvvnL1tEMU7V97dsHLTqKQef2Aez3T1xxw22Xg5Zk16EfPg3/jPBf93Nms/pl0iaFl5JIvmsqEA3TNYNSY3fG29hXAiOB7/DPB/I7h7LeuLAH1qjFKYD6nzjvJV71RspSgj+yZ6elye+4FvhELEZpBUInRR4fT+Pf9PQFmkqDGlsaezqkzwIELhCej+1FLX+Zy806kwm13Y/5HfSVu7B2YJOM2eX5k7ie9ulRrhR/9+tri2N5bYjYOCFVguWq/jyos41R3IBns6dIP+NYo79sfoCCHsZDb9XorqfgzVVtJQBmRfa6M6y4t+AOyhTs0EBcqps4gnHZyWaKQAMAzUf61DpmRoc4hgPcNdhGV5ba7ekyc4sovLoxZVpAaUcBvz+Eu5k+ereUlK4gEd2r2gul82KDaSfTdHjC9KQyI="
 
 # disable the default submodule logic to support local modification of .gitmodules paths
 git:
@@ -135,8 +136,6 @@ script:
       ACF_BUILD_EXAMPLES=YES
       ACF_COPY_3RDPARTY_LICENSES=ON
       GAUZE_ANDROID_USE_EMULATOR=YES
-      HUNTER_USE_CACHE_SERVERS=ONLY
-      HUNTER_DISABLE_BUILDS=YES
       HUNTER_CONFIGURATION_TYPES=${CONFIG}
       HUNTER_SUPPRESS_LIST_OF_FILES=ON
       --archive acf
