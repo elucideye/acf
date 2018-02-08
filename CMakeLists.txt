@@ -7,50 +7,34 @@ cmake_minimum_required(VERSION 3.3)
 ### CMAKE_MODULE_PATH ###
 #########################
 
-set(drishti_upload_modules "${CMAKE_CURRENT_LIST_DIR}/drishti-upload/cmake/Modules")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules")
-list(APPEND CMAKE_MODULE_PATH "${drishti_upload_modules}")
 
 ############################
 ### HunterGate and cache ###
 ############################
 
-# The drishti-upload module provides a common hunter config with
-# a corresponding binary server cache.  We use this for fast CI
-# builds by default.  It can be disabled with this option in favor
-# of a local cmake/Hunter/config.cmake
-option(ACF_USE_DRISHTI_CACHE "Use the drishti-upload config and cache" ON)
-
-if(EXISTS "${drishti_upload_modules}" AND ACF_USE_DRISHTI_CACHE)
-  # drishti specific hunter cache pacakges:
-  set(
-      HUNTER_CACHE_SERVERS
-      "https://github.com/elucideye/hunter-cache"
-      CACHE
-      STRING
-      "Hunter cache servers"
-  )
-  include(drishti_set_hunter_gate)
-  drishti_set_hunter_version(ACF_HUNTER_GATE_URL ACF_HUNTER_GATE_SHA1)
-  set(DRISHTI_UPLOAD_IGNORE_SUBMODULES YES)
-  set(ACF_HUNTER_CONFIG "${CMAKE_CURRENT_LIST_DIR}/drishti-upload/config.cmake")
-else()
-  # Release archive will not contain submodule 'drishti-upload'.
-  # It's a valid case when archive used in Hunter.
-  # URL/SHA1 arguments of HunterGate call will not be used while building
-  # in this situation. One can also set ACF_USE_DRISHTI_CACHE=OFF in order
-  # to build with recent hunter defaults.
-  set(ACF_HUNTER_GATE_URL "https://github.com/ruslo/hunter/archive/v0.19.161.tar.gz")
-  set(ACF_HUNTER_GATE_SHA1 "9af482b6a54875bbbb221274f7290324dff29919")
-  set(ACF_HUNTER_CONFIG "${CMAKE_CURRENT_LIST_DIR}/cmake/Hunter/config.cmake")
-endif()
-
 include("cmake/HunterGate.cmake")
-HunterGate(
-  URL "${ACF_HUNTER_GATE_URL}"
-  SHA1 "${ACF_HUNTER_GATE_SHA1}"
-  FILEPATH "${ACF_HUNTER_CONFIG}"
+
+set(drishti_upload_init "${CMAKE_CURRENT_LIST_DIR}/drishti-upload/init.cmake")
+
+if(EXISTS "${drishti_upload_init}")
+  include("${drishti_upload_init}")
+elseif(HUNTER_ENABLED)
+  # Building as a Hunter dependency. This settings will be inherited from
+  # parent project and was not used in fact.
+  HunterGate(
+      URL "https://github.com/ruslo/hunter/archive/v0.19.237.tar.gz"
+      SHA1 "b64ad42b7ef398a7332f5f4a98cf7bbfd38ca8d0"
   )
+else()
+  message(
+      FATAL_ERROR
+      "File not exists:\n"
+      "  ${drishti_upload_init}\n"
+      "Run this command if submodule is not initialized:\n"
+      "  git submodule update --init --recursive ."
+  )
+endif()
 
 ##########################
 ### CI Travis/Appveyor ###
