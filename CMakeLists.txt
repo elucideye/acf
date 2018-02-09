@@ -13,14 +13,16 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules")
 ### HunterGate and cache ###
 ############################
 
-include("cmake/HunterGate.cmake")
-
 set(drishti_upload_init "${CMAKE_CURRENT_LIST_DIR}/drishti-upload/init.cmake")
 
 if(EXISTS "${drishti_upload_init}")
+  include("cmake/HunterGate.cmake") # HUNTER_ENABLED
+
   option(DRISHTI_UPLOAD_IGNORE_SUBMODULES "Ignore submodules" ON)
   include("${drishti_upload_init}")
 elseif(HUNTER_ENABLED)
+  include("cmake/HunterGate.cmake") # HUNTER_ENABLED
+
   # Building as a Hunter dependency. This settings will be inherited from
   # parent project and was not used in fact.
   HunterGate(
