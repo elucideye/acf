@@ -82,6 +82,10 @@ matrix:
 
     # }
 
+env:
+  global:
+    - secure: "copxh/FOt+cC3TohV8GLrqmxJl/C45uNHt0hbY6E4GAw2yo4AAO5lPpGv2f/9lvxpHFv/n/mZu5MmlJwn5nJrDAb3K6r7pC5jFR0o8MFfUu+dfCm6tR0tWzFPuTuQTjnMl4wmM+t72KI7NHk0HvHm51tlR6J8Vz+OGIvt9vVHBAQtWFs9CbdiGl/HT+kjzw97xpYvbNImDsEOTYBMJExTmx+8s3MmhOyUDmbJO1x5XRF1C9CX2RALBwJbNz0oOI8FFChmtzUKzErvy5JWy8zvwWq/oQKl42RFi9GRLFM5+3NdHP8gXARykJp32cdBdtR1Sih6ySGOjrtT2go/y/asj7r2eXqewKLPsnbddeoovl098kATy/e3A1F9qZSGGMDtrW1xTaRG77KdbSXrQvnXKB58IjpDU5gCwwVFs2hbldjwsFsgcQ4w/RAHhvQrYy7S0lcqa+OjXjeYLn9DNjrZNm89Q99XbGFKCAitEcAfvG1IPsWvl4518bjBE7qwK4sUG7GFstFCGmTzy7ZhBz9vBTe7/SKu/8fYMOVmhX77rLFazZGcc6cOzoTIGdMWU2narwjAuzN7c3NzchcUtC13/+MhWgr/TLMqWJmhPHmwLMt6xrqM+DfEQzv1RFbH1t5WSnfa1L3DKgC2SW84lmL5cQScZ/qvsJC2xEpIrp49xQ="
+
 # disable the default submodule logic to support local modification of .gitmodules paths
 git:
   submodules: false
