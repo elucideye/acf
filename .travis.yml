@@ -46,11 +46,6 @@ addons:
       # pip3
       - python3-pip
 
-env:
-  global:
-    - secure: "j29OsvxfoY4kIKwKNSBuuE9PrOa5asimnrJobfosNlzrmO33xElT3DApd3eatqtOshca5dWWL3yQpoO1oshxgh+0BMujEtUdl/fQNPhPUGEwSe3WfE3IKUBidbpDNQ9QhoGYevHLu99HXrdA0lAA5ZIgiXc5KdTGyyl/DPcnifEVAct0KgqAraHRZqzf+DH4vIHFG6sE9ugrR2KfNfA4nmfn+tAVHqEZ/UABRqJ4RSnJV6P03G1K6bnTDlnsKNczRYSfLUC4F7D1xdCkeVFqhNRUAgcAnSwW3ezip0SNbCekU2u0oj1zp4KvImvQz9zEd4Zf1J/58cbotpbCBoy0PJ++4Ae9xl8bIbiMHeLM1/2PRqItRJPxwYNqZcW0xeISyU6GmtnYVBz2QEAXcBHTDpvCB6XpN81jQosH7xHjlhrge22pXYu8zitf9HKnkc3LieQMIyC/2S3ZUixEyLyEl1U4PvXuGet8JPDHmNIt7yPTlqCuVTE5PeTEYZKU5f74ACz0J6qQicyW9v8WNEvDeJqcrXHluDNtlTsW+SJIXDVeeJ8uzvnHP3U+0n9Cj871fKywzPlshqW1Tlxf7I2ilzYRlIPcBf1CB+aNJmduF8KzQ+RIx6B4iVjIA9cTe+whq85WemUoaeQedf5tkl5hWCkLfwO2FjhfOJKfHqaJdbM="
-
-
 matrix:
   include:
     # Linux {
@@ -81,6 +76,10 @@ matrix:
       env: CONFIG=MinSizeRel TOOLCHAIN=android-ndk-r10e-api-19-armeabi-v7a-neon-hid-sections INSTALL=--strip
 
     # }
+
+env:
+  global:
+    - secure: "copxh/FOt+cC3TohV8GLrqmxJl/C45uNHt0hbY6E4GAw2yo4AAO5lPpGv2f/9lvxpHFv/n/mZu5MmlJwn5nJrDAb3K6r7pC5jFR0o8MFfUu+dfCm6tR0tWzFPuTuQTjnMl4wmM+t72KI7NHk0HvHm51tlR6J8Vz+OGIvt9vVHBAQtWFs9CbdiGl/HT+kjzw97xpYvbNImDsEOTYBMJExTmx+8s3MmhOyUDmbJO1x5XRF1C9CX2RALBwJbNz0oOI8FFChmtzUKzErvy5JWy8zvwWq/oQKl42RFi9GRLFM5+3NdHP8gXARykJp32cdBdtR1Sih6ySGOjrtT2go/y/asj7r2eXqewKLPsnbddeoovl098kATy/e3A1F9qZSGGMDtrW1xTaRG77KdbSXrQvnXKB58IjpDU5gCwwVFs2hbldjwsFsgcQ4w/RAHhvQrYy7S0lcqa+OjXjeYLn9DNjrZNm89Q99XbGFKCAitEcAfvG1IPsWvl4518bjBE7qwK4sUG7GFstFCGmTzy7ZhBz9vBTe7/SKu/8fYMOVmhX77rLFazZGcc6cOzoTIGdMWU2narwjAuzN7c3NzchcUtC13/+MhWgr/TLMqWJmhPHmwLMt6xrqM+DfEQzv1RFbH1t5WSnfa1L3DKgC2SW84lmL5cQScZ/qvsJC2xEpIrp49xQ="
 
 # disable the default submodule logic to support local modification of .gitmodules paths
 git:
