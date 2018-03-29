@@ -13,30 +13,55 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules")
 ### HunterGate and cache ###
 ############################
 
-set(drishti_upload_init "${CMAKE_CURRENT_LIST_DIR}/drishti-upload/init.cmake")
+option(ACF_USE_DRISHTI_UPLOAD "Use drishti upload configuration" OFF)
+option(DRISHTI_UPLOAD_IGNORE_SUBMODULES "Ignore submodules" ON) # override 
+set(drishti_upload_init "${CMAKE_CURRENT_LIST_DIR}/drishti-upload/init.cmake") # cache upload
 
-if(EXISTS "${drishti_upload_init}")
-  include("cmake/HunterGate.cmake") # HUNTER_ENABLED
-
-  option(DRISHTI_UPLOAD_IGNORE_SUBMODULES "Ignore submodules" ON)
-  include("${drishti_upload_init}")
-elseif(HUNTER_ENABLED)
-  include("cmake/HunterGate.cmake") # HUNTER_ENABLED
-
-  # Building as a Hunter dependency. This settings will be inherited from
-  # parent project and was not used in fact.
-  HunterGate(
-      URL "https://github.com/ruslo/hunter/archive/v0.19.237.tar.gz"
-      SHA1 "b64ad42b7ef398a7332f5f4a98cf7bbfd38ca8d0"
-  )
-else()
-  message(
+if(ACF_USE_DRISHTI_UPLOAD)
+  if(EXISTS "${drishti_upload_init}")
+    # CI: Locked CI build configuration
+    include("cmake/HunterGate.cmake") # HUNTER_ENABLED
+    include("${drishti_upload_init}")
+  else()
+    # FAILURE:
+    message(
       FATAL_ERROR
-      "File not exists:\n"
+      "File does not exist:\n"
       "  ${drishti_upload_init}\n"
       "Run this command if submodule is not initialized:\n"
       "  git submodule update --init --recursive ."
   )
+  endif()    
+else()
+  set(ACF_HUNTER_GATE_URL "https://github.com/ruslo/hunter/archive/v0.20.28.tar.gz")
+  set(ACF_HUNTER_GATE_SHA1 "8fee57e4232e35e28a88f0beafb5f2a739a3fa3c")
+  if(HUNTER_ENABLED AND NOT ACF_IS_REPO_BUILD)
+    # DEPENDENCY: if(HUNTER_ENABLE): we are being used as a dependency from
+    # another project and we will use the config.cmake from the parent project.
+    message(STATUS "ACF Hunter package build detected")
+    include("cmake/HunterGate.cmake") # HUNTER_ENABLED
+    HunterGate(
+      URL "${ACF_HUNTER_GATE_URL}"
+      SHA1 "${ACF_HUNTER_GATE_SHA1}"
+    )
+  else()
+    # LOCAL: This is a local repository build and we are relying on a local
+    # config (instead of CI friendly drishti-upload) that is closer to the 
+    # current default versions in ${HUNTER_ROOT}/cmake/configs/default.cmake
+    # *IF* we want to enable local project defaults then they would go in
+    # "${CMAKE_CURRENT_LIST_DIR}/cmake/Hunter/config.cmake"
+    message(STATUS "ACF in-repository build detected")
+    set(ACF_IS_REPO_BUILD TRUE CACHE STRING "Is a build from the local repository")
+    include("cmake/HunterGate.cmake") # HUNTER_ENABLED
+    HunterGate(
+      URL "${ACF_HUNTER_GATE_URL}"
+      SHA1 "${ACF_HUNTER_GATE_SHA1}"
+      # ******************
+      # *** FUTURE USE ***
+      # ******************
+      #FILEPATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Hunter/config.cmake"
+    )
+  endif()
 endif()
 
 ##########################
@@ -97,10 +122,12 @@ else()
   set(ACF_CI FALSE)
 endif()
 
-if(ANDROID OR NOT ${ACF_CI})
-  set(ACF_DO_GPU_TESTING TRUE)
+# On CI platforms we won't have a usable GPU except for the Android emulator
+# We set a variable here to help us make decisions about dependencies later on.
+if(ANDROID OR NOT ${ACF_CI}) 
+  set(ACF_HAS_GPU TRUE)
 else()
-  set(ACF_DO_GPU_TESTING FALSE)
+  set(ACF_HAS_GPU FALSE)
 endif()
 
 if(ACF_BUILD_TESTS)

@@ -10,7 +10,7 @@ add_executable(${test_app} ${acf_ut_srcs})
 set_property(TARGET ${test_app} PROPERTY FOLDER "app/tests")
 target_link_libraries(${test_app} PUBLIC acf GTest::gtest ${OpenCV_LIBS})
 
-if ((${ACF_DO_GPU_TESTING}) AND ACF_BUILD_OGLES_GPGPU)
+if (ACF_BUILD_OGLES_GPGPU AND TARGET aglet::aglet)
   target_link_libraries(${test_app} PUBLIC aglet::aglet)
   target_compile_definitions(${test_app} PUBLIC ACF_DO_GPU=1)
 endif()
@@ -24,4 +24,3 @@ gauze_add_test(
   "$<GAUZE_RESOURCE_FILE:${DRISHTI_ASSETS_FACE_DETECTOR}>"
   "." # Used working directory as portable temp folder
   )
-

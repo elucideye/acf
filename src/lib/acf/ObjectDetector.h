@@ -25,46 +25,14 @@ ACF_NAMESPACE_BEGIN
 class ACF_EXPORT ObjectDetector
 {
 public:
-    // TODO: enforce a public non virtual API that calls a virtual detect method
-    // and applies pruning criteria as needed.
     virtual int operator()(const cv::Mat& image, std::vector<cv::Rect>& objects, std::vector<double>* scores = 0) = 0;
     virtual int operator()(const MatP& image, std::vector<cv::Rect>& objects, std::vector<double>* scores = 0) = 0;
-    virtual void setMaxDetectionCount(size_t maxCount)
-    {
-        m_maxDetectionCount = maxCount;
-    }
-    virtual void setDetectionScorePruneRatio(double ratio)
-    {
-        m_detectionScorePruneRatio = ratio;
-    }
-    virtual void prune(std::vector<cv::Rect>& objects, std::vector<double>& scores)
-    {
-        if (objects.size() > 1)
-        {
-            int cutoff = 1;
-            for (int i = 1; i < std::min(m_maxDetectionCount, objects.size()); i++)
-            {
-                cutoff = i + 1;
-                if (scores[i] < (scores[0] * m_detectionScorePruneRatio))
-                {
-                    break;
-                }
-            }
-            objects.erase(objects.begin() + cutoff, objects.end());
-            scores.erase(scores.begin() + cutoff, scores.end());
-        }
-    }
-    virtual void setDoNonMaximaSuppression(bool flag)
-    {
-        m_doNms = flag;
-    }
-    virtual bool getDoNonMaximaSuppression() const
-    {
-        return m_doNms;
-    }
-
+    virtual void setDoNonMaximaSuppression(bool flag);
+    virtual bool getDoNonMaximaSuppression() const;    
+    virtual void setMaxDetectionCount(size_t maxCount);
+    virtual void setDetectionScorePruneRatio(double ratio);
+    virtual void prune(std::vector<cv::Rect>& objects, std::vector<double>& scores);
     virtual cv::Size getWindowSize() const = 0;
-
 protected:
     bool m_doNms = false;
     double m_detectionScorePruneRatio = 0.0;
