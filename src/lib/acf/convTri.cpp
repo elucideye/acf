@@ -145,11 +145,6 @@ void convConst(const MatP& A, MatP& B, const std::string& type, float p, int s)
     int d = A.channels();
     int m = std::min(ns[0], ns[1]);
     int r = util::round(p);
-    {
-        //cv::Mat canvas;
-        //cv::normalize(A.base(), canvas, 0, 1, cv::NORM_MINMAX, CV_32F);
-        //cv::imshow("canvas", canvas), cv::waitKey(0);
-    }
 
     float* a = const_cast<float*>(A.ptr<float>());
     float* b = B.ptr<float>();

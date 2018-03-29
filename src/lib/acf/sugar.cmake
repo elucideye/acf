@@ -16,6 +16,7 @@ sugar_files(ACF_SRCS
   ACFIO.cpp # optional
   ACFIOArchiveCereal.cpp
   MatP.cpp
+  ObjectDetector.cpp
   acfModify.cpp
   bbNms.cpp
   chnsCompute.cpp
@@ -40,6 +41,7 @@ sugar_files(ACF_HDRS
   ACFIO.h
   ACFIOArchive.h
   ACFObject.h
+  ObjectDetector.h
   #######################
   ### Toolbox headers ###
   #######################  

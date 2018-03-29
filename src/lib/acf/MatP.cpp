@@ -52,7 +52,6 @@ MatP& MatP::operator=(const MatP& src)
 
 void MatP::create(const cv::Size& size, int depth, int channels, bool transpose)
 {
-    //std::cout << size.height*channels  << " " << size.width << " " << depth << std::endl;
     if (transpose)
     {
         data.create(size.height, size.width * channels, depth);
