@@ -89,9 +89,6 @@ const acf::Detector::Pyramid& GLDetector::getPyramid(const cv::Mat& input, const
     glFlush();
     m_impl->acf->fill(m_impl->Pgpu, m_impl->Pcpu);
 
-    logPyramid("/tmp/pyramid_gpu.png", m_impl->Pgpu);
-    logPyramid("/tmp/pyramid_cpu.png", m_impl->Pcpu);
-
     return m_impl->Pgpu;
 }
 
