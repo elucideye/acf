@@ -11,11 +11,11 @@
 #ifndef __util_ordered_h__
 #define __util_ordered_h__ 1
 
+#include <util/acf_util.h>
+
 #include <vector>
 #include <numeric>
 #include <algorithm>
-
-#include "util/acf_util.h"
 
 UTIL_NAMESPACE_BEGIN
 

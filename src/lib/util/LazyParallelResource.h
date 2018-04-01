@@ -11,7 +11,8 @@
 #ifndef __util_LazyParallelResource_h__
 #define __util_LazyParallelResource_h__
 
-#include "util/acf_util.h"
+#include <util/acf_util.h>
+
 #include <functional>
 #include <map>
 

@@ -4,16 +4,18 @@
 * Please email me if you find bugs, or have suggestions or questions!
 * Licensed under the Simplified BSD License [see external/bsd.txt]
 *******************************************************************************/
-#include "wrappers.hpp"
-#include "string.h"
+
+#include <acf/MatP.h>
+#include <acf/toolbox/wrappers.hpp>
+#include <acf/toolbox/sse.hpp>
+
+#include <string.h>
 #include <math.h>
 #include <typeinfo>
-#include "sse.hpp"
+
 typedef unsigned char uchar;
 
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include "acf/MatP.h"
 
 #include <functional>
 #include <iostream>

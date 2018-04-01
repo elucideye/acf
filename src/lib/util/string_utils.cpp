@@ -8,12 +8,11 @@
 
 */
 
-#include <stdio.h>
-
-#include "util/string_utils.h"
-#include "util/Line.h" // for csv_reader
+#include <util/string_utils.h>
+#include <util/Line.h> // for csv_reader
 
 #include <locale>
+#include <stdio.h>
 
 UTIL_NAMESPACE_BEGIN
 

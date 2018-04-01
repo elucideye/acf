@@ -79,8 +79,9 @@
 // Please email me if you find bugs, or have suggestions or questions!
 // Licensed under the Simplified BSD License [see external/bsd.txt]
 
-#include "acf/ACF.h"
-#include "acf/acf_common.h"
+#include <acf/ACF.h>
+#include <acf/acf_common.h>
+
 #include <opencv2/highgui/highgui.hpp>
 
 void gradQuantize(float* O, float* M, int* O0, int* O1, float* M0, float* M1, int nb, int n, float norm, int nOrients, bool full, bool interpolate);

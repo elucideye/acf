@@ -4,9 +4,9 @@
 * Please email me if you find bugs, or have suggestions or questions!
 * Licensed under the Simplified BSD License [see external/bsd.txt]
 *******************************************************************************/
-#include "acf/toolbox/wrappers.hpp"
-#include "acf/toolbox/sse.hpp"
-#include "acf/MatP.h"
+#include <acf/toolbox/wrappers.hpp>
+#include <acf/toolbox/sse.hpp>
+#include <acf/MatP.h>
 
 #include <cmath>
 #include <typeinfo>

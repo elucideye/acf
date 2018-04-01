@@ -5,10 +5,8 @@
 * Licensed under the Simplified BSD License [see external/bsd.txt]
 *******************************************************************************/
 
-#include "acf/ACF.h"
-#include "util/Parallel.h"
-
-#include <opencv2/highgui/highgui.hpp>
+#include <acf/ACF.h>
+#include <util/Parallel.h>
 
 #include <vector>
 #include <cmath>

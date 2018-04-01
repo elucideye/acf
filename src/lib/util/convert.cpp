@@ -8,16 +8,16 @@
 
 */
 
-#include "util/convert.h"
+#include <util/convert.h>
 
 // clang-format off
 #if defined (__arm__) || defined(__arm64__)
 #  include <arm_neon.h>
 #  define USE_SIMD 1
 #elif __APPLE__
-#  include "TargetConditionals.h"
+#  include <TargetConditionals.h>
 #  if !TARGET_IPHONE_SIMULATOR
-#    include "NEON_2_SSE.h"
+#    include <NEON_2_SSE.h>
 #    define USE_SIMD 1
 #  else
 #    define USE_SIMD 0
@@ -25,7 +25,7 @@
 #else
 #  if (defined(__SSE2__) || defined(__x86_64__) || defined(__AVX2__)) && BUILD_REGRESSION_SIMD
 #    define USE_SIMD 1
-#    include "NEON_2_SSE.h"
+#    include <NEON_2_SSE.h>
 #  else
 #    define USE_SIMD 0
 #  endif

@@ -73,7 +73,8 @@
 //if( normRad==0 ), return; end; S = convTri( M, normRad );
 //gradientMex('gradientMagNorm',M,S,normConst); % operates on M
 
-#include "acf/ACF.h"
+#include <acf/ACF.h>
+
 #include <opencv2/highgui/highgui.hpp>
 
 void grad1(float* I, float* Gx, float* Gy, int h, int w, int x);

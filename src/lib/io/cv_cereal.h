@@ -11,7 +11,7 @@
 #ifndef __io_cv_cereal_h__
 #define __io_cv_cereal_h__
 
-#include "acf/acf_common.h"
+#include <acf/acf_common.h>
 
 // see: https://github.com/USCiLab/cereal/issues/104
 

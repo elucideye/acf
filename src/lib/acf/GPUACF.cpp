@@ -8,35 +8,33 @@
 
 */
 
-#include "acf/GPUACF.h"
+#include <acf/GPUACF.h>
 
-#include "ogles_gpgpu/common/proc/grayscale.h"
-#include "ogles_gpgpu/common/proc/pyramid.h"
-#include "ogles_gpgpu/common/proc/grad.h"
-#include "ogles_gpgpu/common/proc/gauss.h"
-#include "ogles_gpgpu/common/proc/gauss_opt.h"
-#include "ogles_gpgpu/common/proc/transform.h"
-#include "ogles_gpgpu/common/proc/gain.h"
-#include "ogles_gpgpu/common/proc/tensor.h"
-#include "ogles_gpgpu/common/proc/nms.h"
+#include <ogles_gpgpu/common/proc/grayscale.h>
+#include <ogles_gpgpu/common/proc/pyramid.h>
+#include <ogles_gpgpu/common/proc/grad.h>
+#include <ogles_gpgpu/common/proc/gauss.h>
+#include <ogles_gpgpu/common/proc/gauss_opt.h>
+#include <ogles_gpgpu/common/proc/transform.h>
+#include <ogles_gpgpu/common/proc/gain.h>
+#include <ogles_gpgpu/common/proc/tensor.h>
+#include <ogles_gpgpu/common/proc/nms.h>
 
 // generic shaders
-#include "ogles_gpgpu/common/proc/gain.h"
-#include "ogles_gpgpu/common/proc/swizzle.h"
-#include "ogles_gpgpu/common/proc/rgb2luv.h"
+#include <ogles_gpgpu/common/proc/gain.h>
+#include <ogles_gpgpu/common/proc/swizzle.h>
+#include <ogles_gpgpu/common/proc/rgb2luv.h>
 
 // acf specific shader
-#include "acf/gpu/swizzle2.h"
-#include "acf/gpu/gradhist.h"
-#include "acf/gpu/triangle.h"
+#include <acf/gpu/swizzle2.h>
+#include <acf/gpu/gradhist.h>
+#include <acf/gpu/triangle.h>
 
-#include "util/convert.h"
-#include "util/timing.h"
-#include "util/Parallel.h"
-#include "util/make_unique.h"
-#include "ogles_gpgpu/common/gl/memtransfer_optimized.h"
-
-#include <opencv2/highgui/highgui.hpp>
+#include <util/convert.h>
+#include <util/timing.h>
+#include <util/Parallel.h>
+#include <util/make_unique.h>
+#include <ogles_gpgpu/common/gl/memtransfer_optimized.h>
 
 #include <iostream>
 #include <chrono>

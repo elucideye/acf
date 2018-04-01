@@ -9,7 +9,8 @@
 
 */
 
-#include "acf/ACF.h"
+#include <acf/ACF.h>
+
 #include <cmath>
 
 //function detector = acfModify( detector, varargin )

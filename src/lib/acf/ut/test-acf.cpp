@@ -31,8 +31,6 @@ int gauze_main(int argc, char** argv)
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#define ACF_TEST_DISPLAY_OUTPUT 0
-
 // clang-format off
 #if defined(ACF_DO_GPU)
 #  include "acf/GPUACF.h"
@@ -98,17 +96,6 @@ const char* outputDirectory;
 #include <opencv2/highgui.hpp>
 
 BEGIN_EMPTY_NAMESPACE
-
-struct WaitKey
-{
-    WaitKey() {}
-    ~WaitKey()
-    {
-#if ACF_TEST_DISPLAY_OUTPUT
-        cv::waitKey(0);
-#endif
-    }
-};
 
 // http://stackoverflow.com/a/32647694
 static bool isEqual(const cv::Mat& a, const cv::Mat& b);
@@ -240,22 +227,7 @@ protected:
 
         cv::Mat input = image;
         
-#if ACF_LOG_GPU_TIME
-        // Warm up the GPU
-        for (int i = 0; i < 10; i++)
         {
-            (*m_acf)({ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT);
-        }
-        m_acf->fill(Pgpu, Pcpu); // be sure to read and flush all commands            
-#endif
-        {
-            
-#if ACF_LOG_GPU_TIME
-            util::ScopeTimeLogger logger = [&](double elapsed)
-            {
-                std::cout << "ACF::fill(): " << input.cols << " " << elapsed << std::endl;
-            };
-#endif
             // Fill in the pyramid:
             (*m_acf)({ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT);
             glFlush();
@@ -279,14 +251,15 @@ protected:
     MatP m_IpT;
 };
 
-#if defined(ACF_DO_GPU)
-static cv::Mat getImage(ogles_gpgpu::ProcInterface& proc)
-{
-    cv::Mat result(proc.getOutFrameH(), proc.getOutFrameW(), CV_8UC4);
-    proc.getResultData(result.ptr());
-    return result;
-}
-#endif // defined(ACF_DO_GPU)
+// This block demonstrates how to retreive output
+//#if defined(ACF_DO_GPU)
+//static cv::Mat getImage(ogles_gpgpu::ProcInterface& proc)
+//{
+//    cv::Mat result(proc.getOutFrameH(), proc.getOutFrameW(), CV_8UC4);
+//    proc.getResultData(result.ptr());
+//    return result;
+//}
+//#endif // defined(ACF_DO_GPU)
 
 // This is a WIP, currently we test the basic CPU detection functionality
 // with a sample image.  Given the complexity of the GPU implementation,
@@ -310,18 +283,16 @@ TEST_F(ACFTest, ACFSerializeCereal)
     ASSERT_TRUE(isEqual(*detector, detector2));
 }
 
-static void draw(cv::Mat& canvas, const std::vector<cv::Rect>& objects)
-{
-    for (const auto& r : objects)
-    {
-        cv::rectangle(canvas, r, { 0, 255, 0 }, 1, 8);
-    }
-}
+//static void draw(cv::Mat& canvas, const std::vector<cv::Rect>& objects)
+//{
+//    for (const auto& r : objects)
+//    {
+//        cv::rectangle(canvas, r, { 0, 255, 0 }, 1, 8);
+//    }
+//}
 
 TEST_F(ACFTest, ACFDetectionCPUMat)
 {
-    WaitKey waitKey;
-
     auto detector = getDetector();
     ASSERT_NE(detector, nullptr);
 
@@ -330,19 +301,11 @@ TEST_F(ACFTest, ACFDetectionCPUMat)
     detector->setIsTranspose(false);
     (*detector)(m_I, objects, &scores);
 
-#if ACF_TEST_DISPLAY_OUTPUT
-    cv::Mat canvas = image.clone();
-    draw(canvas, objects);
-    cv::imshow("acf_cpu_detection_mat", canvas);
-#endif
-
     ASSERT_GT(objects.size(), 0); // Very weak test!!!
 }
 
 TEST_F(ACFTest, ACFDetectionCPUMatP)
 {
-    WaitKey waitKey;
-
     auto detector = getDetector();
     ASSERT_NE(detector, nullptr);
 
@@ -352,12 +315,6 @@ TEST_F(ACFTest, ACFDetectionCPUMatP)
     // Input is transposed, but objects will be returned in upright coordinate system
     detector->setIsTranspose(true);
     (*detector)(m_IpT, objects, &scores);
-
-#if ACF_TEST_DISPLAY_OUTPUT
-    cv::Mat canvas = image.clone();
-    draw(canvas, objects);
-    cv::imshow("acf_cpu_detection_matp", canvas);
-#endif
 
     ASSERT_GT(objects.size(), 0); // Very weak test!!!
 }
@@ -388,18 +345,11 @@ TEST_F(ACFTest, ACFChannelsCPU)
     detector->setIsTranspose(true);
     detector->computeChannels(m_IpT, Ich);
 
-#if ACF_TEST_DISPLAY_OUTPUT
-    cv::Mat canvas = Ich.base().t();
-    WaitKey waitKey;
-    cv::imshow("acf_channel_cpu", canvas);
-#endif
-
     // TODO: comparison for channels:
     // load cereal pba cv::Mat, compare precision, etc
     ASSERT_EQ(Ich.base().empty(), false);
 }
 
-// NOTE: side-effect, set's the CPU pyramid for GPU tests:
 TEST_F(ACFTest, ACFPyramidCPU)
 {
     auto detector = getDetector();
@@ -408,12 +358,6 @@ TEST_F(ACFTest, ACFPyramidCPU)
     auto pyramid = std::make_shared<acf::Detector::Pyramid>();
     detector->setIsTranspose(true);
     detector->computePyramid(m_IpT, *pyramid);
-
-#if ACF_TEST_DISPLAY_OUTPUT
-    WaitKey waitKey;
-    cv::Mat canvas = draw(*pyramid);
-    cv::imshow("acf_pyramid_cpu", canvas.t());
-#endif
 
     // TODO: comparision for pyramid:
     // load cereal pba cv::Mat, compare precision, etc
@@ -427,12 +371,6 @@ TEST_F(ACFTest, ACFPyramidGPU10)
     initGPUAndCreatePyramid(Pgpu);
     ASSERT_NE(m_detector, nullptr);
     ASSERT_NE(m_acf, nullptr);
-
-#if ACF_TEST_DISPLAY_OUTPUT
-    WaitKey waitKey;
-    cv::Mat channels = m_acf->getChannels();
-    cv::imshow("acf_gpu", channels);
-#endif
 
     // TODO: comparision for pyramid:
     // load cereal pba cv::Mat, compare precision, etc
@@ -459,13 +397,6 @@ TEST_F(ACFTest, ACFDetectionGPU10)
 #endif
         (*m_detector)(Pgpu, objects);
     }
-
-#if ACF_TEST_DISPLAY_OUTPUT
-    WaitKey waitKey;
-    cv::Mat canvas = image.clone();
-    draw(canvas, objects);
-    cv::imshow("acf_gpu_detections", canvas);
-#endif
 
     ASSERT_GT(objects.size(), 0); // Very weak test!!!
 }
@@ -521,33 +452,34 @@ static bool isEqual(const acf::Detector& a, const acf::Detector& b)
     //isEqual(a.clf.weights, b.clf.weights) &&
 }
 
-static cv::Mat draw(acf::Detector::Pyramid& pyramid)
-{
-    cv::Mat canvas;
-    std::vector<cv::Mat> levels;
-    for (int i = 0; i < pyramid.nScales; i++)
-    {
-        // Concatenate the transposed faces, so they are compatible with the GPU layout
-        cv::Mat Ccpu;
-        std::vector<cv::Mat> images;
-        for (const auto& image : pyramid.data[i][0].get())
-        {
-            images.push_back(image.t());
-        }
-        cv::vconcat(images, Ccpu);
-
-        // Instead of upright:
-        //cv::vconcat(pyramid.data[i][0].get(), Ccpu);
-
-        if (levels.size())
-        {
-            cv::copyMakeBorder(Ccpu, Ccpu, 0, levels.front().rows - Ccpu.rows, 0, 0, cv::BORDER_CONSTANT);
-        }
-
-        levels.push_back(Ccpu);
-    }
-    cv::hconcat(levels, canvas);
-    return canvas;
-}
+// This block demonstrates how to visualize a pyramid structure:
+//static cv::Mat draw(acf::Detector::Pyramid& pyramid)
+//{
+//    cv::Mat canvas;
+//    std::vector<cv::Mat> levels;
+//    for (int i = 0; i < pyramid.nScales; i++)
+//    {
+//        // Concatenate the transposed faces, so they are compatible with the GPU layout
+//        cv::Mat Ccpu;
+//        std::vector<cv::Mat> images;
+//        for (const auto& image : pyramid.data[i][0].get())
+//        {
+//            images.push_back(image.t());
+//        }
+//        cv::vconcat(images, Ccpu);
+//
+//        // Instead of upright:
+//        //cv::vconcat(pyramid.data[i][0].get(), Ccpu);
+//
+//        if (levels.size())
+//        {
+//            cv::copyMakeBorder(Ccpu, Ccpu, 0, levels.front().rows - Ccpu.rows, 0, 0, cv::BORDER_CONSTANT);
+//        }
+//
+//        levels.push_back(Ccpu);
+//    }
+//    cv::hconcat(levels, canvas);
+//    return canvas;
+//}
 
 END_EMPTY_NAMESPACE

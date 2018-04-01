@@ -11,11 +11,11 @@
 #ifndef __acf_GPUACF_h__
 #define __acf_GPUACF_h__
 
-#include "acf/acf_common.h"
-#include "acf/ACF.h"
+#include <acf/acf_common.h>
+#include <acf/ACF.h>
 
 // ogles_gpgpu shader lib:
-#include "ogles_gpgpu/common/proc/video.h"
+#include <ogles_gpgpu/common/proc/video.h>
 
 #include <memory>
 #include <array>
