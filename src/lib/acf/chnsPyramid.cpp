@@ -127,7 +127,6 @@
 #include <util/Parallel.h>
 #include <util/acf_math.h>
 
-
 #include <opencv2/imgproc/imgproc.hpp>
 
 ACF_NAMESPACE_BEGIN
@@ -211,7 +210,7 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
     auto smooth = p.smooth.get();
     auto concat = p.concat.get();
     auto shrink = pChns.shrink.get();
-    
+
     pChns.isLuv = m_isLuv; // propagate LUV special case through to static function
 
     // Convert I to appropriate color space (or simply normalize):

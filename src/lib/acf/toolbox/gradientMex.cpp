@@ -527,7 +527,7 @@ void gradHist(float* M, float* O, float* H, int h, int w, int bin, int nOrients,
             }
             hasLf = xb >= 0;
             xb0 = hasLf ? (int)xb : -1;
-            
+
             if (xb0 >= (wb - 1))
             {
                 break;

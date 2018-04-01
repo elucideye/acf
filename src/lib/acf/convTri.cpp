@@ -106,8 +106,6 @@
 //if(s>1), t=floor(s/2)+1; J=J(t:s:end-s+t,t:s:end-s+t,:); end
 //end
 
-
-
 #include <acf/acf_common.h>
 #include <acf/ACF.h>
 #include <util/acf_math.h>

@@ -177,7 +177,7 @@ int Detector::chnsCompute(const MatP& IIn, const Options::Pyramid::Chns& pChnsIn
             dfs.clipHog = { "clipHog", 0.2 };
             pChns.pGradHist.merge(dfs, 1);
         }
-        
+
         chns.pChns = pChns; // return the estimate
         return 0;
     }

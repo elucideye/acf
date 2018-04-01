@@ -377,7 +377,7 @@ void rgbConvert(iT* I, oT* J, int n, int d, int flag, oT nrm)
 
 void rgbConvertMex(const MatP& I, MatP& J, int flag, double nrm)
 {
-    if(flag == 4)
+    if (flag == 4)
     {
         J = I;
         return;
@@ -390,28 +390,31 @@ void rgbConvertMex(const MatP& I, MatP& J, int flag, double nrm)
     // {4,"orig"}
     const int channels = (flag > 0) ? 3 : 1;
     const float* pI = I.ptr<float>();
-    
+
     // Only allocate a new image for non-in-place transformations
     // otherwise we prune the channels after conversion.
     bool isInPlace = (I.base().data == J.base().data);
 
-    float * pJ = nullptr;
-    if(!isInPlace)
+    float* pJ = nullptr;
+    if (!isInPlace)
     {
         J.create(I.size(), I.depth(), channels);
         pJ = J.ptr<float>();
     }
     else
     {
-        pJ = const_cast<float *>(pI);
+        pJ = const_cast<float*>(pI);
     }
-    
+
     rgbConvert(const_cast<float*>(pI), pJ, I.size().area(), I.channels(), flag, float(nrm));
-    
+
     // Remove extra channels:
-    if(isInPlace && (J.channels() > channels))
+    if (isInPlace && (J.channels() > channels))
     {
-        do { J.pop_back(); } while(J.channels() > channels);
+        do
+        {
+            J.pop_back();
+        } while (J.channels() > channels);
     }
 }
 

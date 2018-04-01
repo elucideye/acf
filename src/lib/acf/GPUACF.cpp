@@ -93,7 +93,7 @@ struct ACF::Impl
     void initACF(const SizeVec& scales, FeatureKind kind, bool debug)
     {
         static const float scale = (1.f / static_cast<float>(m_shrink));
-        
+
         rotationProc = util::make_unique<ogles_gpgpu::GainProc>();
         rgbSmoothProc = util::make_unique<ogles_gpgpu::GaussOptProc>(2.0f);
         rgb2luvProc = util::make_unique<ogles_gpgpu::Rgb2LuvProc>();
@@ -251,7 +251,7 @@ struct ACF::Impl
     cv::Mat m_grayscale;
 
     int m_shrink = 4;
-    
+
     std::unique_ptr<ogles_gpgpu::GainProc> rotationProc; // make sure we have an unmodified upright image
     std::unique_ptr<ogles_gpgpu::GaussOptProc> rgbSmoothProc;
     std::unique_ptr<ogles_gpgpu::GainProc> reduceRgbSmoothProc; // reduce
@@ -467,11 +467,11 @@ void ACF::beginTransfer()
                 impl->reduceGradHistProcASmooth->getResultData(nullptr);
             }
             break;
-                
+
             case kUnknown:
             {
                 throw std::runtime_error("ACF::beginTransfer() unknown feature type");
-            }                
+            }
         }
     }
 
@@ -496,7 +496,7 @@ void ACF::preConfig()
 void ACF::postConfig()
 {
     // Obtain the scaled image rois:
-    const int &s = impl->m_shrink;
+    const int& s = impl->m_shrink;
     impl->m_crops.clear();
     const auto& rois = impl->pyramidProc->getLevelCrops();
     for (auto& r : rois)

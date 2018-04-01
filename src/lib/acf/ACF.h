@@ -157,7 +157,7 @@ public:
                 };
                 Field<Custom> pCustom;
                 Field<int> complete;
-                
+
                 // MATLAB assumes RGB, but we allow processing of pre-transformed LUV input
                 // for efficiency (from an OpenGL shader, for example) and allow the user
                 // to specify this at run time with the following field.
@@ -356,7 +356,7 @@ public:
 
         // .rois   - [ LEVELS x CHANNELS ] array for channel access
         std::vector<std::vector<cv::Rect>> rois;
-        
+
         void clear()
         {
             data.clear();

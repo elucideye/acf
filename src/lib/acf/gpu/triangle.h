@@ -20,7 +20,6 @@
 #include <ogles_gpgpu/common/common_includes.h>
 #include <ogles_gpgpu/common/proc/base/multipassproc.h>
 
-
 BEGIN_OGLES_GPGPU
 
 class TriangleProc : public MultiPassProc

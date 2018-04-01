@@ -125,14 +125,14 @@ int Detector::rgbConvert(const MatP& IIn, MatP& J, const std::string& colorSpace
     }
 
     // Pass through X-to-X transformation (shallow copy):
-    if(flag == 4)
+    if (flag == 4)
     {
         J = IIn;
         return 0;
     }
-    
+
     // Input = "gray"; Output = "gray"
-    if(IIn.channels() == 1)
+    if (IIn.channels() == 1)
     {
         // Although the function is rgbTo*, we also support
         // pass through grayscale-to-grayscale transformations
@@ -150,14 +150,14 @@ int Detector::rgbConvert(const MatP& IIn, MatP& J, const std::string& colorSpace
         J = IIn;
         return 0;
     }
-    
+
     // Else we assume RGB
     if (flag == 1)
     {
         J = IIn;
         return 0;
     }
-    
+
     if (!IIn.empty())
     {
         rgbConvertMex(IIn, J, flag, 1.0f);

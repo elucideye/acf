@@ -29,11 +29,12 @@ public:
     virtual int operator()(const cv::Mat& image, std::vector<cv::Rect>& objects, std::vector<double>* scores = 0) = 0;
     virtual int operator()(const MatP& image, std::vector<cv::Rect>& objects, std::vector<double>* scores = 0) = 0;
     virtual void setDoNonMaximaSuppression(bool flag);
-    virtual bool getDoNonMaximaSuppression() const;    
+    virtual bool getDoNonMaximaSuppression() const;
     virtual void setMaxDetectionCount(size_t maxCount);
     virtual void setDetectionScorePruneRatio(double ratio);
     virtual void prune(std::vector<cv::Rect>& objects, std::vector<double>& scores);
     virtual cv::Size getWindowSize() const = 0;
+
 protected:
     bool m_doNms = false;
     double m_detectionScorePruneRatio = 0.0;

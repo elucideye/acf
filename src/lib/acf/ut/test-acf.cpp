@@ -33,14 +33,14 @@ int gauze_main(int argc, char** argv)
     outputDirectory = argv[4];
 
 #if defined(ACF_SERIALIZE_WITH_CVMATIO)
-    if(argc >= 8)
+    if (argc >= 8)
     {
         acfInriaDetectorFilename = argv[5];
         acfCaltechDetectorFilename = argv[6];
         acfPedestrianImageFilename = argv[7];
     }
 #endif
-    
+
     return RUN_ALL_TESTS();
 }
 
@@ -182,24 +182,24 @@ protected:
         m_hasTranspose = false;
     }
 
-    void testPedestrianDetector(const char *detectorFilename, const char *imageFilename)
+    void testPedestrianDetector(const char* detectorFilename, const char* imageFilename)
     {
-        if(detectorFilename && imageFilename)
+        if (detectorFilename && imageFilename)
         {
             auto detector = create(detectorFilename);
             ASSERT_NE(detector, nullptr);
-            if(detector)
+            if (detector)
             {
                 cv::Mat image = cv::imread(imageFilename);
                 ASSERT_NE(image.empty(), true);
-                if(!image.empty())
+                if (!image.empty())
                 {
                     std::vector<double> scores;
                     std::vector<cv::Rect> objects;
                     detector->setIsTranspose(false);
                     detector->setDoNonMaximaSuppression(true);
                     (*detector)(image, objects, &scores);
-                    
+
                     // TODO: explicit ground truth with Matlab
                     // CAVEAT: There will likely be some cross-platform variation in
                     // actual detection results even within matlab.  We can do some
@@ -212,17 +212,17 @@ protected:
 
 #if ACF_TEST_DISPLAY_OUTPUT
                     WaitKey waitKey;
-                    for(auto &d : objects)
+                    for (auto& d : objects)
                     {
-                        cv::rectangle(image, d, {0,255,0}, 4, 8);
+                        cv::rectangle(image, d, { 0, 255, 0 }, 4, 8);
                     }
-                    cv::imshow("image", image); cv::waitKey(0);
+                    cv::imshow("image", image);
+                    cv::waitKey(0);
 #endif
                 }
             }
         }
     }
-    
 
 #if defined(ACF_DO_GPU)
     static std::vector<ogles_gpgpu::Size2d> getPyramidSizes(acf::Detector::Pyramid& Pcpu)
@@ -266,7 +266,7 @@ protected:
         m_acf->setDoLuvTransfer(false);
 
         cv::Mat input = image;
-        
+
         {
             // Fill in the pyramid:
             (*m_acf)({ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT);
@@ -350,7 +350,7 @@ ans =
 ```
  */
 
-static void testChnsDefault(const acf::Detector::Options::Pyramid::Chns &pChns)
+static void testChnsDefault(const acf::Detector::Options::Pyramid::Chns& pChns)
 {
     ASSERT_EQ(pChns.shrink.get(), 4);
     ASSERT_EQ(pChns.pColor->enabled.get(), 1);
@@ -376,25 +376,25 @@ TEST_F(ACFTest, ACFchnsComputeDefault)
     testChnsDefault(channels.pChns);
 }
 
-static void rgbToX(const char *filename, const std::string &color)
+static void rgbToX(const char* filename, const std::string& color)
 {
     acf::Detector::Channels dflt, channels;
     acf::Detector::chnsCompute({}, {}, dflt, true, {});
     dflt.pChns.pColor->colorSpace = color;
-    
+
     cv::Mat image = cv::imread(imageFilename);
     cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
-    image.convertTo(image, CV_32FC3, 1.0/255.0); // convert to float
-    
+    image.convertTo(image, CV_32FC3, 1.0 / 255.0); // convert to float
+
     ASSERT_NE(image.empty(), true);
     ASSERT_EQ(image.channels(), 3);
-    
-    if(!image.empty())
+
+    if (!image.empty())
     {
         MatP I(image);
         acf::Detector::chnsCompute(I, dflt.pChns, channels, false, {});
-    
-        for(int i = 0; i < channels.data.size(); i++)
+
+        for (int i = 0; i < channels.data.size(); i++)
         {
             // At the very least we should have
             ASSERT_EQ(channels.info[i].nChns, channels.data[i].channels());
@@ -430,26 +430,26 @@ complete: 1
 w/ `>> result.pChns` same as above
 */
 
-TEST_F(ACFTest,ACFchnsPyramidDefault)
+TEST_F(ACFTest, ACFchnsPyramidDefault)
 {
     acf::Detector detector;
-    
+
     acf::Detector::Pyramid pyramid;
     detector.chnsPyramid({}, nullptr, pyramid, true, {});
 
     testChnsDefault(pyramid.pPyramid.pChns);
     const auto& pPyramid = pyramid.pPyramid;
-    
+
     ASSERT_EQ(pPyramid.nPerOct.get(), 8);
     ASSERT_EQ(pPyramid.nOctUp.get(), 0);
     ASSERT_EQ(pPyramid.nApprox.get(), 7);
     ASSERT_EQ(pPyramid.lambdas.has, false);
-    ASSERT_EQ(pPyramid.pad.get(), cv::Size(0,0));
-    ASSERT_EQ(pPyramid.minDs.get(), cv::Size(16,16));
+    ASSERT_EQ(pPyramid.pad.get(), cv::Size(0, 0));
+    ASSERT_EQ(pPyramid.minDs.get(), cv::Size(16, 16));
     ASSERT_EQ(pPyramid.smooth.get(), 1);
     ASSERT_EQ(pPyramid.concat.get(), 1);
     ASSERT_EQ(pPyramid.complete.get(), 1);
-    
+
     const auto& pChns = pPyramid.pChns;
     testChnsDefault(pChns);
 }
@@ -582,7 +582,6 @@ TEST_F(ACFTest, ACFPyramidGPU10)
 
     // Compare precision with CPU implementation (very loose)
 }
-
 
 TEST_F(ACFTest, ACFDetectionGPU10)
 {

@@ -28,19 +28,18 @@ public:
     using RectVec = std::vector<cv::Rect>;
     using DoubleVec = std::vector<double>;
     using DetectorPtr = std::shared_ptr<acf::Detector>;
-    
+
     GLDetector(const std::string& filename, int maxSize = 2048);
     ~GLDetector();
 
     // Virtual API:
     virtual int operator()(const cv::Mat& input, RectVec& objects, DoubleVec* scores = 0);
-    
-protected:
 
-    void init(const cv::Mat &I);
+protected:
+    void init(const cv::Mat& I);
     void initContext();
-    const acf::Detector::Pyramid & getPyramid(const cv::Mat &input, const cv::Mat &rgb={});
-    
+    const acf::Detector::Pyramid& getPyramid(const cv::Mat& input, const cv::Mat& rgb = {});
+
     struct Impl;
     std::unique_ptr<Impl> m_impl;
 };

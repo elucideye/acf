@@ -223,9 +223,8 @@ int gauze_main(int argc, char** argv)
     std::shared_ptr<VideoSource> video = std::make_shared<VideoSource>(sInput); // list of files
 
     // Allocate resource manager:
-    util::LazyParallelResource<std::thread::id, AcfPtr> manager = [&]()
-    {
-        
+    util::LazyParallelResource<std::thread::id, AcfPtr> manager = [&]() {
+
         // Declare teh core acf::Detector module, which runs on the CPU
         // although we may wrap this with an OpenGL ACF pyramid computation
         // class if we are testing the GPU functionality.  Note that this
@@ -235,19 +234,19 @@ int gauze_main(int argc, char** argv)
         // slower than the pure CPU approach.  A real application should
         // "hide" the transfer through appropriately multi-threading.
         AcfPtr acf;
-        
+
 #if defined(ACF_DO_GPU)
-        if(doGpu)
+        if (doGpu)
         {
             acf = std::make_shared<acf::GLDetector>(sModel);
         }
 #endif
-        
-        if(!acf)
+
+        if (!acf)
         {
             acf = std::make_shared<acf::Detector>(sModel);
         }
-        
+
         if (acf.get() && acf->good())
         {
             // Cofigure parameters:
@@ -266,10 +265,10 @@ int gauze_main(int argc, char** argv)
         {
             acf.reset();
         }
-        
+
         return acf;
     };
-    
+
     std::size_t total = 0;
     std::vector<std::pair<std::string, float>> scores;
 
