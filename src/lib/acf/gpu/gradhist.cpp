@@ -26,7 +26,7 @@ BEGIN_OGLES_GPGPU
 const char * GradHistProc::fshaderGradHistSrcN = OG_TO_STR
 (
 #if defined(OGLES_GPGPU_OPENGLES)
- precision mediump float;
+ precision highp float;
 #endif
  varying vec2 vTexCoord;
  uniform sampler2D uInputTex;

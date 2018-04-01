@@ -138,12 +138,26 @@ cv::Size round(const cv::Size_<T>& size)
     return cv::Size_<T>(util::round(size.width), util::round(size.height));
 }
 
+/*
+ * chnsPyramid() aims to adhere to the above specification as much as possible
+ * given a strongly typed API.  The toolbox Matlab code uses an empty parameter
+ * list as a cue to populate a default parameter list for the Pyramid options
+ * which is passed on as the functions return type.  This API includes an output
+ * Pyramid reference type, so we populate that object's Pyramid::pPyramid field 
+ * with the default options in this case.
+ *
+ * We use the following logic to indicate "empty" input parameters
+ *   
+ *  (const MatP&) IIn.empty()
+ *  (const Options::Pyramid*) p == nullptr
+ */
+
 int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid& pyramid, bool isInit, MatLoggerType pLogger)
 {
     // % get default parameters pPyramid
     //if(nargin==2), p=varargin{1}; else p=[]; end
     Options::Pyramid p;
-    if (isInit)
+    if (isInit && pIn)
     {
         p = *pIn;
     }
@@ -163,7 +177,7 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
         p.merge(dfs, 1);
 
         Detector::Channels chns;
-        chnsCompute({}, p.pChns, chns, false, pLogger);
+        chnsCompute({}, p.pChns.get(), chns, false, pLogger);
 
         p.pChns = chns.pChns;
         p.pChns.get().complete = 1;
@@ -179,7 +193,7 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
 
     if (Iin.empty() && !pIn && isInit)
     {
-        CV_Assert(false); // return pyramid info here
+        pyramid.pPyramid = p;
         return 0;
     }
 
@@ -197,6 +211,8 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
     auto smooth = p.smooth.get();
     auto concat = p.concat.get();
     auto shrink = pChns.shrink.get();
+    
+    pChns.isLuv = m_isLuv; // propagate LUV special case through to static function
 
     // Convert I to appropriate color space (or simply normalize):
     const std::string& cs = pChns.pColor->colorSpace;

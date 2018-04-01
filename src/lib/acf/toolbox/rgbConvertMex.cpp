@@ -377,18 +377,42 @@ void rgbConvert(iT* I, oT* J, int n, int d, int flag, oT nrm)
 
 void rgbConvertMex(const MatP& I, MatP& J, int flag, double nrm)
 {
+    if(flag == 4)
+    {
+        J = I;
+        return;
+    }
+
+    // {0,"gray"}
+    // {1,"rgb"}
+    // {2,"luv"}
+    // {3,"hsv"}
+    // {4,"orig"}
+    const int channels = (flag > 0) ? 3 : 1;
     const float* pI = I.ptr<float>();
+    
+    // Only allocate a new image for non-in-place transformations
+    // otherwise we prune the channels after conversion.
+    bool isInPlace = (I.base().data == J.base().data);
 
-#define USE_MAT_ALLOC 1
-
-#if USE_MAT_ALLOC
-    J.create(I.size(), I.depth(), I.channels());
-    float* pJ = J.ptr<float>();
+    float * pJ = nullptr;
+    if(!isInPlace)
+    {
+        J.create(I.size(), I.depth(), channels);
+        pJ = J.ptr<float>();
+    }
+    else
+    {
+        pJ = const_cast<float *>(pI);
+    }
+    
     rgbConvert(const_cast<float*>(pI), pJ, I.size().area(), I.channels(), flag, float(nrm));
-#else
-    float* pJ = rgbConvert(const_cast<float*>(pI), I.size().area(), I.channels(), flag, float(nrm));
-    J.create(I.size(), I.depth(), I.channels(), pJ, true);
-#endif
+    
+    // Remove extra channels:
+    if(isInPlace && (J.channels() > channels))
+    {
+        do { J.pop_back(); } while(J.channels() > channels);
+    }
 }
 
 // J = rgbConvertMex(I,flag,single); see rgbConvert.m for usage details

@@ -94,19 +94,8 @@ void rgbConvertMex(const MatP& I, MatP& J, int flag, double nrm);
 
 ACF_NAMESPACE_BEGIN
 
-#define USE_OPENCV_CVTCOLOR 0
-
-#if USE_OPENCV_CVTCOLOR
-// TODO: replace this with mex file code (or rework flow to avoid this)
-static void cvtColor(const MatP& src, MatP& dst, int code)
-{
-    cv::Mat src_, dst_;
-    cv::merge(src.get(), src_);
-    cv::cvtColor(src_, dst_, code);
-    dst = MatP(dst_);
-}
-#endif
-
+// In general this function will support in place transformations, however, if we
+// are mapping from RGB to grayscale then we will have a channel reduction, and this
 int Detector::rgbConvert(const MatP& IIn, MatP& J, const std::string& colorSpace, bool useSingle, bool isLuv)
 {
     std::string cs;
@@ -135,48 +124,44 @@ int Detector::rgbConvert(const MatP& IIn, MatP& J, const std::string& colorSpace
             CV_Assert(false);
     }
 
-    if (isLuv)
+    // Pass through X-to-X transformation (shallow copy):
+    if(flag == 4)
     {
-        CV_Assert((cs == "luv") || (cs == "orig"));
+        J = IIn;
+        return 0;
+    }
+    
+    // Input = "gray"; Output = "gray"
+    if(IIn.channels() == 1)
+    {
+        // Although the function is rgbTo*, we also support
+        // pass through grayscale-to-grayscale transformations
+        // since it is free.  For any other case we will flag an
+        // exception.
+        CV_Assert(flag == 0);
         J = IIn;
         return 0;
     }
 
-#if USE_OPENCV_CVTCOLOR
-    if (IIn.empty())
+    // Input = "luv"; Output == "luv"
+    if (isLuv)
     {
-        J = cv::Mat3f();
+        CV_Assert(flag == 2);
+        J = IIn;
         return 0;
     }
-
-    // Just use opencv calls for now (be sure to compare w/ Piotr's code)
-    switch (flag)
+    
+    // Else we assume RGB
+    if (flag == 1)
     {
-        case 0:
-            cvtColor(IIn, J, cv::COLOR_GRAY2RGB);
-            break;
-        case 2:
-            cvtColor(IIn, J, cv::COLOR_RGB2Luv);
-            break;
-        case 3:
-            cvtColor(IIn, J, cv::COLOR_RGB2HSV);
-            break;
-        case 1:
-            J = IIn;
-            break;
-        case 4:
-            J = IIn;
-            break;
-        default:
-            CV_Assert(flag >= 0 && flag <= kinds.size());
+        J = IIn;
+        return 0;
     }
-#else
-    CV_Assert(flag >= 0);
-    if (!IIn.empty() && (flag != 1) && (flag != 4))
+    
+    if (!IIn.empty())
     {
-        rgbConvertMex(IIn, J, flag, useSingle);
+        rgbConvertMex(IIn, J, flag, 1.0f);
     }
-#endif
 
     return 0;
 }

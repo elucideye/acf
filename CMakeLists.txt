@@ -186,6 +186,38 @@ endif(ACF_SERIALIZE_WITH_CEREAL)
 
 message("ACF_ADD_TO_STRING : ${ACF_ADD_TO_STRING}")
 
+################
+## TEST DATA ###
+################
+
+if(COMMAND hunter_private_data)
+  set(acf_release_url "https://github.com/elucideye/acf/releases/download/v0.0.0")
+  
+  hunter_private_data(
+    URL "${acf_release_url}/AcfCaltech.Detector.mat"
+    SHA1 "c19bfd560d66e748a88e48885e944ce6ba55c77a"
+    FILE "AcfCaltech.Detector.mat"
+    LOCATION ACF_CALTECH_DETECTOR_MAT
+  )
+  message("ACF_CALTECH_DETECTOR_MAT = ${ACF_CALTECH_DETECTOR_MAT}")
+
+  hunter_private_data(
+    URL "${acf_release_url}/AcfInriaDetector.mat"
+    SHA1 "eb1d1bf0a39e09766ce055640659b5a40e543395"
+    FILE "AcfInriaDetector.mat"
+    LOCATION ACF_INRIA_DETECTOR_MAT
+    )
+  message("ACF_INRIA_DETECTOR_MAT = ${ACF_INRIA_DETECTOR_MAT}")
+  
+  hunter_private_data(
+    URL "${acf_release_url}/city_crossing_pedestrian_crossing_pedestrians_people_road_street-915416.jpg"
+    SHA1 "0d96af03a8d72a0327a519b8b9467135703876c5"
+    FILE "city_crossing_pedestrian_crossing_pedestrians_people_road_street-915416.jpg"
+    LOCATION ACF_PEDESTRIAN_IMAGE
+  )
+  message("ACF_PEDESTRIAN_IMAGE = ${ACF_PEDESTRIAN_IMAGE}")
+endif()
+
 ##############
 ## Project ###
 ##############

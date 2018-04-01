@@ -124,6 +124,8 @@ void resampleCoef(int ha, int hb, int& n, int*& yas, int*& ybs, T*& wts, int bd[
 template <class T>
 void resample(T* A, T* B, int ha, int hb, int wa, int wb, int d, T r)
 {
+    CV_Assert(A != nullptr);
+    CV_Assert(B != nullptr);
     CV_Assert(A != B);
 
     int hn, wn, x, x1, y, z, xa, xb, ya;

@@ -25,6 +25,7 @@ ACF_NAMESPACE_BEGIN
 class ACF_EXPORT ObjectDetector
 {
 public:
+    virtual ~ObjectDetector();
     virtual int operator()(const cv::Mat& image, std::vector<cv::Rect>& objects, std::vector<double>* scores = 0) = 0;
     virtual int operator()(const MatP& image, std::vector<cv::Rect>& objects, std::vector<double>* scores = 0) = 0;
     virtual void setDoNonMaximaSuppression(bool flag);

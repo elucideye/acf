@@ -11,70 +11,75 @@
 #include <gtest/gtest.h>
 #include <opencv2/core.hpp>
 
-extern const char* imageFilename;
-extern const char* truthFilename;
-extern const char* modelFilename;
-extern const char* outputDirectory;
+const char* imageFilename;
+const char* truthFilename;
+const char* modelFilename;
+const char* outputDirectory;
+
+#if defined(ACF_SERIALIZE_WITH_CVMATIO)
+const char* acfInriaDetectorFilename;
+const char* acfCaltechDetectorFilename;
+const char* acfPedestrianImageFilename;
+#endif
 
 int gauze_main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
-    CV_Assert(argc == 5);
+    CV_Assert(argc >= 5);
 
     imageFilename = argv[1];
     truthFilename = argv[2];
     modelFilename = argv[3];
     outputDirectory = argv[4];
 
+#if defined(ACF_SERIALIZE_WITH_CVMATIO)
+    if(argc >= 8)
+    {
+        acfInriaDetectorFilename = argv[5];
+        acfCaltechDetectorFilename = argv[6];
+        acfPedestrianImageFilename = argv[7];
+    }
+#endif
+    
     return RUN_ALL_TESTS();
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // clang-format off
-#if defined(ACF_DO_GPU)
-#  include "acf/GPUACF.h"
-#  include "aglet/GLContext.h"
+#if defined(ACF_ADD_TO_STRING)
+#  include <io/stdlib_string.h>
 #endif
 // clang-format on
 
 // clang-format off
-#if defined(ACF_ADD_TO_STRING)
-#  include "io/stdlib_string.h"
+#if defined(ACF_DO_GPU)
+#  include <acf/GPUACF.h>
+#  include <aglet/GLContext.h>
 #endif
 // clang-format on
-#include "io/cereal_pba.h"
 
-#include "util/ScopeTimeLogger.h"
-
-#define ACF_LOG_GPU_TIME 0
+#include <acf/ACF.h>
+#include <acf/MatP.h>
+#include <util/Logger.h>
+#include <io/cereal_pba.h>
+#include <util/ScopeTimeLogger.h>
 
 // http://uscilab.github.io/cereal/serialization_archives.html
 #include <cereal/archives/portable_binary.hpp>
 #include <cereal/types/vector.hpp>
 
-// #!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!
-// #!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!
-// #!#!#!#!#!#!#!#!#!#!#!#!#!#!# Work in progress !#!#!#!#!#!#!#!#!#!#!#!#!
-// #!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!
-// #!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!
-
 #include <gtest/gtest.h>
-
-#include "acf/ACF.h"
-#include "acf/MatP.h"
-#include "util/Logger.h"
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 
 #include <fstream>
 #include <memory>
-
-const char* imageFilename;
-const char* truthFilename;
-const char* modelFilename;
-const char* outputDirectory;
+#include <iostream>
+#include <chrono>
 
 // clang-format off
 #ifdef ANDROID
@@ -84,16 +89,10 @@ const char* outputDirectory;
 #endif
 // clang-format on
 
-#include <iostream>
-#include <chrono>
-
 // clang-format off
 #define BEGIN_EMPTY_NAMESPACE namespace {
 #define END_EMPTY_NAMESPACE }
 // clang-format on
-
-#include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
 
 BEGIN_EMPTY_NAMESPACE
 
@@ -183,8 +182,49 @@ protected:
         m_hasTranspose = false;
     }
 
-#if defined(ACF_DO_GPU)
+    void testPedestrianDetector(const char *detectorFilename, const char *imageFilename)
+    {
+        if(detectorFilename && imageFilename)
+        {
+            auto detector = create(detectorFilename);
+            ASSERT_NE(detector, nullptr);
+            if(detector)
+            {
+                cv::Mat image = cv::imread(imageFilename);
+                ASSERT_NE(image.empty(), true);
+                if(!image.empty())
+                {
+                    std::vector<double> scores;
+                    std::vector<cv::Rect> objects;
+                    detector->setIsTranspose(false);
+                    detector->setDoNonMaximaSuppression(true);
+                    (*detector)(image, objects, &scores);
+                    
+                    // TODO: explicit ground truth with Matlab
+                    // CAVEAT: There will likely be some cross-platform variation in
+                    // actual detection results even within matlab.  We can do some
+                    // reasonable comparison for detections where the confidence
+                    // is high using the PASCAL critieria: (a & b) / (a | b)
+                    // For now, we just make sure we have at least 5 detections
+                    // which ensures that the MAT models are loading fine and
+                    // produces reasonable detections.
+                    ASSERT_GE(objects.size(), 5);
 
+#if ACF_TEST_DISPLAY_OUTPUT
+                    WaitKey waitKey;
+                    for(auto &d : objects)
+                    {
+                        cv::rectangle(image, d, {0,255,0}, 4, 8);
+                    }
+                    cv::imshow("image", image); cv::waitKey(0);
+#endif
+                }
+            }
+        }
+    }
+    
+
+#if defined(ACF_DO_GPU)
     static std::vector<ogles_gpgpu::Size2d> getPyramidSizes(acf::Detector::Pyramid& Pcpu)
     {
         std::vector<ogles_gpgpu::Size2d> sizes;
@@ -237,7 +277,7 @@ protected:
 
     std::shared_ptr<aglet::GLContext> m_context;
     std::shared_ptr<ogles_gpgpu::ACF> m_acf;
-#endif
+#endif // defined(ACF_DO_GPU)
 
     std::shared_ptr<spdlog::logger> m_logger;
 
@@ -260,6 +300,159 @@ protected:
 //    return result;
 //}
 //#endif // defined(ACF_DO_GPU)
+
+/*
+`>> result = chnsCompute`
+
+```
+result =
+shrink: 4
+pColor: [1x1 struct]
+pGradMag: [1x1 struct]
+pGradHist: [1x1 struct]
+pCustom: [0x0 struct]
+complete: 1
+```
+
+`>> result.pColor`
+```
+ans =
+enabled: 1
+smooth: 1
+colorSpace: 'luv'
+```
+
+`>> result.pGradMag`
+```
+ans =
+enabled: 1
+colorChn: 0
+normRad: 5
+normConst: 0.0050
+full: 0
+```
+
+`>> result.pGradHist`
+```
+ans =
+enabled: 1
+binSize: []
+nOrients: 6
+softBin: 0
+useHog: 0
+clipHog: 0.2000
+```
+
+`>> result.complete`
+```
+ans =
+1
+```
+ */
+
+static void testChnsDefault(const acf::Detector::Options::Pyramid::Chns &pChns)
+{
+    ASSERT_EQ(pChns.shrink.get(), 4);
+    ASSERT_EQ(pChns.pColor->enabled.get(), 1);
+    ASSERT_EQ(pChns.pColor->smooth.get(), 1);
+    ASSERT_EQ(pChns.pColor->colorSpace.get(), "luv");
+    ASSERT_EQ(pChns.pGradMag->enabled.get(), 1);
+    ASSERT_EQ(pChns.pGradMag->colorChn.get(), 0);
+    ASSERT_EQ(pChns.pGradMag->normRad.get(), 5);
+    ASSERT_EQ(pChns.pGradMag->full.get(), 0);
+    ASSERT_EQ(pChns.pGradHist->enabled.get(), 1);
+    ASSERT_EQ(pChns.pGradHist->binSize.has, false);
+    ASSERT_EQ(pChns.pGradHist->nOrients.get(), 6);
+    ASSERT_EQ(pChns.pGradHist->softBin.get(), 0);
+    ASSERT_EQ(pChns.pGradHist->useHog.get(), 0);
+    ASSERT_EQ(pChns.pGradHist->clipHog.get(), 0.2);
+    ASSERT_EQ(pChns.complete.get(), 1);
+}
+
+TEST_F(ACFTest, ACFchnsComputeDefault)
+{
+    acf::Detector::Channels channels;
+    acf::Detector::chnsCompute({}, {}, channels, true, {});
+    testChnsDefault(channels.pChns);
+}
+
+static void rgbToX(const char *filename, const std::string &color)
+{
+    acf::Detector::Channels dflt, channels;
+    acf::Detector::chnsCompute({}, {}, dflt, true, {});
+    dflt.pChns.pColor->colorSpace = color;
+    
+    cv::Mat image = cv::imread(imageFilename);
+    cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
+    image.convertTo(image, CV_32FC3, 1.0/255.0); // convert to float
+    
+    ASSERT_NE(image.empty(), true);
+    ASSERT_EQ(image.channels(), 3);
+    
+    if(!image.empty())
+    {
+        MatP I(image);
+        acf::Detector::chnsCompute(I, dflt.pChns, channels, false, {});
+    
+        for(int i = 0; i < channels.data.size(); i++)
+        {
+            // At the very least we should have
+            ASSERT_EQ(channels.info[i].nChns, channels.data[i].channels());
+        }
+    }
+}
+
+TEST_F(ACFTest, ACFchnsComputeRgbToGray)
+{
+    rgbToX(imageFilename, "gray");
+}
+
+TEST_F(ACFTest, ACFchnsComputeRgbToLuv)
+{
+    rgbToX(imageFilename, "luv");
+}
+
+/*
+`>> result = chnsPyramid`
+```
+result =
+pChns: [1x1 struct]
+nPerOct: 8
+nOctUp: 0
+nApprox: 7
+lambdas: []
+pad: [0 0]
+minDs: [16 16]
+smooth: 1
+concat: 1
+complete: 1
+```
+w/ `>> result.pChns` same as above
+*/
+
+TEST_F(ACFTest,ACFchnsPyramidDefault)
+{
+    acf::Detector detector;
+    
+    acf::Detector::Pyramid pyramid;
+    detector.chnsPyramid({}, nullptr, pyramid, true, {});
+
+    testChnsDefault(pyramid.pPyramid.pChns);
+    const auto& pPyramid = pyramid.pPyramid;
+    
+    ASSERT_EQ(pPyramid.nPerOct.get(), 8);
+    ASSERT_EQ(pPyramid.nOctUp.get(), 0);
+    ASSERT_EQ(pPyramid.nApprox.get(), 7);
+    ASSERT_EQ(pPyramid.lambdas.has, false);
+    ASSERT_EQ(pPyramid.pad.get(), cv::Size(0,0));
+    ASSERT_EQ(pPyramid.minDs.get(), cv::Size(16,16));
+    ASSERT_EQ(pPyramid.smooth.get(), 1);
+    ASSERT_EQ(pPyramid.concat.get(), 1);
+    ASSERT_EQ(pPyramid.complete.get(), 1);
+    
+    const auto& pChns = pPyramid.pChns;
+    testChnsDefault(pChns);
+}
 
 // This is a WIP, currently we test the basic CPU detection functionality
 // with a sample image.  Given the complexity of the GPU implementation,
@@ -359,10 +552,21 @@ TEST_F(ACFTest, ACFPyramidCPU)
     detector->setIsTranspose(true);
     detector->computePyramid(m_IpT, *pyramid);
 
-    // TODO: comparision for pyramid:
     // load cereal pba cv::Mat, compare precision, etc
     ASSERT_GT(pyramid->data.max_size(), 0);
 }
+
+#if defined(ACF_SERIALIZE_WITH_CVMATIO)
+TEST_F(ACFTest, ACFInriaDetector)
+{
+    testPedestrianDetector(acfInriaDetectorFilename, acfPedestrianImageFilename);
+}
+
+TEST_F(ACFTest, ACFCaltechDetector)
+{
+    testPedestrianDetector(acfCaltechDetectorFilename, acfPedestrianImageFilename);
+}
+#endif // defined(ACF_SERIALIZE_WITH_CVMATIO)
 
 #if defined(ACF_DO_GPU)
 TEST_F(ACFTest, ACFPyramidGPU10)
@@ -379,6 +583,7 @@ TEST_F(ACFTest, ACFPyramidGPU10)
     // Compare precision with CPU implementation (very loose)
 }
 
+
 TEST_F(ACFTest, ACFDetectionGPU10)
 {
     acf::Detector::Pyramid Pgpu;
@@ -388,15 +593,7 @@ TEST_F(ACFTest, ACFDetectionGPU10)
 
     std::vector<double> scores;
     std::vector<cv::Rect> objects;
-    {
-#if ACF_LOG_GPU_TIME
-        util::ScopeTimeLogger logger = [](double elapsed)
-        {
-            std::cout << "acf::Detector::operator():" << elapsed << std::endl;
-        };
-#endif
-        (*m_detector)(Pgpu, objects);
-    }
+    (*m_detector)(Pgpu, objects);
 
     ASSERT_GT(objects.size(), 0); // Very weak test!!!
 }

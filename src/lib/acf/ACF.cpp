@@ -150,12 +150,6 @@ void Detector::computePyramid(const cv::Mat& I, Pyramid& P)
 void Detector::computePyramid(const MatP& Ip, Pyramid& P)
 {
     CV_Assert(Ip[0].depth() == CV_32F);
-
-    auto& pPyramid = *(opts.pPyramid);
-    auto pad = *(pPyramid.pad);
-    auto modelDsPad = *(opts.modelDsPad);
-    auto modelDs = *(opts.modelDs);
-
     chnsPyramid(Ip, &opts.pPyramid.get(), P, true);
 }
 
