@@ -184,15 +184,23 @@ protected:
         m_hasTranspose = false;
     }
 
-    void testPedestrianDetector(const char* detectorFilename, const char* imageFilename)
+    void testPedestrianDetector(const char* detectorFilename, const char* inputFilename)
     {
-        if (detectorFilename && imageFilename)
+        {
+            std::ifstream ifs(inputFilename);
+            if(!ifs)
+            {
+                std::cerr << "DEBUG: unable to find input image with path: " << inputFilename << std::endl;
+            }
+        }
+
+        if (detectorFilename && inputFilename)
         {
             auto detector = create(detectorFilename);
             ASSERT_NE(detector, nullptr);
             if (detector)
             {
-                cv::Mat image = cv::imread(imageFilename);
+                cv::Mat image = cv::imread(inputFilename);
                 ASSERT_NE(image.empty(), true);
                 if (!image.empty())
                 {
@@ -384,7 +392,7 @@ static void rgbToX(const char* filename, const std::string& color)
     acf::Detector::chnsCompute({}, {}, dflt, true, {});
     dflt.pChns.pColor->colorSpace = color;
 
-    cv::Mat image = cv::imread(imageFilename);
+    cv::Mat image = cv::imread(filename);
     cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
     image.convertTo(image, CV_32FC3, 1.0 / 255.0); // convert to float
 
