@@ -9,7 +9,7 @@
   This file contains the implementation of an OpenCV cv::Mat planar format wrapper class.
 */
 
-#include "MatP.h"
+#include <acf/MatP.h>
 
 MatP::MatP(const MatP& src)
     : data(src.data)

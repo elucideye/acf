@@ -4,16 +4,18 @@
 * Please email me if you find bugs, or have suggestions or questions!
 * Licensed under the Simplified BSD License [see external/bsd.txt]
 *******************************************************************************/
-#include "wrappers.hpp"
-#include "string.h"
+
+#include <acf/MatP.h>
+#include <acf/toolbox/wrappers.hpp>
+#include <acf/toolbox/sse.hpp>
+
+#include <string.h>
 #include <math.h>
 #include <typeinfo>
-#include "sse.hpp"
+
 typedef unsigned char uchar;
 
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include "acf/MatP.h"
 
 #include <functional>
 #include <iostream>
@@ -122,6 +124,8 @@ void resampleCoef(int ha, int hb, int& n, int*& yas, int*& ybs, T*& wts, int bd[
 template <class T>
 void resample(T* A, T* B, int ha, int hb, int wa, int wb, int d, T r)
 {
+    CV_Assert(A != nullptr);
+    CV_Assert(B != nullptr);
     CV_Assert(A != B);
 
     int hn, wn, x, x1, y, z, xa, xb, ya;

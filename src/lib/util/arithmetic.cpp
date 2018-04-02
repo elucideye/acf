@@ -8,8 +8,8 @@
 
 */
 
-#include "util/arithmetic.h"
-#include "util/acf_math.h"
+#include <util/arithmetic.h>
+#include <util/acf_math.h>
 
 // clang-format off
 #if defined(__arm__) || defined(__arm64__)

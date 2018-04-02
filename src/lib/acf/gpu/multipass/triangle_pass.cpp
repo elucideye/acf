@@ -8,9 +8,9 @@
 
 */
 
-#include "ogles_gpgpu/common/common_includes.h"
+#include <acf/gpu/multipass/triangle_pass.h>
 
-#include "triangle_pass.h"
+#include <ogles_gpgpu/common/common_includes.h>
 
 #include <cmath>
 

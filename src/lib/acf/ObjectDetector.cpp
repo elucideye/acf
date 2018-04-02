@@ -12,6 +12,8 @@
 
 ACF_NAMESPACE_BEGIN
 
+ObjectDetector::~ObjectDetector() = default;
+
 void ObjectDetector::setMaxDetectionCount(size_t maxCount)
 {
     m_maxDetectionCount = maxCount;

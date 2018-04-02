@@ -158,6 +158,11 @@ public:
                 Field<Custom> pCustom;
                 Field<int> complete;
 
+                // MATLAB assumes RGB, but we allow processing of pre-transformed LUV input
+                // for efficiency (from an OpenGL shader, for example) and allow the user
+                // to specify this at run time with the following field.
+                bool isLuv = false;
+
                 void merge(const Chns& src, int mode);
                 friend std::ostream& operator<<(std::ostream& os, const Chns& src);
 
@@ -351,6 +356,16 @@ public:
 
         // .rois   - [ LEVELS x CHANNELS ] array for channel access
         std::vector<std::vector<cv::Rect>> rois;
+
+        void clear()
+        {
+            data.clear();
+            info.clear();
+            lambdas.clear();
+            scales.clear();
+            scaleshw.clear();
+            rois.clear();
+        }
     };
 
     // This contains the subset of parameters that are permitted to be overriden in acfModify
@@ -389,7 +404,7 @@ public:
     int operator()(const MatP& I, RectVec& objects, RealVec* scores = 0);
 
     // Multiscale search:
-    int operator()(const Pyramid& P, RectVec& objects, RealVec* scores = 0);
+    virtual int operator()(const Pyramid& P, RectVec& objects, RealVec* scores = 0);
 
     int chnsPyramid(const MatP& I, const Options::Pyramid* pPyramid, Pyramid& pyramid, bool isInit = false, MatLoggerType pLogger = {});
 

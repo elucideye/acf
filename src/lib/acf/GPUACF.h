@@ -11,11 +11,11 @@
 #ifndef __acf_GPUACF_h__
 #define __acf_GPUACF_h__
 
-#include "acf/acf_common.h"
-#include "acf/ACF.h"
+#include <acf/acf_common.h>
+#include <acf/ACF.h>
 
 // ogles_gpgpu shader lib:
-#include "ogles_gpgpu/common/proc/video.h"
+#include <ogles_gpgpu/common/proc/video.h>
 
 #include <memory>
 #include <array>
@@ -43,7 +43,7 @@ public:
     using array_type = acf::Detector::Pyramid::array_type;
     using SizeVec = std::vector<Size2d>;
 
-    ACF(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth = 0, bool debug = false);
+    ACF(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth = 0, bool debug = false, int shrink = 4);
     ~ACF();
 
     static void tryEnablePlatformOptimizations();

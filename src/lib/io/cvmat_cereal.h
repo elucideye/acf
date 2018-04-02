@@ -8,7 +8,7 @@
 #ifndef __io_cvmat_cereal_h__
 #define __io_cvmat_cereal_h__
 
-#include "acf/acf_common.h" // for ACF_BEGIN_NAMESPACE()
+#include <acf/acf_common.h> // for ACF_BEGIN_NAMESPACE()
 
 #include <opencv2/opencv.hpp>
 #include <cereal/cereal.hpp>

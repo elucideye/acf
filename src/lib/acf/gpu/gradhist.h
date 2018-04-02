@@ -11,8 +11,9 @@
 #ifndef __acf_gpu_gradhist_h__
 #define __acf_gpu_gradhist_h__
 
-#include "acf/acf_common.h"
-#include "ogles_gpgpu/common/proc/base/filterprocbase.h"
+#include <acf/acf_common.h>
+
+#include <ogles_gpgpu/common/proc/base/filterprocbase.h>
 
 BEGIN_OGLES_GPGPU
 

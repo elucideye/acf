@@ -8,35 +8,33 @@
 
 */
 
-#include "acf/GPUACF.h"
+#include <acf/GPUACF.h>
 
-#include "ogles_gpgpu/common/proc/grayscale.h"
-#include "ogles_gpgpu/common/proc/pyramid.h"
-#include "ogles_gpgpu/common/proc/grad.h"
-#include "ogles_gpgpu/common/proc/gauss.h"
-#include "ogles_gpgpu/common/proc/gauss_opt.h"
-#include "ogles_gpgpu/common/proc/transform.h"
-#include "ogles_gpgpu/common/proc/gain.h"
-#include "ogles_gpgpu/common/proc/tensor.h"
-#include "ogles_gpgpu/common/proc/nms.h"
+#include <ogles_gpgpu/common/proc/grayscale.h>
+#include <ogles_gpgpu/common/proc/pyramid.h>
+#include <ogles_gpgpu/common/proc/grad.h>
+#include <ogles_gpgpu/common/proc/gauss.h>
+#include <ogles_gpgpu/common/proc/gauss_opt.h>
+#include <ogles_gpgpu/common/proc/transform.h>
+#include <ogles_gpgpu/common/proc/gain.h>
+#include <ogles_gpgpu/common/proc/tensor.h>
+#include <ogles_gpgpu/common/proc/nms.h>
 
 // generic shaders
-#include "ogles_gpgpu/common/proc/gain.h"
-#include "ogles_gpgpu/common/proc/swizzle.h"
-#include "ogles_gpgpu/common/proc/rgb2luv.h"
+#include <ogles_gpgpu/common/proc/gain.h>
+#include <ogles_gpgpu/common/proc/swizzle.h>
+#include <ogles_gpgpu/common/proc/rgb2luv.h>
 
 // acf specific shader
-#include "acf/gpu/swizzle2.h"
-#include "acf/gpu/gradhist.h"
-#include "acf/gpu/triangle.h"
+#include <acf/gpu/swizzle2.h>
+#include <acf/gpu/gradhist.h>
+#include <acf/gpu/triangle.h>
 
-#include "util/convert.h"
-#include "util/timing.h"
-#include "util/Parallel.h"
-#include "util/make_unique.h"
-#include "ogles_gpgpu/common/gl/memtransfer_optimized.h"
-
-#include <opencv2/highgui/highgui.hpp>
+#include <util/convert.h>
+#include <util/timing.h>
+#include <util/Parallel.h>
+#include <util/make_unique.h>
+#include <ogles_gpgpu/common/gl/memtransfer_optimized.h>
 
 #include <iostream>
 #include <chrono>
@@ -66,12 +64,13 @@ struct ACF::Impl
     using PlaneInfoVec = std::vector<util::PlaneInfo>;
     using ChannelSpecification = std::vector<std::pair<PlaneInfoVec, ProcInterface*>>;
 
-    Impl(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth, bool debug)
+    Impl(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth, bool debug, int shrink)
         : m_featureKind(kind)
         , m_size(size)
         , m_debug(debug)
         , m_doGray(grayWidth > 0)
         , m_grayscaleScale(float(grayWidth) / float(size.width))
+        , m_shrink(shrink)
     {
         initACF(scales, kind, debug);
 
@@ -93,6 +92,8 @@ struct ACF::Impl
 
     void initACF(const SizeVec& scales, FeatureKind kind, bool debug)
     {
+        static const float scale = (1.f / static_cast<float>(m_shrink));
+
         rotationProc = util::make_unique<ogles_gpgpu::GainProc>();
         rgbSmoothProc = util::make_unique<ogles_gpgpu::GaussOptProc>(2.0f);
         rgb2luvProc = util::make_unique<ogles_gpgpu::Rgb2LuvProc>();
@@ -112,10 +113,10 @@ struct ACF::Impl
         // Reduce base LUV image to highest resolution used in pyramid:
         rgb2luvProc->setOutputSize(scales[0].width, scales[0].height);
 
-        reduceGradProc->setOutputSize(0.25);
-        reduceLuvProc->setOutputSize(0.25);
-        reduceGradHistProcASmooth->setOutputSize(0.25);
-        reduceGradHistProcBSmooth->setOutputSize(0.25);
+        reduceGradProc->setOutputSize(scale);
+        reduceLuvProc->setOutputSize(scale);
+        reduceGradHistProcASmooth->setOutputSize(scale);
+        reduceGradHistProcBSmooth->setOutputSize(scale);
 
 #if GPU_ACF_TRANSPOSE
         reduceGradProc->setOutputRenderOrientation(RenderOrientationDiagonal);
@@ -249,6 +250,8 @@ struct ACF::Impl
     bool m_hasGrayscaleOutput = false;
     cv::Mat m_grayscale;
 
+    int m_shrink = 4;
+
     std::unique_ptr<ogles_gpgpu::GainProc> rotationProc; // make sure we have an unmodified upright image
     std::unique_ptr<ogles_gpgpu::GaussOptProc> rgbSmoothProc;
     std::unique_ptr<ogles_gpgpu::GainProc> reduceRgbSmoothProc; // reduce
@@ -302,10 +305,10 @@ struct ACF::Impl
 // ::::::::::: PUBLIC ::::::::::::::
 
 // { 1280 x 960 } x 0.25 => 320x240
-ACF::ACF(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth, bool debug)
+ACF::ACF(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth, bool debug, int shrink)
     : VideoSource(glContext)
 {
-    impl = util::make_unique<Impl>(glContext, size, scales, kind, grayWidth, debug);
+    impl = util::make_unique<Impl>(glContext, size, scales, kind, grayWidth, debug, shrink);
 
     // ((( video -> smooth(luv) )))
     set(impl->rotationProc.get());
@@ -464,6 +467,11 @@ void ACF::beginTransfer()
                 impl->reduceGradHistProcASmooth->getResultData(nullptr);
             }
             break;
+
+            case kUnknown:
+            {
+                throw std::runtime_error("ACF::beginTransfer() unknown feature type");
+            }
         }
     }
 
@@ -488,12 +496,13 @@ void ACF::preConfig()
 void ACF::postConfig()
 {
     // Obtain the scaled image rois:
+    const int& s = impl->m_shrink;
     impl->m_crops.clear();
     const auto& rois = impl->pyramidProc->getLevelCrops();
     for (auto& r : rois)
     {
         // TODO: check rounding error (add clipping)?
-        impl->m_crops.emplace_back(r.x >> 2, r.y >> 2, r.width >> 2, r.height >> 2);
+        impl->m_crops.emplace_back(r.x / s, r.y / s, r.width / s, r.height / s);
     }
 }
 

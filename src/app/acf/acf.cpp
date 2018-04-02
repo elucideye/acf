@@ -18,6 +18,12 @@
 
 #include "acf/ACF.h"
 
+// clang-format off
+#if defined(ACF_DO_GPU)
+#  include <acf/GLDetector.h>
+#endif
+// clang-format on
+
 #include "util/LazyParallelResource.h"
 #include "util/Line.h"
 #include "util/Logger.h"
@@ -40,7 +46,8 @@
 
 #include <type_traits>
 
-using AcfPtr = std::unique_ptr<acf::Detector>;
+using ObjectDetectorPtr = std::shared_ptr<acf::ObjectDetector>;
+using AcfPtr = std::shared_ptr<acf::Detector>;
 using RectVec = std::vector<cv::Rect>;
 
 struct VideoSource
@@ -145,9 +152,10 @@ int gauze_main(int argc, char** argv)
     bool doWindow = false;
     bool doBox = false;
     bool doNms = false;
+    bool doGpu = false;
     double cascCal = 0.0;
     int minWidth = -1; // minimum object width
-    int maxWidth = -1; // maximum object width TODO
+    //int maxWidth = -1; /* maximum object width TODO */
 
     cxxopts::Options options("acf-detect", "Command line interface for ACF object detection (see Piotr's toolbox)");
 
@@ -166,6 +174,7 @@ int gauze_main(int argc, char** argv)
         ("s,scores", "Log the filenames + max score", cxxopts::value<bool>(doScoreLog))
         ("1,single", "Single detection (max)", cxxopts::value<bool>(doSingleDetection))
         ("w,window", "Use window preview", cxxopts::value<bool>(doWindow))
+        ("g,gpu", "Use gpu pyramid processing", cxxopts::value<bool>(doGpu))
         ("h,help", "Print help message");
     // clang-format on
 
@@ -215,7 +224,29 @@ int gauze_main(int argc, char** argv)
 
     // Allocate resource manager:
     util::LazyParallelResource<std::thread::id, AcfPtr> manager = [&]() {
-        AcfPtr acf = util::make_unique<acf::Detector>(sModel);
+
+        // Declare teh core acf::Detector module, which runs on the CPU
+        // although we may wrap this with an OpenGL ACF pyramid computation
+        // class if we are testing the GPU functionality.  Note that this
+        // is intended primarily as an API test, and since we aren't doing
+        // anything clever to utilize multi-threading that hides the
+        // CPU -> GPU -> CPU transfer it is very likely to actually run
+        // slower than the pure CPU approach.  A real application should
+        // "hide" the transfer through appropriately multi-threading.
+        AcfPtr acf;
+
+#if defined(ACF_DO_GPU)
+        if (doGpu)
+        {
+            acf = std::make_shared<acf::GLDetector>(sModel);
+        }
+#endif
+
+        if (!acf)
+        {
+            acf = std::make_shared<acf::Detector>(sModel);
+        }
+
         if (acf.get() && acf->good())
         {
             // Cofigure parameters:
@@ -232,14 +263,13 @@ int gauze_main(int argc, char** argv)
         }
         else
         {
-            acf.release();
+            acf.reset();
         }
 
         return acf;
     };
 
     std::size_t total = 0;
-
     std::vector<std::pair<std::string, float>> scores;
 
     // Parallel loop:
@@ -252,8 +282,6 @@ int gauze_main(int argc, char** argv)
         // Load current image
         auto frame = (*video)(i);
         auto& image = frame.image;
-
-        //cv::imwrite("/tmp/i.png", image);
 
         if (!image.empty())
         {
@@ -345,7 +373,7 @@ int gauze_main(int argc, char** argv)
     };
 
     auto count = static_cast<int>(video->size());
-    if (threads == 1 || threads == 0 || doWindow || !video->isRandomAccess())
+    if (doGpu || threads == 1 || threads == 0 || doWindow || !video->isRandomAccess())
     {
         for (int i = 0; (i < count); i++)
         {

@@ -14,9 +14,10 @@
 #ifndef __acf_gpu_multipass_triangle_pass_h__
 #define __acf_gpu_multipass_triangle_pass_h__
 
-#include "acf/acf_common.h"
-#include "ogles_gpgpu/common/common_includes.h"
-#include "ogles_gpgpu/common/proc/base/filterprocbase.h"
+#include <acf/acf_common.h>
+
+#include <ogles_gpgpu/common/common_includes.h>
+#include <ogles_gpgpu/common/proc/base/filterprocbase.h>
 
 BEGIN_OGLES_GPGPU
 

@@ -11,10 +11,10 @@
 #ifndef __acf_timing_h__
 #define __acf_timing_h__
 
+#include <util/acf_util.h>
+
 #include <chrono>
 #include <functional>
-
-#include "util/acf_util.h"
 
 UTIL_NAMESPACE_BEGIN
 

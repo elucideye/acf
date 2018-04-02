@@ -106,14 +106,13 @@
 //if(s>1), t=floor(s/2)+1; J=J(t:s:end-s+t,t:s:end-s+t,:); end
 //end
 
-#include <math.h>
-
-#include "acf/acf_common.h"
-#include "acf/ACF.h"
-#include "util/acf_math.h"
+#include <acf/acf_common.h>
+#include <acf/ACF.h>
+#include <util/acf_math.h>
 
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
+
+#include <math.h>
 
 ACF_NAMESPACE_BEGIN
 float round(const float& x)

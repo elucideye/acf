@@ -128,9 +128,9 @@
 // Please email me if you find bugs, or have suggestions or questions!
 // Licensed under the Simplified BSD License [see external/bsd.txt]
 
-#include "acf/ACF.h"
+#include <acf/ACF.h>
+
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
 
 ACF_NAMESPACE_BEGIN
 
@@ -142,7 +142,6 @@ int Detector::chnsCompute(const MatP& IIn, const Options::Pyramid::Chns& pChnsIn
     if (!pChnsIn.complete.has || (pChnsIn.complete.get() != 1) || IIn.empty())
     {
         // Create default structures and merge:
-
         {
             // top level
             Options::Pyramid::Chns dfs;
@@ -167,7 +166,6 @@ int Detector::chnsCompute(const MatP& IIn, const Options::Pyramid::Chns& pChnsIn
             dfs.normConst = { "normConst", 0.005 };
             dfs.full = { "full", 0 };
             pChns.pGradMag.merge(dfs, 1);
-            ;
         }
         {
             // pGradHist
@@ -179,8 +177,9 @@ int Detector::chnsCompute(const MatP& IIn, const Options::Pyramid::Chns& pChnsIn
             dfs.clipHog = { "clipHog", 0.2 };
             pChns.pGradHist.merge(dfs, 1);
         }
-        //std::cout << pChns << std::endl;
-        // TODO
+
+        chns.pChns = pChns; // return the estimate
+        return 0;
     }
 
     // Create output struct:
@@ -219,7 +218,7 @@ int Detector::chnsCompute(const MatP& IIn, const Options::Pyramid::Chns& pChnsIn
         // Compute color channels:
         auto p = pChns.pColor.get();
         std::string nm = "color channels";
-        rgbConvert(I, I, p.colorSpace, true);
+        rgbConvert(I, I, p.colorSpace, pChnsIn.isLuv);
 
         if (I.channels())
         {
@@ -257,10 +256,6 @@ int Detector::chnsCompute(const MatP& IIn, const Options::Pyramid::Chns& pChnsIn
         {
             M = MO[0];
             O = MO[1];
-
-            //cv::Vec2d vals;
-            //cv::minMaxLoc(O, &vals[0], &vals[1]);
-            //std::cout << vals << std::endl;
         }
         else if (I.channels())
         {
@@ -338,27 +333,7 @@ static int addChn(Detector::Channels& chns, const MatP& dataIn, const std::strin
     if (dataIn.size() != cv::Size(w, h))
     {
         data.create(cv::Size(w, h), dataIn.depth(), dataIn.channels());
-
-#if 0
-        // OpenCV resize is typically a little faster than resample acf code are similar:
-        //
-        //907802(opencv:)  1130427(acf:)
-        //238942(opencv:)  345563(acf:)
-        //1376805(opencv:) 1635851(acf:)
-        //185866(opencv:)  308654(acf:)
-        //70380(opencv:)   76641(acf:)
-        //445637(opencv:)  341431(acf:)
-        //36914(opencv:)   97596(acf:)
-        //16854(opencv:)   19379(acf:)
-        //170856(opencv:)  554549(acf:)
-        //11789(opencv:)   13580(acf:)
-        cv::Mat tmpA, tmpB;
-        cv::merge(A.get(), tmpA);
-        cv::resize(tmpA, tmpB, {size.width,size.height});
-        cv::split(tmpB, B.get());
-#else
         imResample(dataIn, data, cv::Size(w, h), 1.0);
-#endif
     }
     else
     {

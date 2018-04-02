@@ -8,7 +8,7 @@
 
 */
 
-#include "acf/gpu/triangle.h"
+#include <acf/gpu/triangle.h>
 
 BEGIN_OGLES_GPGPU
 

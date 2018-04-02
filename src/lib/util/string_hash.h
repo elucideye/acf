@@ -13,7 +13,7 @@
 #ifndef __acf_string_hash_h__
 #define __acf_string_hash_h__
 
-#include "acf/acf_common.h"
+#include <acf/acf_common.h>
 
 #include <string>
 
