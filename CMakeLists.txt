@@ -190,7 +190,9 @@ message("ACF_ADD_TO_STRING : ${ACF_ADD_TO_STRING}")
 ## TEST DATA ###
 ################
 
-if(COMMAND hunter_private_data)
+# Only download test data if tests are enabled and we are running 
+# a recent enough version of Hunter to support hunter_private_data()
+if(ACF_BUILD_TESTS AND COMMAND hunter_private_data)
   set(acf_release_url "https://github.com/elucideye/acf/releases/download/v0.0.0")
   
   hunter_private_data(
@@ -199,7 +201,7 @@ if(COMMAND hunter_private_data)
     FILE "AcfCaltech.Detector.mat"
     LOCATION ACF_CALTECH_DETECTOR_MAT
   )
-  message("ACF_CALTECH_DETECTOR_MAT = ${ACF_CALTECH_DETECTOR_MAT}")
+  message("ACF_CALTE CH_DETECTOR_MAT = ${ACF_CALTECH_DETECTOR_MAT}")
 
   hunter_private_data(
     URL "${acf_release_url}/AcfInriaDetector.mat"
@@ -216,6 +218,13 @@ if(COMMAND hunter_private_data)
     LOCATION ACF_PEDESTRIAN_IMAGE
   )
   message("ACF_PEDESTRIAN_IMAGE = ${ACF_PEDESTRIAN_IMAGE}")
+
+  if(ACF_CALTECH_DETECTOR_MAT AND ACF_INRIA_DETECTOR_MAT AND ACF_PEDESTRIAN_IMAGE)
+    set(ACF_HAS_TOOLBOX_DATA TRUE)
+  else()
+    set(ACF_HAS_TOOLBOX_DATA FALSE)
+  endif()
+
 endif()
 
 ##############
