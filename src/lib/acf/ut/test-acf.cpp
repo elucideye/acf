@@ -25,19 +25,21 @@ const char* acfPedestrianImageFilename;
 int gauze_main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
-    CV_Assert(argc >= 5);
 
+    outputDirectory = ".";
+
+    CV_Assert(argc >= 4);
     imageFilename = argv[1];
     truthFilename = argv[2];
     modelFilename = argv[3];
-    outputDirectory = argv[4];
+
 
 #if defined(ACF_SERIALIZE_WITH_CVMATIO)
-    if (argc >= 8)
+    if (argc >= 7)
     {
-        acfInriaDetectorFilename = argv[5];
-        acfCaltechDetectorFilename = argv[6];
-        acfPedestrianImageFilename = argv[7];
+        acfInriaDetectorFilename = argv[4];
+        acfCaltechDetectorFilename = argv[5];
+        acfPedestrianImageFilename = argv[6];
     }
 #endif
 
