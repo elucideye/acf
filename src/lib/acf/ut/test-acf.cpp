@@ -186,14 +186,6 @@ protected:
 
     void testPedestrianDetector(const char* detectorFilename, const char* inputFilename)
     {
-        {
-            std::ifstream ifs(inputFilename);
-            if(!ifs)
-            {
-                std::cerr << "DEBUG: unable to find input image with path: " << inputFilename << std::endl;
-            }
-        }
-
         if (detectorFilename && inputFilename)
         {
             auto detector = create(detectorFilename);
