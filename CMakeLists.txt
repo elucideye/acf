@@ -219,11 +219,11 @@ if(ACF_BUILD_TESTS)
     LOCATION ACF_INRIA_DETECTOR_MAT
     )
   message("ACF_INRIA_DETECTOR_MAT = ${ACF_INRIA_DETECTOR_MAT}")
-  
+
   hunter_private_data(
-    URL "${acf_release_url}/city_crossing_pedestrian_crossing_pedestrians_people_road_street-915416.jpg"
-    SHA1 "0d96af03a8d72a0327a519b8b9467135703876c5"
-    FILE "city_crossing_pedestrian_crossing_pedestrians_people_road_street-915416.jpg"
+    URL "${acf_release_url}/city_crossing_pedestrian_crossing_pedestrians_people_road_street-915416.png"
+    SHA1 "043962311fe78bd434be0bada127f8fee3b05072"
+    FILE "city_crossing_pedestrian_crossing_pedestrians_people_road_street-915416.png"
     LOCATION ACF_PEDESTRIAN_IMAGE
   )
   message("ACF_PEDESTRIAN_IMAGE = ${ACF_PEDESTRIAN_IMAGE}")
