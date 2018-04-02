@@ -38,6 +38,18 @@ Sample 10 Channel ACF from GPU: LUV + magnitude (locally normalized) + gradient 
 .. |Hunter| image:: https://img.shields.io/badge/hunter-v0.19.107-blue.svg
   :target: http://github.com/ruslo/hunter
 
+========
+Training
+========
+
+To train your own model, you can use Piotr's Toolbox.  This currently requires Matlab until the training code gets ported.  There are a few existing samples for pedestrian detection applications that are well documented and can be modified for your application.  See `acfDemoCal.m <https://github.com/pdollar/toolbox/blob/master/detector/acfDemoCal.m>`__ for example.
+
+===========
+Integration 
+===========
+
+If you would like to integrate the library in another project, the easiest thing will be to use `Hunter<http://github.com/ruslo/hunter>`__ to manage and build your application or SDK.  The acf library and all dependencies will then be managed automatically.  Please see the documentation in the above link for more details.  If this isn't an option, it will be easiest to build ACF as a single shared library (without dependencies) that can then be integrated in your project.  In the later case, you can pass CMake's `BUILD_SHARED_LIBS=ON` on the command line while generating the project.  For iOS, you can use `polly` to create a dynamic framework from the generated `libacf.dylib` (see command line options) as a post build step.  See the build instructions below for more information on building and installing.
+
 ===========
 Quick Start
 ===========
