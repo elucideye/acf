@@ -40,9 +40,6 @@
 #include <chrono>
 #include <array>
 
-#include <sys/types.h> // for umask()
-#include <sys/stat.h>  // -/-
-
 // clang-format off
 #ifdef ANDROID
 #  define TEXTURE_FORMAT GL_RGBA
@@ -53,10 +50,6 @@
 #endif
 // clang-format on
 
-#define GPU_ACF_DEBUG_CHANNELS 0
-
-#define DO_INLINE_MERGE 0
-
 BEGIN_OGLES_GPGPU
 
 struct ACF::Impl
@@ -64,22 +57,21 @@ struct ACF::Impl
     using PlaneInfoVec = std::vector<util::PlaneInfo>;
     using ChannelSpecification = std::vector<std::pair<PlaneInfoVec, ProcInterface*>>;
 
-    Impl(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth, bool debug, int shrink)
+    Impl(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth, int shrink)
         : m_featureKind(kind)
         , m_size(size)
-        , m_debug(debug)
         , m_doGray(grayWidth > 0)
         , m_grayscaleScale(float(grayWidth) / float(size.width))
         , m_shrink(shrink)
     {
-        initACF(scales, kind, debug);
+        initACF(scales, kind);
 
         if (m_doGray)
         {
             Size2d graySize(grayWidth, int(m_grayscaleScale * size.height + 0.5f));
-            reduceRgbSmoothProc = util::make_unique<ogles_gpgpu::GainProc>();
-            reduceRgbSmoothProc->setOutputSize(graySize.width, graySize.height);
-            rgbSmoothProc->add(reduceRgbSmoothProc.get()); // ### OUTPUT ###
+            reduceRgbProc = util::make_unique<ogles_gpgpu::GainProc>();
+            reduceRgbProc->setOutputSize(graySize.width, graySize.height);
+            rotationProc->add(reduceRgbProc.get()); // ### OUTPUT ###
         }
 
         if (m_doLuvTransfer)
@@ -90,26 +82,24 @@ struct ACF::Impl
         }
     }
 
-    void initACF(const SizeVec& scales, FeatureKind kind, bool debug)
+    void initACF(const SizeVec& scales, FeatureKind kind)
     {
         static const float scale = (1.f / static_cast<float>(m_shrink));
 
-        rotationProc = util::make_unique<ogles_gpgpu::GainProc>();
-        rgbSmoothProc = util::make_unique<ogles_gpgpu::GaussOptProc>(2.0f);
+        rotationProc = util::make_unique<ogles_gpgpu::GainProc>(1.f);
         rgb2luvProc = util::make_unique<ogles_gpgpu::Rgb2LuvProc>();
         pyramidProc = util::make_unique<ogles_gpgpu::PyramidProc>(scales);
-        smoothProc = util::make_unique<ogles_gpgpu::GaussOptProc>(1);
-        reduceLuvProc = util::make_unique<ogles_gpgpu::GainProc>();
-        gradProc = util::make_unique<ogles_gpgpu::GradProc>(1.0f);
-        reduceGradProc = util::make_unique<ogles_gpgpu::GainProc>();
+        reduceLuvProc = util::make_unique<ogles_gpgpu::GainProc>(1.0f);
+        gradProc = util::make_unique<ogles_gpgpu::GradProc>(1.f);
+        reduceGradProc = util::make_unique<ogles_gpgpu::GainProc>(1.0f);
         normProc = util::make_unique<ogles_gpgpu::GaussOptProc>(7, true, 0.005f);
         gradHistProcA = util::make_unique<ogles_gpgpu::GradHistProc>(6, 0, 1.f);
         gradHistProcB = util::make_unique<ogles_gpgpu::GradHistProc>(6, 4, 1.f);
-        gradHistProcASmooth = util::make_unique<ogles_gpgpu::GaussOptProc>(3.0f);
-        gradHistProcBSmooth = util::make_unique<ogles_gpgpu::GaussOptProc>(3.0f);
+        gradHistProcASmooth = util::make_unique<ogles_gpgpu::GaussOptProc>(2.0f);
+        gradHistProcBSmooth = util::make_unique<ogles_gpgpu::GaussOptProc>(2.0f);
         reduceGradHistProcASmooth = util::make_unique<ogles_gpgpu::GainProc>(1.0f);
         reduceGradHistProcBSmooth = util::make_unique<ogles_gpgpu::GainProc>(1.0f);
-
+        
         // Reduce base LUV image to highest resolution used in pyramid:
         rgb2luvProc->setOutputSize(scales[0].width, scales[0].height);
 
@@ -127,18 +117,14 @@ struct ACF::Impl
 
         pyramidProc->setInterpolation(ogles_gpgpu::TransformProc::BICUBIC);
 
-        rotationProc->add(rgbSmoothProc.get());
-        rgbSmoothProc->add(rgb2luvProc.get());
+        rotationProc->add(rgb2luvProc.get());
 
         // ((( luv -> pyramid(luv) )))
         rgb2luvProc->add(pyramidProc.get());
 
-        // ((( pyramid(luv) -> smooth(pyramid(luv)) )))
-        pyramidProc->add(smoothProc.get());
-
-        // ((( smooth(pyramid(luv)) -> {luv_out, MOXY} )))
-        smoothProc->add(reduceLuvProc.get()); // output 1/4 LUV
-        smoothProc->add(gradProc.get());      // MOXY
+        // ((( pyramid(luv) -> {luv_out, MOXY} )))
+        pyramidProc->add(reduceLuvProc.get());
+        pyramidProc->add(gradProc.get());
 
         // ((( MOXY -> norm(M) ))
         gradProc->add(normProc.get()); // norm(M)OX.
@@ -182,20 +168,6 @@ struct ACF::Impl
                 break;
             default:
                 CV_Assert(false);
-        }
-
-        if (debug)
-        {
-            // #### OUTPUT ###
-            normProcOut = util::make_unique<ogles_gpgpu::GainProc>(0.33f);
-            gradProcOut = util::make_unique<ogles_gpgpu::GainProc>(1.0f);
-            gradHistProcAOut = util::make_unique<ogles_gpgpu::GainProc>(1.0f);
-            gradHistProcBOut = util::make_unique<ogles_gpgpu::GainProc>(1.0f);
-
-            gradProc->add(gradProcOut.get());                       // ### OUTPUT ###
-            normProc->add(normProcOut.get());                       // ### OUTPUT ###
-            reduceGradHistProcBSmooth->add(gradHistProcBOut.get()); // ### OUTPUT ###
-            reduceGradHistProcASmooth->add(gradHistProcAOut.get()); // ### OUTPUT ###
         }
     }
     
@@ -273,8 +245,6 @@ struct ACF::Impl
     std::array<int, 4> m_rgba = { { 0, 1, 2, 3 } };
     Size2d m_size;
 
-    bool m_debug = false;
-
     // Retriev input image:
     bool m_doAcfTransfer = true;
 
@@ -292,11 +262,9 @@ struct ACF::Impl
     int m_shrink = 4;
 
     std::unique_ptr<ogles_gpgpu::GainProc> rotationProc; // make sure we have an unmodified upright image
-    std::unique_ptr<ogles_gpgpu::GaussOptProc> rgbSmoothProc;
-    std::unique_ptr<ogles_gpgpu::GainProc> reduceRgbSmoothProc; // reduce
+    std::unique_ptr<ogles_gpgpu::GainProc> reduceRgbProc; // (optional) reduce for grayscale output
     std::unique_ptr<ogles_gpgpu::Rgb2LuvProc> rgb2luvProc;
     std::unique_ptr<ogles_gpgpu::PyramidProc> pyramidProc;
-    std::unique_ptr<ogles_gpgpu::GaussOptProc> smoothProc; // (1);
     std::unique_ptr<ogles_gpgpu::GainProc> reduceLuvProc;
     std::unique_ptr<ogles_gpgpu::GradProc> gradProc; // (1.0);
     std::unique_ptr<ogles_gpgpu::GainProc> reduceGradProc;
@@ -309,10 +277,6 @@ struct ACF::Impl
     std::unique_ptr<ogles_gpgpu::GainProc> reduceGradHistProcBSmooth; // (1);
 
     // #### OUTPUT ###
-    std::unique_ptr<ogles_gpgpu::GainProc> normProcOut;      //(0.33);
-    std::unique_ptr<ogles_gpgpu::GainProc> gradProcOut;      //(16.0);
-    std::unique_ptr<ogles_gpgpu::GainProc> gradHistProcAOut; //(1.0f);
-    std::unique_ptr<ogles_gpgpu::GainProc> gradHistProcBOut; //(1.0f);
     std::unique_ptr<ogles_gpgpu::GainProc> luvTransposeOut;  //  transposed LUV output
 
     // Multi-texture swizzle (one or the other for 8 vs 10 channels)
@@ -344,10 +308,10 @@ struct ACF::Impl
 // ::::::::::: PUBLIC ::::::::::::::
 
 // { 1280 x 960 } x 0.25 => 320x240
-ACF::ACF(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth, bool debug, int shrink)
+ACF::ACF(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth, int shrink)
     : VideoSource(glContext)
 {
-    impl = util::make_unique<Impl>(glContext, size, scales, kind, grayWidth, debug, shrink);
+    impl = util::make_unique<Impl>(glContext, size, scales, kind, grayWidth, shrink);
 
     // ((( video -> smooth(luv) )))
     set(impl->rotationProc.get());
@@ -406,9 +370,9 @@ ProcInterface* ACF::first()
     return impl->rotationProc.get();
 }
 
-ProcInterface* ACF::getRgbSmoothProc()
+ProcInterface* ACF::getRgb()
 {
-    return dynamic_cast<ProcInterface*>(impl->rgbSmoothProc.get());
+    return dynamic_cast<ProcInterface*>(impl->rotationProc.get());
 }
 
 void ACF::connect(std::shared_ptr<spdlog::logger>& logger)
@@ -439,17 +403,11 @@ void ACF::initLuvTransposeOutput()
     impl->rgb2luvProc->add(impl->luvTransposeOut.get());
 }
 
-void ACF::operator()(const Size2d& size, void* pixelBuffer, bool useRawPixels, GLuint inputTexture, GLenum inputPixFormat)
-{
-    FrameInput frame(size, pixelBuffer, useRawPixels, inputTexture, inputPixFormat);
-    return (*this)(frame);
-}
-
 // Implement virtual API to toggle detection + tracking:
 void ACF::operator()(const FrameInput& frame)
 {
     // Inial pipeline filters:
-    // this -> rotationProc -> rgbSmoothProc -> rgb2luvProc -> pyramidProc
+    // this -> rotationProc -> rgb2luvProc -> pyramidProc
     bool needsPyramid = (impl->m_doAcfTransfer);
     bool needsLuv = (needsPyramid | impl->m_doLuvTransfer);
 
@@ -469,10 +427,10 @@ void ACF::operator()(const FrameInput& frame)
         impl->pyramidProc->setActive(needsPyramid);
     }
 
-    // smoothProc is the highest level unique ACF processing filter:
-    if (impl->smoothProc.get())
+    // pyramidProc is the highest level unique ACF processing filter:
+    if (impl->pyramidProc.get())
     {
-        impl->smoothProc->setActive(impl->m_doAcfTransfer);
+        impl->pyramidProc->setActive(impl->m_doAcfTransfer);
     }
 
     impl->frameIndex++;
@@ -516,7 +474,7 @@ void ACF::beginTransfer()
 
     if (impl->m_doGray)
     {
-        impl->reduceRgbSmoothProc->getResultData(nullptr);
+        impl->reduceRgbProc->getResultData(nullptr);
     }
 
     if (impl->m_doLuvTransfer)
@@ -832,10 +790,10 @@ cv::Mat ACF::getChannelsImpl()
         if (impl->m_doGray)
         {
             // Here we use the green channel:
-            const auto graySize = impl->reduceRgbSmoothProc->getOutFrameSize();
+            const auto graySize = impl->reduceRgbProc->getOutFrameSize();
             gray.create({ graySize.width, graySize.height }, CV_8UC1, 1);
             Impl::PlaneInfoVec grayInfo{ { gray[0], rgba[0] } };
-            planeIndex.emplace_back(grayInfo, impl->reduceRgbSmoothProc.get());
+            planeIndex.emplace_back(grayInfo, impl->reduceRgbProc.get());
         }
 
         if (impl->m_doLuvTransfer)

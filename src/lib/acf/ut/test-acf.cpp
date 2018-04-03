@@ -101,7 +101,7 @@ BEGIN_EMPTY_NAMESPACE
 // http://stackoverflow.com/a/32647694
 static bool isEqual(const cv::Mat& a, const cv::Mat& b);
 static bool isEqual(const acf::Detector& a, const acf::Detector& b);
-static cv::Mat draw(acf::Detector::Pyramid& pyramid);
+//static cv::Mat draw(acf::Detector::Pyramid& pyramid);
 
 class ACFTest : public ::testing::Test
 {
@@ -271,7 +271,7 @@ protected:
 
         {
             // Fill in the pyramid:
-            (*m_acf)({ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT);
+            (*m_acf)({{ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT});
             glFlush();
             m_acf->fill(Pgpu, Pcpu);
         }

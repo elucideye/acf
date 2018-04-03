@@ -19,9 +19,7 @@ ACF_NAMESPACE_BEGIN
 static void* void_ptr(const unsigned char* ptr);
 static std::vector<ogles_gpgpu::Size2d> getPyramidSizes(acf::Detector::Pyramid& Pcpu, int shrink);
 static cv::Mat cvtAnyTo8UC4(const cv::Mat& input);
-
 static cv::Mat drawPyramid(const acf::Detector::Pyramid& pyramid);
-static void logPyramid(const std::string& filename, const acf::Detector::Pyramid& P);
 
 struct GLDetector::Impl
 {
@@ -69,7 +67,7 @@ void GLDetector::init(const cv::Mat& I)
     const int shrink = opts.pPyramid->pChns->shrink.get();
     const auto sizes = getPyramidSizes(m_impl->Pcpu, shrink);
     const ogles_gpgpu::Size2d inputSize(I.cols, I.rows);
-    m_impl->acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, m_impl->featureKind, false, false, shrink);
+    m_impl->acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, m_impl->featureKind, false, shrink);
     m_impl->acf->setDoLuvTransfer(false);
     m_impl->acf->setRotation(0);
 }
@@ -85,7 +83,7 @@ const acf::Detector::Pyramid& GLDetector::getPyramid(const cv::Mat& input, const
     (*m_impl->context)();
 
     // Fill in the pyramid:
-    (*m_impl->acf)({ input.cols, input.rows }, void_ptr(input.ptr()), true, 0, DFLT_TEXTURE_FORMAT);
+    (*m_impl->acf)({{ input.cols, input.rows }, void_ptr(input.ptr()), true, 0, DFLT_TEXTURE_FORMAT});
     glFlush();
     m_impl->acf->fill(m_impl->Pgpu, m_impl->Pcpu);
 
@@ -202,17 +200,6 @@ static cv::Mat drawPyramid(const acf::Detector::Pyramid& pyramid)
     }
     cv::hconcat(levels, canvas);
     return canvas;
-}
-
-static void logPyramid(const std::string& filename, const acf::Detector::Pyramid& P)
-{
-    cv::Mat canvas = drawPyramid(P);
-
-    if (canvas.depth() != CV_8UC1)
-    {
-        canvas.convertTo(canvas, CV_8UC1, 255.0);
-    }
-    cv::imwrite(filename, canvas);
 }
 
 ACF_NAMESPACE_END
