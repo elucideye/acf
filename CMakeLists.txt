@@ -1,7 +1,7 @@
 # Copyright (c) 2015-2017, David Hirvonen, Ruslan Baratov
 # All rights reserved.
 
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.9) # CMAKE_INTERPROCEDURAL_OPTIMIZATION
 
 # By default, the source code for all managed dependencies will be removed after
 # building and installing to the cache.  This behavior is consistent with most 
@@ -92,28 +92,11 @@ else()
   endif()
 endif()
 
-##########################
-### CI Travis/Appveyor ###
-##########################
-
-string(COMPARE NOTEQUAL "$ENV{TRAVIS_TAG}" "" travis_deploy)
-string(COMPARE EQUAL "$ENV{APPVEYOR_REPO_TAG}" "true" appveyor_deploy)
-
-if(travis_deploy)
-  set(version "$ENV{TRAVIS_TAG}")
-elseif(appveyor_deploy)
-  set(version "$ENV{APPVEYOR_REPO_TAG_NAME}")
-else()
-  set(version "v0.0.1")
-endif()
-
-string(REGEX REPLACE "^v" "" version "${version}")
-
 ###################
 ### ACF project ###
 ###################
 
-project(acf VERSION ${version})
+project(acf VERSION 0.0.2)
 
 set(ACF_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
@@ -137,6 +120,35 @@ option(ACF_SERIALIZE_WITH_CVMATIO "Build with CVMATIO" ON)
 option(ACF_BUILD_OGLES_GPGPU "Build with OGLES_GPGPU" ON)
 option(ACF_BUILD_TESTS "Build tests" OFF)
 option(ACF_BUILD_EXAMPLES "Build examples" ON)
+
+####################
+## Version check ###
+####################
+
+# https://github.com/hunter-packages/check_ci_tag
+hunter_add_package(check_ci_tag)
+find_package(check_ci_tag CONFIG REQUIRED)
+check_ci_tag()
+
+#######################
+### Packaging/CPack ###
+#######################
+# see https://github.com/forexample/github-binary-release/blob/master/CMakeLists.txt
+
+include(InstallRequiredSystemLibraries)
+include("cmake/pack.cmake") # includes Cpack
+
+string(COMPARE NOTEQUAL "$ENV{TRAVIS_TAG}" "" travis_deploy)
+string(COMPARE EQUAL "$ENV{APPVEYOR_REPO_TAG}" "true" appveyor_deploy)
+
+if(travis_deploy OR appveyor_deploy)
+  string(COMPARE EQUAL "$ENV{CONFIG}" "Debug" debug_build)
+  if(debug_build)
+    set(CPACK_PACKAGE_NAME "${PROJECT_NAME}-$ENV{TOOLCHAIN}-Debug")
+  else()
+    set(CPACK_PACKAGE_NAME "${PROJECT_NAME}-$ENV{TOOLCHAIN}")
+  endif()
+endif()
 
 ################
 #### Testing ###
