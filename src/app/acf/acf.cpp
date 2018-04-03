@@ -372,6 +372,7 @@ int gauze_main(int argc, char** argv)
                     // then we dump both the CPU and the GPU pyramids and we use a reset()
                     // method in order to ensure the CPU pyramid will be computed for each
                     // frame.
+#if defined(ACF_DO_GPU)
                     if(acf::GLDetector *handle = dynamic_cast<acf::GLDetector*>(detector.get()))
                     {
                         cv::Mat Pcpu = handle->draw(false);
@@ -380,6 +381,7 @@ int gauze_main(int argc, char** argv)
                         cv::imwrite(filename + "_Pgpu.png", Pgpu);
                         handle->clear();
                     }
+#endif
                 }
 
                 if (doScoreLog)
