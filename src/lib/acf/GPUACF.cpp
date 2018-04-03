@@ -198,28 +198,67 @@ struct ACF::Impl
             reduceGradHistProcASmooth->add(gradHistProcAOut.get()); // ### OUTPUT ###
         }
     }
-
+    
     // This provides a map for unpacking/swizzling OpenGL textures (i.e., RGBA or BGRA) to user
     // memory using NEON optimized instructions.
     ChannelSpecification getACFChannelSpecification(MatP& acf) const
     {
-        // clang-format on
+        // clang-format off
         const auto& rgba = m_rgba;
         switch (m_featureKind)
         {
             case kLUVM012345:
                 // 10 : { LUVMp; H0123p; H4567p } requires 3 textures
-                return ChannelSpecification{
-                    { { { acf[0], rgba[0] }, { acf[1], rgba[1] }, { acf[2], rgba[2] }, { acf[3], rgba[3] } }, mergeProcLUVG.get() },
-                    { { { acf[4], rgba[0] }, { acf[5], rgba[1] }, { acf[6], rgba[2] }, { acf[7], rgba[3] } }, reduceGradHistProcASmooth.get() },
-                    { { { acf[8], rgba[0] }, { acf[9], rgba[1] } }, reduceGradHistProcBSmooth.get() }
+                return ChannelSpecification
+                {
+                    {
+                        {
+                            { acf[0], rgba[0] },
+                            { acf[1], rgba[1] },
+                            { acf[2], rgba[2] },
+                            { acf[3], rgba[3] }
+                        },
+                        mergeProcLUVG.get()
+                    },
+                    {
+                        {
+                            { acf[4], rgba[0] },
+                            { acf[5], rgba[1] },
+                            { acf[6], rgba[2] },
+                            { acf[7], rgba[3] }
+                        },
+                        reduceGradHistProcASmooth.get()
+                    },
+                    {
+                        {
+                            { acf[8], rgba[0] },
+                            { acf[9], rgba[1] }
+                        },
+                        reduceGradHistProcBSmooth.get()
+                    }
                 };
 
             case kM012345:
                 // 7: { Mp; H0123p; H4567p } requires only 2 textures
-                return ChannelSpecification{
-                    { { { acf[0], rgba[1] }, { acf[5], rgba[2] }, { acf[6], rgba[3] } }, mergeProcLG56.get() },
-                    { { { acf[1], rgba[0] }, { acf[2], rgba[1] }, { acf[3], rgba[2] }, { acf[4], rgba[3] } }, reduceGradHistProcASmooth.get() }
+                return ChannelSpecification
+                {
+                    {
+                        {
+                            { acf[0], rgba[1] },
+                            { acf[5], rgba[2] },
+                            { acf[6], rgba[3] }
+                        },
+                        mergeProcLG56.get()
+                    },
+                    {
+                        {
+                            { acf[1], rgba[0] },
+                            { acf[2], rgba[1] },
+                            { acf[3], rgba[2] },
+                            { acf[4], rgba[3] }
+                        },
+                        reduceGradHistProcASmooth.get()
+                    }
                 };
             default:
                 CV_Assert(false);

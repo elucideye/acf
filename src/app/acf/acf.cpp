@@ -16,7 +16,7 @@
 #endif
 // clang-format on
 
-#include "acf/ACF.h"
+#include <acf/ACF.h>
 
 // clang-format off
 #if defined(ACF_DO_GPU)
@@ -24,18 +24,19 @@
 #endif
 // clang-format on
 
-#include "util/LazyParallelResource.h"
-#include "util/Line.h"
-#include "util/Logger.h"
-#include "util/Parallel.h"
-#include "util/make_unique.h"
-#include "util/string_utils.h"
-#include "util/cli.h"
-#include "io/cv_cereal.h"
-#include "io/cereal_pba.h" // optional
+// Private/internal headers:
+#include <util/LazyParallelResource.h>
+#include <util/Line.h>
+#include <util/Logger.h>
+#include <util/Parallel.h>
+#include <util/make_unique.h>
+#include <util/string_utils.h>
+#include <util/cli.h>
+#include <io/cv_cereal.h>
+#include <io/cereal_pba.h> // optional
 
 // Package includes:
-#include "cxxopts.hpp"
+#include <cxxopts.hpp>
 
 #include <opencv2/highgui.hpp>
 
@@ -50,6 +51,8 @@ using ObjectDetectorPtr = std::shared_ptr<acf::ObjectDetector>;
 using AcfPtr = std::shared_ptr<acf::Detector>;
 using RectVec = std::vector<cv::Rect>;
 
+static void randomShapes(cv::Mat &image, int n);
+
 struct VideoSource
 {
     struct Frame
@@ -62,12 +65,27 @@ struct VideoSource
     {
         filenames = util::cli::expand(filename);
     }
+    
+    VideoSource(int n) : m_n(n) // random frames
+    {
+        
+    }
 
     virtual Frame operator()(int i)
     {
         Frame frame;
-        frame.name = filenames[i];
-        frame.image = cv::imread(filenames[i], cv::IMREAD_COLOR);
+        if(filenames.size())
+        {
+            frame.name = filenames[i];
+            frame.image = cv::imread(filenames[i], cv::IMREAD_COLOR);
+        }
+        else
+        {
+            frame.name = std::to_string(i);
+            frame.image = cv::Mat::zeros(640, 480, CV_8UC3);
+            randomShapes(frame.image, rand()%32);
+        }
+        
         return frame;
     }
 
@@ -78,9 +96,10 @@ struct VideoSource
 
     virtual std::size_t size()
     {
-        return filenames.size();
+        return filenames.size() ? filenames.size() : m_n;
     }
 
+    int m_n = 0;
     std::vector<std::string> filenames;
 };
 
@@ -153,6 +172,8 @@ int gauze_main(int argc, char** argv)
     bool doBox = false;
     bool doNms = false;
     bool doGpu = false;
+    bool doPyramids = false;
+    bool doRandom = false;
     double cascCal = 0.0;
     int minWidth = -1; // minimum object width
     //int maxWidth = -1; /* maximum object width TODO */
@@ -175,6 +196,8 @@ int gauze_main(int argc, char** argv)
         ("1,single", "Single detection (max)", cxxopts::value<bool>(doSingleDetection))
         ("w,window", "Use window preview", cxxopts::value<bool>(doWindow))
         ("g,gpu", "Use gpu pyramid processing", cxxopts::value<bool>(doGpu))
+        ("pyramids", "Dump pyramids", cxxopts::value<bool>(doPyramids))
+        ("random", "Random frames", cxxopts::value<bool>(doRandom))
         ("h,help", "Print help message");
     // clang-format on
 
@@ -220,7 +243,15 @@ int gauze_main(int argc, char** argv)
         return 1;
     }
 
-    std::shared_ptr<VideoSource> video = std::make_shared<VideoSource>(sInput); // list of files
+    std::shared_ptr<VideoSource> video;
+    if(doRandom)
+    {
+        video = std::make_shared<VideoSource>(1000);
+    }
+    else
+    {
+        video = std::make_shared<VideoSource>(sInput); // list of files
+    }
 
     // Allocate resource manager:
     util::LazyParallelResource<std::thread::id, AcfPtr> manager = [&]() {
@@ -331,6 +362,25 @@ int gauze_main(int argc, char** argv)
                 {
                     maxScore = *iter;
                 }
+                
+                if (doPyramids)
+                {
+                    // The "--pyramid" command line option can be used to visualize the
+                    // CPU and GPU computed ACF pyramids.  This was added to acf-detect
+                    // in order to help reduce differences between the shader and SSE/CPU
+                    // computed features.  If we are in a GPU model (using acf::GLDetector)
+                    // then we dump both the CPU and the GPU pyramids and we use a reset()
+                    // method in order to ensure the CPU pyramid will be computed for each
+                    // frame.
+                    if(acf::GLDetector *handle = dynamic_cast<acf::GLDetector*>(detector.get()))
+                    {
+                        cv::Mat Pcpu = handle->draw(false);
+                        cv::Mat Pgpu = handle->draw(true);
+                        cv::imwrite(filename + "_Pcpu.png", Pcpu);
+                        cv::imwrite(filename + "_Pgpu.png", Pgpu);
+                        handle->clear();
+                    }
+                }
 
                 if (doScoreLog)
                 {
@@ -393,7 +443,18 @@ int main(int argc, char** argv)
 {
     try
     {
-        return gauze_main(argc, argv);
+        const std::string home=getenv("HOME");
+        std::vector<char *> args(argc);
+        args[0] = argv[0];
+        
+        std::vector<std::string> storage(argc);
+        for(int i = 0; i < argc; i++)
+        {
+            storage[i] = std::regex_replace(std::string(argv[i]), std::regex("HOME"), home);
+            args[i] = const_cast<char*>(storage[i].c_str());
+        }
+        
+        return gauze_main(argc, &args.front());
     }
     catch (std::exception& e)
     {
@@ -464,4 +525,62 @@ static void drawObjects(cv::Mat& canvas, const std::vector<cv::Rect>& objects)
 static cv::Rect2f operator*(const cv::Rect2f& roi, float scale)
 {
     return { roi.x * scale, roi.y * scale, roi.width * scale, roi.height * scale };
+}
+
+static void randomEllipse(cv::Mat &image, int n)
+{
+    for(int i = 0; i < n; i++)
+    {
+        const cv::Point2f center(rand()%image.cols, rand()%image.rows);
+        const cv::Size2f size(rand()%image.cols, rand()%image.rows);
+        const cv::RotatedRect ellipse(center, size, static_cast<float>(rand() % 1000)/1000.f * M_PI);
+        const cv::Scalar bgr(rand()%255, rand()%255, rand()%255);
+        cv::ellipse(image, ellipse, bgr, -1);
+    }
+}
+
+static void randomRectangle(cv::Mat &image, int n)
+{
+    for(int i = 0; i < n; i++)
+    {
+        const cv::Point p1(rand() % image.cols, rand() % image.rows);
+        const cv::Point p2(rand() % image.cols, rand() % image.rows);
+        
+        if((rand() % 8) > 4)
+        {
+            cv::randu(image(cv::Rect(p1, p2)), cv::Scalar::all(0), cv::Scalar::all(255));
+        }
+        else
+        {
+            const cv::Scalar bgr(rand()%255, rand()%255, rand()%255);
+            cv::rectangle(image, p1, p2, bgr, -1);
+        }
+    }
+}
+
+static void randomLines(cv::Mat &image, int n)
+{
+    for(int i = 0; i < n; i++)
+    {
+        const cv::Point u1(rand() % image.cols, rand() % image.rows);
+        const cv::Point u2(rand() % image.cols, rand() % image.rows);
+        const cv::Scalar bgr(rand()%255, rand()%255, rand()%255);
+        cv::line(image, u1, u2, bgr, (rand() % 16)+1, 8);
+    }
+}
+
+// Provide a simple mechanism for testing the ACF pyramids (GPU and CPU)
+// without the need for reading actual images.  This was added initially
+// to aid testing on mobile devices.
+static void randomShapes(cv::Mat &image, int n)
+{
+    for(int i = 0; i < n; i++)
+    {
+        switch(rand()%3)
+        {
+            case 0: randomLines(image, 1);
+            case 1: randomRectangle(image, 1);
+            case 2: randomEllipse(image, 1);
+        }
+    }
 }

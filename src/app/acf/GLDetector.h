@@ -35,6 +35,9 @@ public:
     // Virtual API:
     virtual int operator()(const cv::Mat& input, RectVec& objects, DoubleVec* scores = 0);
 
+    cv::Mat draw(bool gpu); // debug routine
+    void clear();
+    
 protected:
     void init(const cv::Mat& I);
     void initContext();

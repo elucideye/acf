@@ -20,7 +20,7 @@ static void* void_ptr(const unsigned char* ptr);
 static std::vector<ogles_gpgpu::Size2d> getPyramidSizes(acf::Detector::Pyramid& Pcpu, int shrink);
 static cv::Mat cvtAnyTo8UC4(const cv::Mat& input);
 
-static cv::Mat draw(const acf::Detector::Pyramid& pyramid);
+static cv::Mat drawPyramid(const acf::Detector::Pyramid& pyramid);
 static void logPyramid(const std::string& filename, const acf::Detector::Pyramid& P);
 
 struct GLDetector::Impl
@@ -128,6 +128,21 @@ std::vector<ogles_gpgpu::Size2d> getPyramidSizes(acf::Detector::Pyramid& Pcpu, i
     return sizes;
 }
 
+void GLDetector::clear()
+{
+    m_impl->size = {0,0};
+}
+
+cv::Mat GLDetector::draw(bool doGpu)
+{
+    cv::Mat pyramid = drawPyramid(doGpu ? m_impl->Pgpu : m_impl->Pcpu);
+    if (pyramid.depth() != CV_8UC1)
+    {
+        pyramid.convertTo(pyramid, CV_8UC1, 255.0);
+    }
+    return pyramid;
+}
+
 static cv::Mat cvtAnyTo8UC4(const cv::Mat& input)
 {
     cv::Mat output;
@@ -160,7 +175,7 @@ static cv::Mat cvtAnyTo8UC4(const cv::Mat& input)
     return output;
 }
 
-static cv::Mat draw(const acf::Detector::Pyramid& pyramid)
+static cv::Mat drawPyramid(const acf::Detector::Pyramid& pyramid)
 {
     cv::Mat canvas;
     std::vector<cv::Mat> levels;
@@ -191,7 +206,7 @@ static cv::Mat draw(const acf::Detector::Pyramid& pyramid)
 
 static void logPyramid(const std::string& filename, const acf::Detector::Pyramid& P)
 {
-    cv::Mat canvas = draw(P);
+    cv::Mat canvas = drawPyramid(P);
 
     if (canvas.depth() != CV_8UC1)
     {

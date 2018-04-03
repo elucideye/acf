@@ -37,17 +37,18 @@ const char * GradHistProc::fshaderGradHistSrcN = OG_TO_STR
  void main()
  {
      vec4 val = texture2D(uInputTex, vTexCoord);
+     val.y *= (1.0 - step(1.0, val.y));
      float mag = val.x * strength;
-     float t = val.y * nOrientations; // (clamp(val.y, 0.0, 1.0) * nOrientations);
+     float t = val.y * nOrientations;
      vec2 k = floor(mod(floor(vec2(t, t+1.0)), nOrientations));
 
      float a = abs(t - k.x);
      float b = abs(1.0 - a);
      vec4 index0 = vec4(equal(ivec4(int(k.x)), index));
      vec4 index1 = vec4(equal(ivec4(int(k.y)), index));
-     vec4 final = mag * vec4((index0 * b) + (index1 * a));
+     vec4 result = mag * vec4((index0 * b) + (index1 * a));
 
-     gl_FragColor = final;
+     gl_FragColor = result;
  });
 // clang-format on
 END_OGLES_GPGPU
