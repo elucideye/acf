@@ -135,6 +135,15 @@ public:
 #endif
         return a1[i];
     }
+    
+    const int max()
+    {
+        return +(n + b - 1);
+    };
+    const int min()
+    {
+        return -(n * b - 1);
+    };
 
     const static int n = 10000, b = 10;
 
@@ -190,6 +199,10 @@ void gradMag(float* I, float* M, float* O, int h, int w, int d, bool full)
     _Gx = (__m128*)Gx;
     Gy = (float*)alMalloc(s, 16);
     _Gy = (__m128*)Gy;
+    
+    __m128 upper = SET(static_cast<float>(ACosTable::getInstance().max()));
+    __m128 lower = SET(static_cast<float>(ACosTable::getInstance().min()));
+    
     // compute gradient magnitude and orientation for each column
     for (x = 0; x < w; x++)
     {
@@ -220,7 +233,7 @@ void gradMag(float* I, float* M, float* O, int h, int w, int d, bool full)
             {
                 _Gx[y] = MUL(MUL(_Gx[y], _m), SET(acMult));
                 _Gx[y] = XOR(_Gx[y], AND(_Gy[y], SET(-0.f)));
-                _Gx[y] = MAX_sse(MIN_sse(XOR(_Gx[y], AND(_Gy[y], SET(-0.f))), SET(acMult)), SET(-acMult));
+                _Gx[y] = MAX_sse(MIN_sse(_Gx[y], upper), lower); // prevent: NaN, -0.0
             }
         };
         memcpy(M + x * h, M2, h * sizeof(float));

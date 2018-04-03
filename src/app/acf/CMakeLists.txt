@@ -28,6 +28,24 @@ endif()
 set_property(TARGET ${test_app} PROPERTY FOLDER "app/console")
 install(TARGETS ${test_app} DESTINATION bin)
 
+set_target_properties(
+  ${test_app}
+  PROPERTIES
+  MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/plist.in" # file sharing
+  XCODE_ATTRIBUTE_PRODUCT_NAME "${test_app}"
+  XCODE_ATTRIBUTE_BUNDLE_IDENTIFIER "com.elucideye.acf.${test_app}"
+  XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.elucideye.acf.${test_app}"
+  XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2" # iPhone/iPad
+)
+
+# gauze_add_test(
+#   NAME AcfDetect
+#   COMMAND ${test_app}
+#   "IOS_TEST"
+#   "$<GAUZE_RESOURCE_FILE:${DRISHTI_ASSETS_FACE_DETECTOR}>"
+#   "$<GAUZE_RESOURCE_FILE:${ACF_DODECAGON_IMAGE}>"
+# )
+
 ###############
 ### mat2cpb ###
 ###############
