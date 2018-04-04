@@ -1,5 +1,6 @@
 #include <acf/GLDetector.h>
 #include <acf/GPUACF.h>
+#include <acf/draw.h>
 #include <util/make_unique.h>
 
 #include <aglet/GLContext.h>
@@ -19,7 +20,6 @@ ACF_NAMESPACE_BEGIN
 static void* void_ptr(const unsigned char* ptr);
 static std::vector<ogles_gpgpu::Size2d> getPyramidSizes(acf::Detector::Pyramid& Pcpu, int shrink);
 static cv::Mat cvtAnyTo8UC4(const cv::Mat& input);
-static cv::Mat drawPyramid(const acf::Detector::Pyramid& pyramid);
 
 struct GLDetector::Impl
 {
@@ -134,7 +134,7 @@ void GLDetector::clear()
 
 cv::Mat GLDetector::draw(bool doGpu)
 {
-    cv::Mat pyramid = drawPyramid(doGpu ? m_impl->Pgpu : m_impl->Pcpu);
+    cv::Mat pyramid = acf::draw((doGpu ? m_impl->Pgpu : m_impl->Pcpu));
     if (pyramid.depth() != CV_8UC1)
     {
         pyramid.convertTo(pyramid, CV_8UC1, 255.0);
@@ -172,35 +172,6 @@ static cv::Mat cvtAnyTo8UC4(const cv::Mat& input)
             throw std::runtime_error("Unsupported foramt");
     }
     return output;
-}
-
-static cv::Mat drawPyramid(const acf::Detector::Pyramid& pyramid)
-{
-    cv::Mat canvas;
-    std::vector<cv::Mat> levels;
-    for (int i = 0; i < pyramid.nScales; i++)
-    {
-        // Concatenate the transposed faces, so they are compatible with the GPU layout
-        cv::Mat Ccpu;
-        std::vector<cv::Mat> images;
-        for (const auto& image : pyramid.data[i][0].get())
-        {
-            images.push_back(image.t());
-        }
-        cv::vconcat(images, Ccpu);
-
-        // Instead of upright:
-        //cv::vconcat(pyramid.data[i][0].get(), Ccpu);
-
-        if (levels.size())
-        {
-            cv::copyMakeBorder(Ccpu, Ccpu, 0, levels.front().rows - Ccpu.rows, 0, 0, cv::BORDER_CONSTANT);
-        }
-
-        levels.push_back(Ccpu);
-    }
-    cv::hconcat(levels, canvas);
-    return canvas;
 }
 
 ACF_NAMESPACE_END

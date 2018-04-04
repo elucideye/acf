@@ -63,6 +63,7 @@ int gauze_main(int argc, char** argv)
 
 #include <acf/ACF.h>
 #include <acf/MatP.h>
+#include <acf/draw.h>
 #include <util/Logger.h>
 #include <io/cereal_pba.h>
 #include <util/ScopeTimeLogger.h>
@@ -101,7 +102,6 @@ BEGIN_EMPTY_NAMESPACE
 // http://stackoverflow.com/a/32647694
 static bool isEqual(const cv::Mat& a, const cv::Mat& b);
 static bool isEqual(const acf::Detector& a, const acf::Detector& b);
-//static cv::Mat draw(acf::Detector::Pyramid& pyramid);
 
 class ACFTest : public ::testing::Test
 {
@@ -126,10 +126,9 @@ protected:
         // * RGB channel order
         loadACFInput(imageFilename);
 
-// TODO: we need to load ground truth output for each shader
-// (some combinations could be tested, but that is probably excessive!)
-// truth = loadImage(truthFilename);
-
+        // TODO: we need to load ground truth output for each shader
+        // (some combinations could be tested, but that is probably excessive!)
+        // truth = loadImage(truthFilename);
 #if defined(ACF_DO_GPU)
         m_context = aglet::GLContext::create(aglet::GLContext::kAuto);
         CV_Assert(m_context && (*m_context));
@@ -250,13 +249,9 @@ protected:
     void initGPUAndCreatePyramid(acf::Detector::Pyramid& Pgpu)
     {
         m_detector = create(modelFilename);
-
-        // Compute a reference pyramid on the CPU:
-        acf::Detector::Pyramid Pcpu;
-        m_detector->computePyramid(m_IpT, Pcpu);
-
         ASSERT_NE(m_detector, nullptr);
 
+        acf::Detector::Pyramid Pcpu;
         m_detector->setIsTranspose(true);
         m_detector->computePyramid(m_IpT, Pcpu);
         const int shrink = m_detector->opts.pPyramid->pChns->shrink.get();        
@@ -270,12 +265,10 @@ protected:
 
         cv::Mat input = image;
 
-        {
-            // Fill in the pyramid:
-            (*m_acf)({{ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT});
-            glFlush();
-            m_acf->fill(Pgpu, Pcpu);
-        }
+        // Fill in the pyramid:
+        (*m_acf)({{ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT});
+        glFlush();
+        m_acf->fill(Pgpu, Pcpu);
     }
 
     std::shared_ptr<aglet::GLContext> m_context;
@@ -479,14 +472,6 @@ TEST_F(ACFTest, ACFSerializeCereal)
     ASSERT_TRUE(isEqual(*detector, detector2));
 }
 
-//static void draw(cv::Mat& canvas, const std::vector<cv::Rect>& objects)
-//{
-//    for (const auto& r : objects)
-//    {
-//        cv::rectangle(canvas, r, { 0, 255, 0 }, 1, 8);
-//    }
-//}
-
 TEST_F(ACFTest, ACFDetectionCPUMat)
 {
     auto detector = getDetector();
@@ -650,35 +635,5 @@ static bool isEqual(const acf::Detector& a, const acf::Detector& b)
     //isEqual(a.clf.hs, b.clf.hs) &&
     //isEqual(a.clf.weights, b.clf.weights) &&
 }
-
-// This block demonstrates how to visualize a pyramid structure:
-//static cv::Mat draw(acf::Detector::Pyramid& pyramid)
-//{
-//    cv::Mat canvas;
-//    std::vector<cv::Mat> levels;
-//    for (int i = 0; i < pyramid.nScales; i++)
-//    {
-//        // Concatenate the transposed faces, so they are compatible with the GPU layout
-//        cv::Mat Ccpu;
-//        std::vector<cv::Mat> images;
-//        for (const auto& image : pyramid.data[i][0].get())
-//        {
-//            images.push_back(image.t());
-//        }
-//        cv::vconcat(images, Ccpu);
-//
-//        // Instead of upright:
-//        //cv::vconcat(pyramid.data[i][0].get(), Ccpu);
-//
-//        if (levels.size())
-//        {
-//            cv::copyMakeBorder(Ccpu, Ccpu, 0, levels.front().rows - Ccpu.rows, 0, 0, cv::BORDER_CONSTANT);
-//        }
-//
-//        levels.push_back(Ccpu);
-//    }
-//    cv::hconcat(levels, canvas);
-//    return canvas;
-//}
 
 END_EMPTY_NAMESPACE

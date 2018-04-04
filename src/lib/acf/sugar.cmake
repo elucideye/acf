@@ -22,6 +22,7 @@ sugar_files(ACF_SRCS
   chnsCompute.cpp
   chnsPyramid.cpp
   convTri.cpp
+  draw.cpp
   gradientHist.cpp
   gradientMag.cpp
   rgbConvert.cpp
@@ -42,6 +43,7 @@ sugar_files(ACF_HDRS
   ACFIOArchive.h
   ACFObject.h
   ObjectDetector.h
+  draw.h
   #######################
   ### Toolbox headers ###
   #######################  
@@ -66,6 +68,7 @@ if(ACF_BUILD_OGLES_GPGPU)
     gpu/multipass/triangle_pass.h
     gpu/swizzle2.h
     gpu/triangle.h
+    gpu/binomial.h
     )
   sugar_files(ACF_SRCS
     GPUACF.cpp
@@ -73,5 +76,6 @@ if(ACF_BUILD_OGLES_GPGPU)
     gpu/multipass/triangle_pass.cpp
     gpu/swizzle2.cpp
     gpu/triangle.cpp
+    gpu/binomial.cpp
     )
 endif()
