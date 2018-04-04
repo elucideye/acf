@@ -66,8 +66,9 @@ void GLDetector::init(const cv::Mat& I)
     computePyramid(I, m_impl->Pcpu);
     const int shrink = opts.pPyramid->pChns->shrink.get();
     const auto sizes = getPyramidSizes(m_impl->Pcpu, shrink);
+    static const bool doGray = false;    
     const ogles_gpgpu::Size2d inputSize(I.cols, I.rows);
-    m_impl->acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, m_impl->featureKind, false, shrink);
+    m_impl->acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, m_impl->featureKind, doGray, shrink);
     m_impl->acf->setDoLuvTransfer(false);
     m_impl->acf->setRotation(0);
 }

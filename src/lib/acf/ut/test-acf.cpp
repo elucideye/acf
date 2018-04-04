@@ -259,11 +259,12 @@ protected:
 
         m_detector->setIsTranspose(true);
         m_detector->computePyramid(m_IpT, Pcpu);
+        const int shrink = m_detector->opts.pPyramid->pChns->shrink.get();        
         auto sizes = getPyramidSizes(Pcpu);
-        static const bool doGrayscale = false;
+        static const bool doGray = false;
         ogles_gpgpu::Size2d inputSize(image.cols, image.rows);
 
-        m_acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, ogles_gpgpu::ACF::kM012345, doGrayscale, false);
+        m_acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, ogles_gpgpu::ACF::kM012345, doGray, shrink);
         m_acf->setRotation(0);
         m_acf->setDoLuvTransfer(false);
 
