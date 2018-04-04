@@ -43,7 +43,7 @@ public:
     using array_type = acf::Detector::Pyramid::array_type;
     using SizeVec = std::vector<Size2d>;
 
-    ACF(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth = 0, bool debug = false, int shrink = 4);
+    ACF(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth = 0, int shrink = 4);
     ~ACF();
 
     static void tryEnablePlatformOptimizations();
@@ -68,7 +68,6 @@ public:
     static cv::Mat getImage(ProcInterface& proc, cv::Mat& frame);
 
     virtual void operator()(const FrameInput& frame);
-    virtual void operator()(const Size2d& size, void* pixelBuffer, bool useRawPixels, GLuint inputTexture = 0, GLenum inputPixFormat = DFLT_PIX_FORMAT);
 
     void release();
     void connect(std::shared_ptr<spdlog::logger>& logger);
@@ -88,13 +87,8 @@ public:
     // GPU => CPU for grayscale:
     const cv::Mat& getGrayscale();
 
-    // GPU => CPU for optical flow:
-    const cv::Mat& getFlow();
-
-    std::vector<cv::Mat> getFlowPyramid();
-
     ProcInterface* first();
-    ProcInterface* getRgbSmoothProc();
+    ProcInterface* getRgb();
 
     // Retrieve Luv image as planar 3 channel CV_32F
     const MatP& getLuvPlanar();

@@ -101,7 +101,7 @@ BEGIN_EMPTY_NAMESPACE
 // http://stackoverflow.com/a/32647694
 static bool isEqual(const cv::Mat& a, const cv::Mat& b);
 static bool isEqual(const acf::Detector& a, const acf::Detector& b);
-static cv::Mat draw(acf::Detector::Pyramid& pyramid);
+//static cv::Mat draw(acf::Detector::Pyramid& pyramid);
 
 class ACFTest : public ::testing::Test
 {
@@ -259,11 +259,12 @@ protected:
 
         m_detector->setIsTranspose(true);
         m_detector->computePyramid(m_IpT, Pcpu);
+        const int shrink = m_detector->opts.pPyramid->pChns->shrink.get();        
         auto sizes = getPyramidSizes(Pcpu);
-        static const bool doGrayscale = false;
+        static const bool doGray = false;
         ogles_gpgpu::Size2d inputSize(image.cols, image.rows);
 
-        m_acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, ogles_gpgpu::ACF::kM012345, doGrayscale, false);
+        m_acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, ogles_gpgpu::ACF::kM012345, doGray, shrink);
         m_acf->setRotation(0);
         m_acf->setDoLuvTransfer(false);
 
@@ -271,7 +272,7 @@ protected:
 
         {
             // Fill in the pyramid:
-            (*m_acf)({ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT);
+            (*m_acf)({{ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT});
             glFlush();
             m_acf->fill(Pgpu, Pcpu);
         }
