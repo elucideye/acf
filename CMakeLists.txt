@@ -84,9 +84,6 @@ else()
     HunterGate(
       URL "${ACF_HUNTER_GATE_URL}"
       SHA1 "${ACF_HUNTER_GATE_SHA1}"
-      # ******************
-      # *** FUTURE USE ***
-      # ******************
       FILEPATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Hunter/config.cmake"
     )
   endif()
@@ -96,7 +93,8 @@ endif()
 ### ACF project ###
 ###################
 
-project(acf VERSION 0.0.2)
+# See https://github.com/hunter-packages/check_ci_tag when changing VERSION
+project(acf VERSION 0.1.0)
 
 set(ACF_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}")
 

@@ -71,6 +71,10 @@ std::string fragmentShaderForTriangle(int blurRadius, bool doNorm = false, int p
     int numberOfOffsets = optimizedTriangleOffsets.size();
 
     std::stringstream ss;
+#if defined(OGLES_GPGPU_OPENGLES)
+    ss << "precision highp float;\n";
+    ss << "\n";
+#endif
     ss << "uniform sampler2D inputImageTexture;\n";
     ss << "uniform float texelWidthOffset;\n";
     ss << "uniform float texelHeightOffset;\n\n";
@@ -78,7 +82,7 @@ std::string fragmentShaderForTriangle(int blurRadius, bool doNorm = false, int p
     ss << "void main()\n";
     ss << "{\n";
     ss << "   vec4 sum = vec4(0.0);\n";
-    ss << "   vec4 center = texture2D(inputImageTexture, blurCoordinates[0]);\n";
+    ss << "   vec4 center = texture2D(inputImageTexture, blurCoordinates[" << numberOfOffsets/2 << "]);\n";
 
     for (int currentBlurCoordinateIndex = 0; currentBlurCoordinateIndex < numberOfOffsets; currentBlurCoordinateIndex++)
     {
@@ -113,15 +117,8 @@ void TriangleProcPass::setRadius(int radius)
     if (radius != _blurRadiusInPixels)
     {
         _blurRadiusInPixels = radius;
-
-        //std::cout << "Blur radius " << _blurRadiusInPixels << " calculated sample radius " << calculatedSampleRadius << std::endl;
-        //std::cout << "===" << std::endl;
-
         vshaderTriangleSrc = vertexShaderForTriangle(radius);
         fshaderTriangleSrc = fragmentShaderForTriangle(radius, doNorm, renderPass, normConst);
-
-        std::cout << vshaderTriangleSrc << std::endl;
-        std::cout << fshaderTriangleSrc << std::endl;
     }
 }
 
