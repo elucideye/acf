@@ -64,7 +64,7 @@ artifacts:
 deploy:
   provider: GitHub
   auth_token:
-    secure: "CoKCLb93hAmZW3WcvhaNnr4Oh0umrcPD8dLA4x5N/Hs71YbfDZbK9ihcjIESu8nC"
+    secure: "x43zgAFmaHoqWwNDZEVzMvEWQSkHojfRWnVGMnmQziw9ozwrJTEnZdz5QD39bXMv"
   artifact: /acf-.*\.tar.gz/
   draft: false
   prerelease: false
