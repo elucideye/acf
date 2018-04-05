@@ -10,7 +10,7 @@ echo POLLY_ROOT %POLLY_ROOT%
 
 python %POLLY_ROOT%\bin\polly.py ^
 --verbose ^
---archive drishti ^
+--archive acf ^
 --config "%1%" ^
 --toolchain "%2%" ^
 --test ^
