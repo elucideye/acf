@@ -11,9 +11,12 @@ find_package(sugar CONFIG REQUIRED)
 sugar_include(.)
 
 add_library(acf ${ACF_SRCS} ${ACF_HDRS} ${ACF_HDRS_PUBLIC})
-target_link_libraries(acf PRIVATE ${ACF_3RDPARTY_PKG_LIBS})
-target_compile_definitions(acf PUBLIC ACF_DO_HALF=1)  # half precision serialization
+target_link_libraries(acf
+  PUBLIC ${ACF_3RDPARTY_PKG_LIBS}
+  PRIVATE ${ACF_3RDPARTY_PKG_LIBS_}
+)
 target_compile_definitions(acf PUBLIC _USE_MATH_DEFINES)  # define M_PI_2 for Visual Studio
+target_compile_definitions(acf PUBLIC ACF_DO_HALF=1)  # half precision serialization
 if(ACF_SERIALIZE_WITH_CVMATIO)
   target_compile_definitions(acf PUBLIC ACF_SERIALIZE_WITH_CVMATIO=1)
 endif()
