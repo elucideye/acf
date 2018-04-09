@@ -2,6 +2,9 @@
 ## Dependencies ###
 ###################
 
+# ACF_3RDPARTY_PKG_LIBS  : public libs
+# ACF_3RDPARTY_PKG_LIBS_ : private libs
+
 # OpenCV
 hunter_add_package(OpenCV)
 find_package(OpenCV REQUIRED)
@@ -23,30 +26,30 @@ list(APPEND ACF_3RDPARTY_PKG_LIBS spdlog::spdlog)
 if(ACF_SERIALIZE_WITH_CEREAL)
   hunter_add_package(cereal)
   find_package(cereal CONFIG REQUIRED)
-  list(APPEND ACF_3RDPARTY_PKG_LIBS cereal::cereal)
+  list(APPEND ACF_3RDPARTY_PKG_LIBS_ cereal::cereal)
 
   # half
   hunter_add_package(half)
   find_package(half CONFIG REQUIRED)
-  list(APPEND ACF_3RDPARTY_PKG_LIBS half::half)  
+  list(APPEND ACF_3RDPARTY_PKG_LIBS_ half::half)  
 endif()
 
 # cvmatio
 if(ACF_SERIALIZE_WITH_CVMATIO)
   hunter_add_package(cvmatio)
   find_package(cvmatio REQUIRED CONFIG)
-  list(APPEND ACF_3RDPARTY_PKG_LIBS cvmatio::cvmatio)
+  list(APPEND ACF_3RDPARTY_PKG_LIBS_ cvmatio::cvmatio)
 endif()
 
 # NEON_2_SSE ### (header only)
 hunter_add_package(ARM_NEON_2_x86_SSE)
 find_package(ARM_NEON_2_x86_SSE CONFIG REQUIRED)
-list(APPEND ACF_SDK_3RDPARTY_PKG_LIBS ARM_NEON_2_x86_SSE::ARM_NEON_2_x86_SSE)
+list(APPEND ACF_SDK_3RDPARTY_PKG_LIBS_ ARM_NEON_2_x86_SSE::ARM_NEON_2_x86_SSE)
 
 # sse2neon ### (header only)
 hunter_add_package(sse2neon)
 find_package(sse2neon CONFIG REQUIRED)
-list(APPEND ACF_SDK_3RDPARTY_PKG_LIBS sse2neon::sse2neon) # Add library
+list(APPEND ACF_SDK_3RDPARTY_PKG_LIBS_ sse2neon::sse2neon) # Add library
 
 # We use aglet for an "off screen" OpenGL context.
 # This currently provides 3 options:
