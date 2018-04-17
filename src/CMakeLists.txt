@@ -58,10 +58,6 @@ list(APPEND ACF_SDK_3RDPARTY_PKG_LIBS_ sse2neon::sse2neon) # Add library
 #   * GLContextAndroid
 # Note: Android emulator supports GPU use
 
-option(ACF_BUILD_OGLES_GPGPU "Build with OGLES_GPGPU" ON)
-option(ACF_BUILD_TESTS "Build tests" OFF)
-option(ACF_BUILD_EXAMPLES "Build examples" ON)
-
 if((ACF_BUILD_TESTS OR ACF_BUILD_EXAMPLES) AND ACF_HAS_GPU AND ACF_BUILD_OGLES_GPGPU)
   hunter_add_package(aglet) # aglet_FOUND will bed used in test/exe targets
   find_package(aglet CONFIG REQUIRED)
