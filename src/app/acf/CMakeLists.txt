@@ -38,14 +38,6 @@ set_target_properties(
   XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2" # iPhone/iPad
 )
 
-# gauze_add_test(
-#   NAME AcfDetect
-#   COMMAND ${test_app}
-#   "IOS_TEST"
-#   "$<GAUZE_RESOURCE_FILE:${DRISHTI_ASSETS_FACE_DETECTOR}>"
-#   "$<GAUZE_RESOURCE_FILE:${ACF_DODECAGON_IMAGE}>"
-# )
-
 ###############
 ### mat2cpb ###
 ###############

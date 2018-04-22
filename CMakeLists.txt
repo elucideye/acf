@@ -29,7 +29,7 @@ cmake_minimum_required(VERSION 3.9) # CMAKE_INTERPROCEDURAL_OPTIMIZATION
 # using HUNTER_CONFIGURATION_TYPES=Release
 
 # https://docs.hunter.sh/en/latest/reference/user-variables.html#hunter-keep-package-sources
-option(HUNTER_KEEP_PACKAGE_SOURCES "Keep installed package sources for debugging (caveat...)" OFF)
+option(HUNTER_KEEP_PACKAGE_SOURCES "Keep installed package sources for debugging (caveat...)" ON)
 
 #########################
 ### CMAKE_MODULE_PATH ###
