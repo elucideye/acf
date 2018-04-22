@@ -308,7 +308,12 @@ int gauze_main(int argc, char** argv)
         // Get thread specific segmenter lazily:
         auto& detector = manager[std::this_thread::get_id()];
         assert(detector);
-        const auto winSize = detector->getWindowSize();
+        
+        auto winSize = detector->getWindowSize();
+        if(!detector->getIsRowMajor())
+        {
+            std::swap(winSize.width, winSize.height);
+        }
 
         // Load current image
         auto frame = (*video)(i);
