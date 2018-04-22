@@ -57,9 +57,13 @@
 
 */
 
-#include "GPUDetectionPipeline.h"
+#if defined(ACF_ADD_TO_STRING)
+#  include <io/stdlib_string.h> // first
+#endif
 
 #include <util/Logger.h>
+
+#include "GPUDetectionPipeline.h"
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
