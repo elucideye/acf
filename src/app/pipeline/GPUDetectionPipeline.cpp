@@ -6,6 +6,7 @@
 #include <thread_pool/thread_pool.hpp> // tp::ThreadPool<>
 
 #include <util/make_unique.h>
+#include <util/ScopeTimeLogger.h>
 
 #include <thread>
 #include <deque>
@@ -87,6 +88,14 @@ struct GPUDetectionPipeline::Impl
 
     // Show a line annotator:
     ogles_gpgpu::LineProc lines;
+
+    struct Log
+    {
+        double read = 0.0;
+        double detect = 0.0;
+        double complete = 0.0;
+    }
+    log;
 };
 
 GPUDetectionPipeline::GPUDetectionPipeline(DetectionPtr& detector, const cv::Size& inputSize, std::size_t n, int rotation, int minObjectWidth)
@@ -230,7 +239,6 @@ void GPUDetectionPipeline::computeAcf(const ogles_gpgpu::FrameInput& frame, bool
 
 GLuint GPUDetectionPipeline::paint(const Detections& scene, GLuint inputTexture)
 {
-
     //if(impl->lines)
     {
         std::vector<std::array<float, 2>> segments;
@@ -305,10 +313,14 @@ std::pair<GLuint, Detections> GPUDetectionPipeline::operator()(const ogles_gpgpu
     ogles_gpgpu::FrameInput frame1;
     frame1.size = frame2.size;
 
+    util::ScopeTimeLogger logger = [&](double elapsed) { impl->log.complete += elapsed; };
+    
     Detections scene2(impl->frameIndex), scene1, scene0, *outputScene = &scene2;
 
     if (impl->fifo->getBufferCount() > 0)
     {
+        util::ScopeTimeLogger logger = [&](double elapsed) { impl->log.read += elapsed; };
+        
         // read GPU results for frame n-1
 
         // Here we always trigger GPU pipeline reads
@@ -351,6 +363,8 @@ std::pair<GLuint, Detections> GPUDetectionPipeline::operator()(const ogles_gpgpu
 
         // Run CPU detection + regression for frame n-1
         impl->scene = impl->threads->process([scene1, frame1, this]() {
+            util::ScopeTimeLogger logger = [&](double elapsed) { impl->log.detect += elapsed; };
+            
             Detections sceneOut = scene1;
             detect(frame1, sceneOut, scene1.P != nullptr);
             return sceneOut;
@@ -378,6 +392,16 @@ std::pair<GLuint, Detections> GPUDetectionPipeline::operator()(const ogles_gpgpu
     }
 
     return std::make_pair(outputTexture, *outputScene);
+}
+
+std::map<std::string, double> GPUDetectionPipeline::summary()
+{
+    return
+    {
+        {"read", impl->log.read},
+        {"detect", impl->log.detect},
+        {"complete", impl->log.complete}
+    };
 }
 
 ACF_NAMESPACE_END
