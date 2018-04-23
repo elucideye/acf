@@ -6,4 +6,6 @@ find_package(cxxopts CONFIG REQUIRED)
 
 add_subdirectory(acf)
 
-add_subdirectory(pipeline)
+if (ACF_BUILD_OGLES_GPGPU AND TARGET aglet::aglet)
+  add_subdirectory(pipeline)
+endif()
