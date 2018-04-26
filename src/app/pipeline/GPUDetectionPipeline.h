@@ -52,6 +52,8 @@ public:
     void operator+=(const DetectionCallback& callback);
 
     std::map<std::string, double> summary();
+    
+    void setDoGlobalNMS(bool flag);
 
 protected:
 

@@ -230,6 +230,11 @@ struct Application
         }
     }
 
+    void setDoGlobalNMS(bool flag)
+    {
+        pipeline->setDoGlobalNMS(flag);
+    }
+
     bool update()
     {
         cv::Mat frame;
@@ -302,7 +307,7 @@ int gauze_main(int argc, char** argv)
         logger->info("arg[{}] = {}", i, argv[i]);
     }
 
-    bool help = false, doWindow = false;
+    bool help = false, doWindow = false, doGlobal = false;
     float resolution = 1.f, acfCalibration = 0.f;
     std::string sInput, sOutput, sModel;
     int minWidth = 0, repeat = 1;
@@ -317,6 +322,7 @@ int gauze_main(int argc, char** argv)
         ("m,model", "Model file", cxxopts::value<std::string>(sModel))
         ("c,calibration", "ACF calibration", cxxopts::value<float>(acfCalibration))
         ("r,resolution", "Resolution", cxxopts::value<float>(resolution))
+        ("g,global", "Globl nms", cxxopts::value<bool>(doGlobal))
         ("w,window", "Window", cxxopts::value<bool>(doWindow))
         ("M,minimum", "Minimum object width", cxxopts::value<int>(minWidth))
         ("R,repeat", "Repeat the input video R times", cxxopts::value<int>(repeat))
@@ -346,6 +352,7 @@ int gauze_main(int argc, char** argv)
     Application app(sInput, sModel, acfCalibration, minWidth, doWindow, resolution);
     app.setLogger(logger);
     app.setRepeat(repeat);
+    app.setDoGlobalNMS(doGlobal);
 
     std::size_t count = 0;
     aglet::GLContext::RenderDelegate delegate = [&]() -> bool
@@ -403,8 +410,11 @@ static std::shared_ptr<cv::VideoCapture> create(const std::string& filename)
 
 static cv::Size getSize(cv::VideoCapture& video)
 {
-    return {
+    // clang-format off
+    return
+    {
         static_cast<int>(video.get(CV_CAP_PROP_FRAME_WIDTH)),
         static_cast<int>(video.get(CV_CAP_PROP_FRAME_HEIGHT))
     };
+    // clang-format on
 }

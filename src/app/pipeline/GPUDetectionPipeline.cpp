@@ -109,8 +109,11 @@ GPUDetectionPipeline::~GPUDetectionPipeline()
 {
     try
     {
-        // If this has already been retrieved it will throw
-        impl->scene.get(); // block on any abandoned calls
+        if(impl && impl->scene.valid())
+        {
+            // If this has already been retrieved it will throw
+            impl->scene.get(); // block on any abandoned calls
+        }
     }
     catch (std::exception& e)
     {
@@ -120,6 +123,11 @@ GPUDetectionPipeline::~GPUDetectionPipeline()
 void GPUDetectionPipeline::operator+=(const DetectionCallback& callback)
 {
     impl->callbacks.push_back(callback);
+}
+
+void GPUDetectionPipeline::setDoGlobalNMS(bool flag)
+{
+    impl->doSingleObject = flag;
 }
 
 void GPUDetectionPipeline::init(const cv::Size& inputSize)

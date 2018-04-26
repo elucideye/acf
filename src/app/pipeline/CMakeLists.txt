@@ -58,8 +58,9 @@ gauze_add_test(
   NAME ${test_name}
   COMMAND ${test_app}
       --input=$<GAUZE_RESOURCE_FILE:${DRISHTI_FACES_FACE_IMAGE}>
-      --repeat=200
+      --repeat=64
       --model=$<GAUZE_RESOURCE_FILE:${DRISHTI_ASSETS_FACE_DETECTOR}>
       --minimum=128
       --calibration=0.01
+      --global
 )

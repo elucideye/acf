@@ -37,10 +37,7 @@ Detector::Detector(const std::string& filename)
     m_good = deserializeAny(filename) == 0;
 }
 
-Detector::~Detector()
-{
-    // Provide destructor for static analyzer
-}
+Detector::~Detector() = default;
 
 int Detector::initializeOpts() // Seems to be required
 {
