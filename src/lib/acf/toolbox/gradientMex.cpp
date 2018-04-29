@@ -105,20 +105,6 @@ void grad2(float* I, float* Gx, float* Gy, int h, int w, int d)
     }
 }
 
-#if ACF_DEBUG_ACOS_TABLE
-static bool isValid(const __m128& value)
-{
-    for (int i = 0; i < 4; i++)
-    {
-        if (std::isnan(value[0]) || std::isinf(value[0]))
-        {
-            return false;
-        }
-    }
-    return true;
-}
-#endif
-
 class ACosTable
 {
 public:
@@ -142,7 +128,7 @@ public:
     };
     const int min()
     {
-        return -(n * b - 1);
+        return -(n + b - 1);
     };
 
     const static int n = 10000, b = 10;
