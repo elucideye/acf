@@ -18,6 +18,10 @@ set(acf_srcs
 add_executable(${test_app} ${acf_srcs})
 target_link_libraries(${test_app} PUBLIC acf cxxopts::cxxopts ${OpenCV_LIBS})
 
+# cross platform testing
+hunter_add_package(gauze)
+find_package(gauze CONFIG REQUIRED)
+
 # thread-pool-cpp:
 hunter_add_package(thread-pool-cpp)
 find_package(thread-pool-cpp CONFIG REQUIRED)
@@ -42,4 +46,21 @@ set_target_properties(
   XCODE_ATTRIBUTE_BUNDLE_IDENTIFIER "com.elucideye.acf.${test_app}"
   XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.elucideye.acf.${test_app}"
   XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2" # iPhone/iPad
+)
+
+#############
+### TEST ####
+#############
+set(test_name AcfPipelineTest)
+message("test_app ${test_app} test_name ${test_name}")
+
+gauze_add_test(
+  NAME ${test_name}
+  COMMAND ${test_app}
+      --input=$<GAUZE_RESOURCE_FILE:${DRISHTI_FACES_FACE_IMAGE}>
+      --repeat=64
+      --model=$<GAUZE_RESOURCE_FILE:${DRISHTI_ASSETS_FACE_DETECTOR}>
+      --minimum=128
+      --calibration=0.01
+      --global
 )

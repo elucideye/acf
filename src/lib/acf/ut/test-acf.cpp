@@ -33,7 +33,6 @@ int gauze_main(int argc, char** argv)
     truthFilename = argv[2];
     modelFilename = argv[3];
 
-
 #if defined(ACF_SERIALIZE_WITH_CVMATIO)
     if (argc >= 7)
     {
@@ -245,8 +244,8 @@ protected:
     // State:
     // 1) Allocates acf::Detector
     // 2) Allocates ogles_gpgpu::ACF
-
-    void initGPUAndCreatePyramid(acf::Detector::Pyramid& Pgpu)
+    
+    void initGPUAndCreatePyramid(acf::Detector::Pyramid& Pgpu, ogles_gpgpu::ACF::FeatureKind kind)
     {
         m_detector = create(modelFilename);
         ASSERT_NE(m_detector, nullptr);
@@ -259,7 +258,7 @@ protected:
         static const bool doGray = false;
         ogles_gpgpu::Size2d inputSize(image.cols, image.rows);
 
-        m_acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, ogles_gpgpu::ACF::kM012345, doGray, shrink);
+        m_acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, kind, doGray, shrink);
         m_acf->setRotation(0);
         m_acf->setDoLuvTransfer(false);
 
@@ -544,23 +543,11 @@ TEST_F(ACFTest, ACFPyramidCPU)
     ASSERT_GT(pyramid->data.max_size(), 0);
 }
 
-#if defined(ACF_SERIALIZE_WITH_CVMATIO)
-TEST_F(ACFTest, ACFInriaDetector)
-{
-    testPedestrianDetector(acfInriaDetectorFilename, acfPedestrianImageFilename);
-}
-
-TEST_F(ACFTest, ACFCaltechDetector)
-{
-    testPedestrianDetector(acfCaltechDetectorFilename, acfPedestrianImageFilename);
-}
-#endif // defined(ACF_SERIALIZE_WITH_CVMATIO)
-
 #if defined(ACF_DO_GPU)
 TEST_F(ACFTest, ACFPyramidGPU10)
 {
     acf::Detector::Pyramid Pgpu;
-    initGPUAndCreatePyramid(Pgpu);
+    initGPUAndCreatePyramid(Pgpu, ogles_gpgpu::ACF::kLUVM012345);
     ASSERT_NE(m_detector, nullptr);
     ASSERT_NE(m_acf, nullptr);
 
@@ -574,7 +561,7 @@ TEST_F(ACFTest, ACFPyramidGPU10)
 TEST_F(ACFTest, ACFDetectionGPU10)
 {
     acf::Detector::Pyramid Pgpu;
-    initGPUAndCreatePyramid(Pgpu);
+    initGPUAndCreatePyramid(Pgpu, ogles_gpgpu::ACF::kLUVM012345);
     ASSERT_NE(m_detector, nullptr);
     ASSERT_NE(m_acf, nullptr);
 
@@ -585,6 +572,19 @@ TEST_F(ACFTest, ACFDetectionGPU10)
     ASSERT_GT(objects.size(), 0); // Very weak test!!!
 }
 #endif // defined(ACF_DO_GPU)
+
+#if defined(ACF_SERIALIZE_WITH_CVMATIO)
+TEST_F(ACFTest, ACFInriaDetector)
+{
+    testPedestrianDetector(acfInriaDetectorFilename, acfPedestrianImageFilename);
+}
+
+TEST_F(ACFTest, ACFCaltechDetector)
+{
+    testPedestrianDetector(acfCaltechDetectorFilename, acfPedestrianImageFilename);
+}
+#endif // defined(ACF_SERIALIZE_WITH_CVMATIO)
+
 
 // ### utility ###
 

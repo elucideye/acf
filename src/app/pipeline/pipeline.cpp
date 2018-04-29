@@ -62,6 +62,7 @@
 #endif
 
 #include <util/Logger.h>
+#include <util/ScopeTimeLogger.h>
 
 #include "GPUDetectionPipeline.h"
 
@@ -91,6 +92,81 @@ void* void_ptr(const T* ptr)
 
 static std::shared_ptr<cv::VideoCapture> create(const std::string& filename);
 static cv::Size getSize(cv::VideoCapture& video);
+
+class VideoCaptureImage : public cv::VideoCapture
+{
+public:
+    VideoCaptureImage(const cv::Mat &image, int frames=100)
+        : image(image)
+        , frames(frames)
+    {
+    }
+    
+    VideoCaptureImage(const std::string &filename, int frames=100)
+        : frames(frames)
+    {
+        image = cv::imread(filename, cv::IMREAD_COLOR);
+    }
+    
+    virtual ~VideoCaptureImage()
+    {
+        
+    }
+    
+    void setRepeat(int n)
+    {
+        frames = n;
+    }
+    
+    virtual bool grab ()
+    {
+        return false;
+    }
+    
+    virtual bool isOpened () const
+    {
+        return !image.empty();
+    }
+    
+    virtual void release()
+    {
+        image.release();
+    }
+    
+    virtual bool open (const cv::String &filename)
+    {
+        image = cv::imread(filename);
+        return !image.empty();
+    }
+    virtual bool read (cv::OutputArray image)
+    {
+        if(++index <= frames)
+        {
+            image.assign(this->image);
+            return true;
+        }
+        return false;
+    }
+    
+    double get(int propId) const
+    {
+        switch (propId)
+        {
+            case CV_CAP_PROP_FRAME_WIDTH:
+                return static_cast<double>(image.cols);
+            case CV_CAP_PROP_FRAME_HEIGHT:
+                return static_cast<double>(image.rows);
+            case CV_CAP_PROP_FRAME_COUNT:
+                return static_cast<double>(frames);
+            default:
+                return 0.0;
+        }
+    }
+    
+    cv::Mat image;
+    int frames = 0;
+    int index = -1;
+};
 
 struct Application
 {
@@ -145,6 +221,19 @@ struct Application
     {
         this->logger = logger;
     }
+    
+    void setRepeat(int n)
+    {
+        if(VideoCaptureImage *cap = dynamic_cast<VideoCaptureImage *>(video.get()))
+        {
+            cap->setRepeat(n);
+        }
+    }
+
+    void setDoGlobalNMS(bool flag)
+    {
+        pipeline->setDoGlobalNMS(flag);
+    }
 
     bool update()
     {
@@ -158,10 +247,10 @@ struct Application
 
         if (frame.channels() == 3)
         {
-// ogles_gpgpu supports both {BGR,RGB}A and NV{21,12} inputs, and
-// cv::VideoCapture support {RGB,BGR} output, so we need to add an
-// alpha plane.  Doing this on the CPU is wasteful, and it would be
-// better to access the camera directly for NV{21,12} processing
+            // ogles_gpgpu supports both {BGR,RGB}A and NV{21,12} inputs, and
+            // cv::VideoCapture support {RGB,BGR} output, so we need to add an
+            // alpha plane.  Doing this on the CPU is wasteful, and it would be
+            // better to access the camera directly for NV{21,12} processing
 #if ANDROID
             cv::cvtColor(frame, frame, cv::COLOR_BGR2RGBA); // android need GL_RGBA
 #else
@@ -173,13 +262,15 @@ struct Application
 
         if (logger)
         {
-            logger->info("OBJECTS : {}", result.second.roi.size());
+            logger->info("OBJECTS[{}] = {}", counter, result.second.roi.size());
         }
 
         if (display)
         {
             show(result.first);
         }
+        
+        counter++;
 
         return true; // continue sequence
     }
@@ -203,16 +294,23 @@ struct Application
     std::shared_ptr<cv::VideoCapture> video;
     std::shared_ptr<acf::Detector> detector;
     std::shared_ptr<acf::GPUDetectionPipeline> pipeline;
+    
+    std::size_t counter = 0;
 };
 
-int main(int argc, char** argv)
+int gauze_main(int argc, char** argv)
 {
     auto logger = util::Logger::create("acf-pipeline");
 
-    bool help = false, doWindow = false;
+    for(int i = 0; i < argc; i++)
+    {
+        logger->info("arg[{}] = {}", i, argv[i]);
+    }
+
+    bool help = false, doWindow = false, doGlobal = false;
     float resolution = 1.f, acfCalibration = 0.f;
     std::string sInput, sOutput, sModel;
-    int minWidth = 0;
+    int minWidth = 0, repeat = 1;
 
     const int argumentCount = argc;
     cxxopts::Options options("acf-pipeline", "GPU accelerated ACF object detection (see Piotr's toolbox)");
@@ -224,8 +322,10 @@ int main(int argc, char** argv)
         ("m,model", "Model file", cxxopts::value<std::string>(sModel))
         ("c,calibration", "ACF calibration", cxxopts::value<float>(acfCalibration))
         ("r,resolution", "Resolution", cxxopts::value<float>(resolution))
+        ("g,global", "Globl nms", cxxopts::value<bool>(doGlobal))
         ("w,window", "Window", cxxopts::value<bool>(doWindow))
         ("M,minimum", "Minimum object width", cxxopts::value<int>(minWidth))
+        ("R,repeat", "Repeat the input video R times", cxxopts::value<int>(repeat))
         ("h,help", "Help message", cxxopts::value<bool>(help))
         ;
     // clang-format on
@@ -251,14 +351,38 @@ int main(int argc, char** argv)
 
     Application app(sInput, sModel, acfCalibration, minWidth, doWindow, resolution);
     app.setLogger(logger);
+    app.setRepeat(repeat);
+    app.setDoGlobalNMS(doGlobal);
 
-    aglet::GLContext::RenderDelegate delegate = [&]() {
-        return app.update();
+    std::size_t count = 0;
+    aglet::GLContext::RenderDelegate delegate = [&]() -> bool
+    {
+        bool status = app.update();
+        if(status)
+        {
+            count++;
+        }
+        return status;
     };
 
-    (*app.context)(delegate);
+    double seconds = 0.0;    
+    { // Process all frames (main loop) and record the total time:
+        util::ScopeTimeLogger timer = [&](double total) { seconds = total; };
+        (*app.context)(delegate);
+    }
 
-    logger->info("DONE");
+    const double fps = (seconds > 0.0) ? static_cast<double>(count)/seconds : 0.0;
+    logger->info("ACF FULL: FPS={}", fps);
+
+    if(count > 0)
+    {
+        auto summary = app.pipeline->summary();
+        for(auto &entry : summary)
+        {
+            entry.second /= static_cast<double>(count);
+            logger->info("\tACF STAGE {} = {}", entry.first, entry.second);
+        }
+    }
 
     return 0;
 }
@@ -273,14 +397,24 @@ static std::shared_ptr<cv::VideoCapture> create(const std::string& filename)
     }
     else
     {
-        return std::make_shared<cv::VideoCapture>(filename);
+        if(filename.find(".png") != std::string::npos)
+        {
+            return std::make_shared<VideoCaptureImage>(filename);
+        }
+        else
+        {
+            return std::make_shared<cv::VideoCapture>(filename);
+        }
     }
 }
 
 static cv::Size getSize(cv::VideoCapture& video)
 {
-    return {
+    // clang-format off
+    return
+    {
         static_cast<int>(video.get(CV_CAP_PROP_FRAME_WIDTH)),
         static_cast<int>(video.get(CV_CAP_PROP_FRAME_HEIGHT))
     };
+    // clang-format on
 }

@@ -61,8 +61,8 @@ if(ACF_USE_DRISHTI_UPLOAD)
   )
   endif()    
 else()
-  set(ACF_HUNTER_GATE_URL "https://github.com/ruslo/hunter/archive/v0.20.28.tar.gz")
-  set(ACF_HUNTER_GATE_SHA1 "8fee57e4232e35e28a88f0beafb5f2a739a3fa3c")
+  set(ACF_HUNTER_GATE_URL "https://github.com/ruslo/hunter/archive/v0.20.51.tar.gz")
+  set(ACF_HUNTER_GATE_SHA1 "4919c28709340b4fb64a6c11d0bc203301edd685")
   if(HUNTER_ENABLED AND NOT ACF_IS_REPO_BUILD)
     # DEPENDENCY: if(HUNTER_ENABLE): we are being used as a dependency from
     # another project and we will use the config.cmake from the parent project.
@@ -118,6 +118,7 @@ option(ACF_SERIALIZE_WITH_CVMATIO "Build with CVMATIO" ON)
 option(ACF_BUILD_OGLES_GPGPU "Build with OGLES_GPGPU" ON)
 option(ACF_BUILD_TESTS "Build tests" OFF)
 option(ACF_BUILD_EXAMPLES "Build examples" ON)
+option(ACF_OPENGL_ES3 "Use OpenGL ES 3.0 (and compatible)" OFF)
 
 ####################
 ## Version check ###
