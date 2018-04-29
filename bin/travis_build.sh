@@ -34,6 +34,7 @@ polly_args=(
     --archive acf
     --jobs 2
     --test
+    --verbose
     ${INSTALL}
 )
 

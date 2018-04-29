@@ -160,9 +160,14 @@ int Detector::deserialize(ParserNodeDetector& detector_)
         opts_.parse<Field<double>, decltype(opts_->nPerNeg)>("nPerNeg", opts_->nPerNeg);
         opts_.parse<Field<double>, decltype(opts_->nAccNeg)>("nAccNeg", opts_->nAccNeg);
 
+        try
         {
             auto&& pJitter_ = opts_.create("pJitter", opts_->pJitter);
             pJitter_.parse<Field<double>, decltype((*pJitter_)->flip)>("flip", (*pJitter_)->flip);
+        }
+        catch(...)
+        {
+            opts_->pJitter->flip.set("jitter", false, true, 0);
         }
 
         opts_.parse<Field<double>, decltype(opts_->winsSave)>("winsSave", opts_->winsSave);
