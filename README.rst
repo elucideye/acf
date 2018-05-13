@@ -131,11 +131,32 @@ If you would like to integrate the library in another project, the easiest thing
 
     polly.py --toolchain ${TOOLCHAIN} --config ${CONFIG} --fwd HUNTER_CONFIGURATION_TYPES=${CONFIG} ACF_BUILD_SHARED_SDK=ON --install --verbose
 
-For iOS, you can use `polly` to create a dynamic framework from the generated `libacf.dylib` (see command line options) as a post build step.  
+For iOS, you can use `polly` to create a dynamic framework from the generated `libacf.dylib` (see command line options) as a post build step, note the additional `--framework` and `--framework-lib` options in the build command below:
 
 ::
 
     polly.py --toolchain ${TOOLCHAIN} --config ${CONFIG} --fwd HUNTER_CONFIGURATION_TYPES=${CONFIG} ACF_BUILD_SHARED_SDK=ON --install --verbose --framework --framework-lib libacf.dylib
+    
+The resulting framework will be generated in the `_framework` directory as shown below:    
+   
+::
+
+    tree _framework/
+    _framework/
+    └── ios-11-3-dep-9-0-arm64
+        └── acf.framework
+            ├── Headers
+            │   ├── ACF.h
+            │   ├── ACFField.h
+            │   ├── GPUACF.h
+            │   ├── MatP.h
+            │   ├── ObjectDetector.h
+            │   ├── acf_common.h
+            │   └── acf_export.h
+            ├── Info.plist
+            ├── _CodeSignature
+            │   └── CodeResources
+            └── acf
 
 =====
 HOWTO
