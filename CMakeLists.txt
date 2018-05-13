@@ -94,7 +94,7 @@ endif()
 ###################
 
 # See https://github.com/hunter-packages/check_ci_tag when changing VERSION
-project(acf VERSION 0.1.3)
+project(acf VERSION 0.1.4)
 
 set(ACF_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
