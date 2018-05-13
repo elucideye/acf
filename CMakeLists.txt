@@ -94,7 +94,7 @@ endif()
 ###################
 
 # See https://github.com/hunter-packages/check_ci_tag when changing VERSION
-project(acf VERSION 0.1.3)
+project(acf VERSION 0.1.4)
 
 set(ACF_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
@@ -112,6 +112,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 ###############
 
 # make sure these are before first hunter_add_package() call
+option(ACF_BUILD_SHARED_SDK "Build ACF as a shared library" OFF)
 option(ACF_BUILD_APPS "Build applications" ON)
 option(ACF_SERIALIZE_WITH_CEREAL "Serialize w/ cereal" ON) # always on
 option(ACF_SERIALIZE_WITH_CVMATIO "Build with CVMATIO" ON)
