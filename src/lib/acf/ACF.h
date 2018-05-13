@@ -54,7 +54,7 @@ public:
     bool good() const { return m_good; }
     explicit operator bool() const { return m_good; }
 
-    struct Options
+    struct ACF_EXPORT Options
     {
         //   .type       - ['max'] 'max', 'maxg', 'ms', 'cover', or 'none'
         //   .thr        - [-inf] threshold below which to discard (0 for 'ms')
@@ -65,7 +65,7 @@ public:
         //   .resize     - {} parameters for bbApply('resize')
         //   .separate   - [0] run nms separately on each bb type (bbType)
 
-        struct Nms
+        struct ACF_EXPORT Nms
         {
             Field<std::string> type;
             Field<double> thr;
@@ -83,9 +83,9 @@ public:
             void serialize(Archive& ar, const uint32_t version);
         };
 
-        struct Pyramid
+        struct ACF_EXPORT Pyramid
         {
-            struct Chns
+            struct ACF_EXPORT Chns
             {
                 Chns()
                 {
@@ -99,7 +99,7 @@ public:
 
                 Field<int> shrink;
 
-                struct Color
+                struct ACF_EXPORT Color
                 {
                     Field<int> enabled;
                     Field<double> smooth;
@@ -113,7 +113,7 @@ public:
                 };
                 Field<Color> pColor;
 
-                struct GradMag
+                struct ACF_EXPORT GradMag
                 {
                     Field<int> enabled;
                     Field<int> colorChn;
@@ -129,7 +129,7 @@ public:
                 };
                 Field<GradMag> pGradMag;
 
-                struct GradHist
+                struct ACF_EXPORT GradHist
                 {
                     Field<int> enabled;
                     Field<int> binSize;
@@ -146,7 +146,7 @@ public:
                 };
                 Field<GradHist> pGradHist;
 
-                struct Custom
+                struct ACF_EXPORT Custom
                 {
                     // TODO:
                     void merge(const Custom& src, int mode);
@@ -200,9 +200,9 @@ public:
         Field<double> cascCal;
         Field<std::vector<int>> nWeak;
 
-        struct Boost
+        struct ACF_EXPORT Boost
         {
-            struct Tree
+            struct ACF_EXPORT Tree
             {
                 Field<int> nBins;
                 Field<int> maxDepth;
@@ -243,7 +243,7 @@ public:
         Field<int> nPerNeg;
         Field<int> nAccNeg;
 
-        struct Jitter
+        struct ACF_EXPORT Jitter
         {
             Field<int> flip;
 
@@ -278,7 +278,7 @@ public:
     //   .losses     - [1 x nWeak] loss after every iteration (for debugging)
     //   .treeDepth  - depth of all leaf nodes (or 0 if leaf depth varies)
 
-    struct Classifier
+    struct ACF_EXPORT Classifier
     {
         cv::Mat fids;    // uint32_t
         cv::Mat thrs;    // float
@@ -312,12 +312,12 @@ public:
     //    .nChns      - number of channels for given channel type
     //    .padWith    - how channel should be padded (0,'replicate')
 
-    struct Channels
+    struct ACF_EXPORT Channels
     {
         Options::Pyramid::Chns pChns;
         int nTypes = 0;
         std::vector<MatP> data;
-        struct Info
+        struct ACF_EXPORT Info
         {
             std::string name;
             // Detector::Options::Pyramid::Chns pChn; /* TODO: C++ requires strong type */
@@ -327,7 +327,16 @@ public:
         std::vector<Info> info;
     };
 
-    static int chnsCompute(const MatP& I, const Options::Pyramid::Chns& pChns, Channels& chns, bool isInit = false, MatLoggerType pLogger = {});
+    // clang-format off
+    static int chnsCompute
+    (
+        const MatP& I,
+        const Options::Pyramid::Chns& pChns,
+        Channels& chns,
+        bool isInit = false,
+        MatLoggerType pLogger = {}
+    );
+    // clang-format on
 
     // see chnsPyramid()
     // OUTPUTS
@@ -341,7 +350,7 @@ public:
     //   .scales       - [nScales x 1] relative scales (approximate)
     //   .scaleshw     - [nScales x 2] exact scales for resampling h and w
 
-    struct Pyramid
+    struct ACF_EXPORT Pyramid
     {
         using array_type = std::vector<std::vector<MatP>>;
 
@@ -369,7 +378,7 @@ public:
     };
 
     // This contains the subset of parameters that are permitted to be overriden in acfModify
-    struct Modify
+    struct ACF_EXPORT Modify
     {
         Field<int> nPerOct;
         Field<int> nOctUp;
@@ -406,20 +415,78 @@ public:
     // Multiscale search:
     virtual int operator()(const Pyramid& P, RectVec& objects, RealVec* scores = 0);
 
-    int chnsPyramid(const MatP& I, const Options::Pyramid* pPyramid, Pyramid& pyramid, bool isInit = false, MatLoggerType pLogger = {});
+    // clang-format off
+    int chnsPyramid
+    (
+        const MatP& I,
+        const Options::Pyramid* pPyramid,
+        Pyramid& pyramid,
+        bool isInit = false,
+        MatLoggerType pLogger = {}
+    );
+    // clang-format on
 
-    static int rgbConvert(const MatP& I, MatP& J, const std::string& cs, bool useSingle, bool isLuv = false);
-    static int getScales(int nPerOct, int nOctUp, const cv::Size& minDs, int shrink, const cv::Size& sz, RealVec& scales, Size2dVec& scaleshw);
+    // clang-format off
+    static int rgbConvert
+    (
+        const MatP& I,
+        MatP& J,
+        const std::string& cs,
+        bool useSingle,
+        bool isLuv = false
+    );
+    // clang-format on
+
+    // clang-format off
+    static int getScales
+    (
+        int nPerOct,
+        int nOctUp,
+        const cv::Size& minDs,
+        int shrink,
+        const cv::Size& sz,
+        RealVec& scales,
+        Size2dVec& scaleshw
+    );
+    // clang-format on
+    
     static int convTri(const MatP& I, MatP& J, double r = 1.0, int s = 1);
-    static int gradientMag(const cv::Mat& I, cv::Mat& M, cv::Mat& O, int channel = 0, int normRad = 0, double normConst = 0.005, int full = 0, MatLoggerType logger = {});
-    static int gradientHist(const cv::Mat& M, const cv::Mat& O, MatP& H, int binSize, int nOrients, int softBin, int useHog, double clipHog, int full);
+
+    // clang-format off
+    static int gradientMag
+    (
+        const cv::Mat& I,
+        cv::Mat& M,
+        cv::Mat& O,
+        int channel = 0,
+        int normRad = 0,
+        double normConst = 0.005,
+        int full = 0,
+        MatLoggerType logger = {}
+    );
+    // clang-format on
+
+    // clang-format off    
+    static int gradientHist
+    (
+        const cv::Mat& M,
+        const cv::Mat& O,
+        MatP& H,
+        int binSize,
+        int nOrients,
+        int softBin,
+        int useHog,
+        double clipHog,
+        int full
+    );
+    // clang-format on
 
     virtual void setDetectionScorePruneRatio(double ratio)
     {
         m_detectionScorePruneRatio = ratio;
     }
 
-    struct Detection
+    struct ACF_EXPORT Detection
     {
         Detection() {}
         Detection(const cv::Rect& r, double s)
@@ -436,7 +503,19 @@ public:
     };
     using DetectionVec = std::vector<Detection>;
 
-    void acfDetect1(const MatP& chns, const RectVec& rois, int shrink, cv::Size modelDsPad, int stride, double cascThr, DetectionVec& objects);
+    // clang-format off
+    void acfDetect1
+    (
+        const MatP& chns,
+        const RectVec& rois,
+        int shrink,
+        cv::Size modelDsPad,
+        int stride,
+        double cascThr,
+        DetectionVec& objects
+    );
+    // clang-format on
+    
     int bbNms(const DetectionVec& bbsIn, const Options::Nms& pNms, DetectionVec& bbs);
     int acfModify(const Detector::Modify& params);
 
@@ -496,7 +575,18 @@ public:
 
 protected:
     using DetectionParamPtr = std::shared_ptr<DetectionParams>;
-    DetectionParamPtr createDetector(const MatP& chns, const RectVec& rois, int shrink, cv::Size modelDsPad, int stride, DetectionSink* sink) const;
+
+    // clang-format off
+    DetectionParamPtr createDetector
+    (
+        const MatP& chns,
+        const RectVec& rois,
+        int shrink,
+        cv::Size modelDsPad,
+        int stride,
+        DetectionSink* sink
+    ) const;
+    // clang-format on
 
     MatLoggerType m_logger;
 

@@ -48,7 +48,7 @@ To train your own model, you can use Piotr's Toolbox.  This currently requires M
 Integration 
 ===========
 
-If you would like to integrate the library in another project, the easiest thing will be to use `Hunter <http://github.com/ruslo/hunter>`__ to manage and build your application or SDK.  The acf library and all dependencies will then be managed automatically.  Please see the documentation in the above link for more details.  If this isn't an option, it will be easiest to build ACF as a single shared library (without dependencies) that can then be integrated in your project.  In the later case, you can pass CMake's `BUILD_SHARED_LIBS=ON` on the command line while generating the project.  For iOS, you can use `polly` to create a dynamic framework from the generated `libacf.dylib` (see command line options) as a post build step.  See the build instructions below for more information on building and installing.
+If you would like to integrate the library in another project, the easiest thing will be to use `Hunter <http://github.com/ruslo/hunter>`__ to manage and build your application or SDK.  The acf library and all dependencies will then be managed automatically.  Please see the documentation in the above link for more details.  If this isn't an option, it will be easiest to build ACF as a single shared library (without dependencies) that can then be integrated in your project.  In the later case, you can pass `ACF_BUILD_SHARED_SDK=ON` on the command line while generating the project in order to build the ACF library as a shared library while all dependencies will be compiled as static libraries.  For iOS, you can use `polly` to create a dynamic framework from the generated `libacf.dylib` (see command line options) as a post build step.  See the build instructions below for more information on building and installing.
 
 ===========
 Quick Start
@@ -126,6 +126,7 @@ After the environment is configured, you can build for any supported
 ::
 
     polly.py --toolchain ${TOOLCHAIN} --config ${CONFIG} --fwd HUNTER_CONFIGURATION_TYPES=${CONFIG} --install --verbose
+
 
 =====
 HOWTO

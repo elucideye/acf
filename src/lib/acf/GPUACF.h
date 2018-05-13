@@ -11,6 +11,7 @@
 #ifndef __acf_GPUACF_h__
 #define __acf_GPUACF_h__
 
+#include <acf/acf_export.h>
 #include <acf/acf_common.h>
 #include <acf/ACF.h>
 
@@ -30,7 +31,7 @@ BEGIN_OGLES_GPGPU
 
 #define GPU_ACF_TRANSPOSE 1
 
-struct ACF : public ogles_gpgpu::VideoSource
+struct ACF_EXPORT ACF : public ogles_gpgpu::VideoSource
 {
 public:
     enum FeatureKind
@@ -109,7 +110,7 @@ protected:
     std::unique_ptr<Impl> impl;
 };
 
-ACF::FeatureKind getFeatureKind(const acf::Detector::Options::Pyramid::Chns& chns);
+ACF_EXPORT ACF::FeatureKind getFeatureKind(const acf::Detector::Options::Pyramid::Chns& chns);
 
 END_OGLES_GPGPU
 

@@ -10,7 +10,13 @@
 find_package(sugar CONFIG REQUIRED)
 sugar_include(.)
 
-add_library(acf ${ACF_SRCS} ${ACF_HDRS} ${ACF_HDRS_PUBLIC})
+if(ACF_BUILD_SHARED_SDK)
+  set(acf_lib_type SHARED)
+else()
+  set(acf_lib_type STATIC)
+endif()
+
+add_library(acf ${acf_lib_type} ${ACF_SRCS} ${ACF_HDRS} ${ACF_HDRS_PUBLIC})
 target_link_libraries(acf
   PUBLIC ${ACF_3RDPARTY_PKG_LIBS}
   PRIVATE ${ACF_3RDPARTY_PKG_LIBS_}
