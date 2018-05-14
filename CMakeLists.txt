@@ -61,8 +61,8 @@ if(ACF_USE_DRISHTI_UPLOAD)
   )
   endif()    
 else()
-  set(ACF_HUNTER_GATE_URL "https://github.com/ruslo/hunter/archive/v0.20.51.tar.gz")
-  set(ACF_HUNTER_GATE_SHA1 "4919c28709340b4fb64a6c11d0bc203301edd685")
+  set(ACF_HUNTER_GATE_URL "https://github.com/ruslo/hunter/archive/v0.20.74.tar.gz")
+  set(ACF_HUNTER_GATE_SHA1 "88e3c806f0ff640c0e3cbc32b340ae2c370b31f5")
   if(HUNTER_ENABLED AND NOT ACF_IS_REPO_BUILD)
     # DEPENDENCY: if(HUNTER_ENABLE): we are being used as a dependency from
     # another project and we will use the config.cmake from the parent project.
