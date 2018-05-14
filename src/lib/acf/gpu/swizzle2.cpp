@@ -28,7 +28,7 @@ void MergeProc::useTexture(GLuint id, GLuint useTexUnit, GLenum target, int posi
 // clang-format off
 const char *MergeProc::fshaderMergeSrcABC1 = 
 #if defined(OGLES_GPGPU_OPENGLES)
- precision mediump float;
+ OG_TO_STR(precision mediump float;)
 #endif
 OG_TO_STR(
  varying vec2 textureCoordinate;
@@ -45,12 +45,11 @@ OG_TO_STR(
 // clang-format on
 
 // clang-format off
-const char *MergeProc::fshaderMergeSrcAB12 = OG_TO_STR
-(
+const char *MergeProc::fshaderMergeSrcAB12 = 
 #if defined(OGLES_GPGPU_OPENGLES)
- precision mediump float;
+ OG_TO_STR(precision mediump float;)
 #endif
-
+OG_TO_STR(
  varying vec2 textureCoordinate;
  uniform sampler2D inputImageTexture;
  uniform sampler2D inputImageTexture2;
@@ -67,7 +66,7 @@ const char *MergeProc::fshaderMergeSrcAB12 = OG_TO_STR
 // clang-format off
 const char *MergeProc::fshaderMergeSrcAD12 =
 #if defined(OGLES_GPGPU_OPENGLES)
- precision mediump float;
+  OG_TO_STR(precision mediump float;)
 #endif
 OG_TO_STR(
  varying vec2 textureCoordinate;
