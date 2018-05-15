@@ -439,7 +439,7 @@ int Detector::getScales(int nPerOct, int nOctUp, const cv::Size& minDs, int shri
     int nScales = std::floor(double(nPerOct) * (double(nOctUp) + util::log2(std::min(ratio.width, ratio.height))) + 1.0);
 
     double d0 = sz.height, d1 = sz.width;
-    if (sz.height < sz.width)
+    if (sz.height >= sz.width)
     {
         std::swap(d0, d1);
     }
