@@ -66,7 +66,7 @@ void GLDetector::init(const cv::Mat& I)
     computePyramid(I, m_impl->Pcpu);
     const int shrink = opts.pPyramid->pChns->shrink.get();
     const auto sizes = getPyramidSizes(m_impl->Pcpu, shrink);
-    static const bool doGray = false;    
+    static const bool doGray = false;
     const ogles_gpgpu::Size2d inputSize(I.cols, I.rows);
     m_impl->acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, m_impl->featureKind, doGray, shrink);
     m_impl->acf->setDoLuvTransfer(false);
@@ -84,7 +84,7 @@ const acf::Detector::Pyramid& GLDetector::getPyramid(const cv::Mat& input, const
     (*m_impl->context)();
 
     // Fill in the pyramid:
-    (*m_impl->acf)({{ input.cols, input.rows }, void_ptr(input.ptr()), true, 0, DFLT_TEXTURE_FORMAT});
+    (*m_impl->acf)({ { input.cols, input.rows }, void_ptr(input.ptr()), true, 0, DFLT_TEXTURE_FORMAT });
     glFlush();
     m_impl->acf->fill(m_impl->Pgpu, m_impl->Pcpu);
 
@@ -129,7 +129,7 @@ std::vector<ogles_gpgpu::Size2d> getPyramidSizes(acf::Detector::Pyramid& Pcpu, i
 
 void GLDetector::clear()
 {
-    m_impl->size = {0,0};
+    m_impl->size = { 0, 0 };
 }
 
 cv::Mat GLDetector::draw(bool doGpu)

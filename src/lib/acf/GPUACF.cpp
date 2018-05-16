@@ -82,7 +82,7 @@ struct ACF::Impl
             rgb2luvProc->add(luvTransposeOut.get());
         }
     }
-    
+
     void initACF(const SizeVec& scales, FeatureKind kind)
     {
         // Rotation + rescale and ACF pipeline:
@@ -99,7 +99,7 @@ struct ACF::Impl
         smoothNormGradProc = util::make_unique<SmoothProc>(1.0);
         smoothGradHistProcA = util::make_unique<SmoothProc>(1.0);
         smoothGradHistProcB = util::make_unique<SmoothProc>(1.0);
-        
+
         // Reduction:
         reduceRgbProc = util::make_unique<ogles_gpgpu::GainProc>();
         reduceLuvProc = util::make_unique<ogles_gpgpu::GainProc>();
@@ -147,7 +147,7 @@ struct ACF::Impl
         // ((( histA -> smooth(histA) )))
         gradHistProcA->add(smoothGradHistProcA.get());
         smoothGradHistProcA->add(reduceGradHistProcA.get());
-        
+
         // ((( histB -> smooth(histB) )))
         gradHistProcB->add(smoothGradHistProcB.get());
         smoothGradHistProcB->add(reduceGradHistProcB.get());
@@ -180,7 +180,7 @@ struct ACF::Impl
                 CV_Assert(false);
         }
     }
-    
+
     // This provides a map for unpacking/swizzling OpenGL textures (i.e., RGBA or BGRA) to user
     // memory using NEON optimized instructions.
     ChannelSpecification getACFChannelSpecification(MatP& acf) const
@@ -248,7 +248,7 @@ struct ACF::Impl
         return ChannelSpecification();
         // clang-format on
     }
-    
+
     bool needsTextures() const
     {
         bool status = false;
@@ -277,16 +277,16 @@ struct ACF::Impl
     float m_grayscaleScale = 1.0f;
     bool m_hasGrayscaleOutput = false;
     cv::Mat m_grayscale;
-    
+
     int m_shrink = 4;
 
     std::unique_ptr<ogles_gpgpu::GainProc> rotationProc; // make sure we have an unmodified upright image
     std::unique_ptr<ogles_gpgpu::Rgb2LuvProc> rgb2luvProc;
     std::unique_ptr<ogles_gpgpu::PyramidProc> pyramidProc;
-    std::unique_ptr<ogles_gpgpu::GradProc> gradProc;            // (1.0);
-    std::unique_ptr<ogles_gpgpu::TriangleProc> normProc;        // (5, true, 0.005);
-    std::unique_ptr<ogles_gpgpu::GradHistProc> gradHistProcA;   // (6, 0, 1.f);
-    std::unique_ptr<ogles_gpgpu::GradHistProc> gradHistProcB;   // (6, 4, 1.f);
+    std::unique_ptr<ogles_gpgpu::GradProc> gradProc;          // (1.0);
+    std::unique_ptr<ogles_gpgpu::TriangleProc> normProc;      // (5, true, 0.005);
+    std::unique_ptr<ogles_gpgpu::GradHistProc> gradHistProcA; // (6, 0, 1.f);
+    std::unique_ptr<ogles_gpgpu::GradHistProc> gradHistProcB; // (6, 4, 1.f);
 
     // Reduction:
     std::unique_ptr<ogles_gpgpu::GainProc> reduceRgbProc; // initial reduction
@@ -294,8 +294,8 @@ struct ACF::Impl
     std::unique_ptr<ogles_gpgpu::GainProc> reduceNormGradProc;
     std::unique_ptr<ogles_gpgpu::GainProc> reduceGradHistProcA; // (1);
     std::unique_ptr<ogles_gpgpu::GainProc> reduceGradHistProcB; // (1);
-    std::unique_ptr<ogles_gpgpu::GainProc> reduceForGrayProc; // (optional) reduce for grayscale output
-    
+    std::unique_ptr<ogles_gpgpu::GainProc> reduceForGrayProc;   // (optional) reduce for grayscale output
+
     // Strategic smoothing (hand tuned to match ACF output)
     std::unique_ptr<SmoothProc> smoothProc;
     std::unique_ptr<SmoothProc> smoothNormGradProc;
@@ -303,7 +303,7 @@ struct ACF::Impl
     std::unique_ptr<SmoothProc> smoothGradHistProcB;
 
     // #### OUTPUT ###
-    std::unique_ptr<ogles_gpgpu::GainProc> luvTransposeOut;  //  transposed LUV output
+    std::unique_ptr<ogles_gpgpu::GainProc> luvTransposeOut; //  transposed LUV output
 
     // Multi-texture swizzle (one or the other for 7 vs 10 channels)
     std::unique_ptr<ogles_gpgpu::MergeProc> mergeProcLUVG;

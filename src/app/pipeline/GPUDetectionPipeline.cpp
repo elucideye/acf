@@ -20,7 +20,7 @@ static void chooseBest(std::vector<cv::Rect>& objects, std::vector<double>& scor
 #include <opencv2/highgui.hpp>
 static cv::Mat draw(const acf::Detector::Pyramid& pyramid);
 static void logPyramid(const std::string& filename, const acf::Detector::Pyramid& P);
-#endif 
+#endif
 
 template <typename Container>
 void push_fifo(Container& container, const typename Container::value_type& value, int size)
@@ -106,8 +106,7 @@ struct GPUDetectionPipeline::Impl
         double read = 0.0;
         double detect = 0.0;
         double complete = 0.0;
-    }
-    log;
+    } log;
 };
 
 GPUDetectionPipeline::GPUDetectionPipeline(DetectionPtr& detector, const cv::Size& inputSize, std::size_t n, int rotation, int minObjectWidth)
@@ -121,7 +120,7 @@ GPUDetectionPipeline::~GPUDetectionPipeline()
 {
     try
     {
-        if(impl && impl->scene.valid())
+        if (impl && impl->scene.valid())
         {
             // If this has already been retrieved it will throw
             impl->scene.get(); // block on any abandoned calls
@@ -272,7 +271,7 @@ void GPUDetectionPipeline::computeAcf(const ogles_gpgpu::FrameInput& frame, bool
 
 GLuint GPUDetectionPipeline::paint(const Detections& scene, GLuint inputTexture)
 {
-    if(scene.roi.size())
+    if (scene.roi.size())
     {
         std::vector<std::array<float, 2>> segments;
         for (const auto& r : scene.roi)
@@ -470,7 +469,7 @@ auto GPUDetectionPipeline::run(const FrameInput& frame2, bool doDetection) -> De
 auto GPUDetectionPipeline::operator()(const FrameInput& frame2, bool doDetection) -> DetectionTex
 {
     util::ScopeTimeLogger logger = [&](double elapsed) { impl->log.complete += elapsed; };
-    
+
     std::pair<GLuint, Detections> result = run(frame2, doDetection);
 
     for (auto& c : impl->callbacks)
@@ -541,14 +540,12 @@ std::shared_ptr<acf::Detector::Pyramid> GPUDetectionPipeline::createAcfCpu(const
     return P;
 }
 
-
 std::map<std::string, double> GPUDetectionPipeline::summary()
 {
-    return
-    {
-        {"read", impl->log.read},
-        {"detect", impl->log.detect},
-        {"complete", impl->log.complete}
+    return {
+        { "read", impl->log.read },
+        { "detect", impl->log.detect },
+        { "complete", impl->log.complete }
     };
 }
 
@@ -570,7 +567,6 @@ static void chooseBest(std::vector<cv::Rect>& objects, std::vector<double>& scor
         scores = { scores[best] };
     }
 }
-
 
 #if ACF_DEBUG_PYRAMIDS
 

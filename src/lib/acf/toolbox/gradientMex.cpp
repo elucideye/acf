@@ -121,7 +121,7 @@ public:
 #endif
         return a1[i];
     }
-    
+
     const int max()
     {
         return +(n + b - 1);
@@ -185,10 +185,10 @@ void gradMag(float* I, float* M, float* O, int h, int w, int d, bool full)
     _Gx = (__m128*)Gx;
     Gy = (float*)alMalloc(s, 16);
     _Gy = (__m128*)Gy;
-    
+
     __m128 upper = SET(static_cast<float>(ACosTable::getInstance().max()));
     __m128 lower = SET(static_cast<float>(ACosTable::getInstance().min()));
-    
+
     // compute gradient magnitude and orientation for each column
     for (x = 0; x < w; x++)
     {

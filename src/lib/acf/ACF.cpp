@@ -280,8 +280,7 @@ int Detector::operator()(const Pyramid& P, std::vector<cv::Rect>& objects, std::
     auto scales = create_random_indices(P.nScales);
     std::vector<DetectionVec> bbs_(P.nScales);
 
-    std::function<void(const cv::Range &r)> worker = [&](const cv::Range &r)
-    {
+    std::function<void(const cv::Range& r)> worker = [&](const cv::Range& r) {
         for (int j = r.start; j < r.end; j++)
         {
             int i = scales[j];
@@ -314,20 +313,20 @@ int Detector::operator()(const Pyramid& P, std::vector<cv::Rect>& objects, std::
         }
     };
 
-    if(m_doParallel)
+    if (m_doParallel)
     {
-        cv::parallel_for_({0, P.nScales}, worker);
+        cv::parallel_for_({ 0, P.nScales }, worker);
     }
     else
     {
-        worker({0, P.nScales});
+        worker({ 0, P.nScales });
     }
 
-    for(int i = 1; i < bbs_.size(); i++)
+    for (int i = 1; i < bbs_.size(); i++)
     {
         std::copy(bbs_[i].begin(), bbs_[i].end(), std::back_inserter(bbs_[0]));
     }
-    auto &bbs = bbs_[0];
+    auto& bbs = bbs_[0];
 
     if (m_doNms)
     {

@@ -449,7 +449,7 @@ public:
         Size2dVec& scaleshw
     );
     // clang-format on
-    
+
     static int convTri(const MatP& I, MatP& J, double r = 1.0, int s = 1);
 
     // clang-format off
@@ -466,7 +466,7 @@ public:
     );
     // clang-format on
 
-    // clang-format off    
+    // clang-format off
     static int gradientHist
     (
         const cv::Mat& M,
@@ -490,7 +490,7 @@ public:
     {
         return m_doParallel;
     }
-    
+
     virtual void setDetectionScorePruneRatio(double ratio)
     {
         m_detectionScorePruneRatio = ratio;
@@ -525,7 +525,7 @@ public:
         DetectionVec& objects
     );
     // clang-format on
-    
+
     int bbNms(const DetectionVec& bbsIn, const Options::Nms& pNms, DetectionVec& bbs);
     int acfModify(const Detector::Modify& params);
 

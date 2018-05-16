@@ -58,7 +58,7 @@
 */
 
 #if defined(ACF_ADD_TO_STRING)
-#  include <io/stdlib_string.h> // first
+#include <io/stdlib_string.h> // first
 #endif
 
 #include <util/Logger.h>
@@ -150,10 +150,10 @@ struct Application
     {
         this->logger = logger;
     }
-    
+
     void setRepeat(int n)
     {
-        if(VideoCaptureImage *cap = dynamic_cast<VideoCaptureImage *>(video.get()))
+        if (VideoCaptureImage* cap = dynamic_cast<VideoCaptureImage*>(video.get()))
         {
             cap->setRepeat(n);
         }
@@ -182,8 +182,8 @@ struct Application
         }
         return frame;
     };
-    
-    virtual cv::Mat getFrameInput(ogles_gpgpu::FrameInput &input)
+
+    virtual cv::Mat getFrameInput(ogles_gpgpu::FrameInput& input)
     {
         cv::Mat frame = grab();
         input = { { frame.cols, frame.rows }, void_ptr(frame.data), true, false, TEXTURE_FORMAT };
@@ -194,7 +194,7 @@ struct Application
     {
         ogles_gpgpu::FrameInput frame;
         cv::Mat storage = getFrameInput(frame);
-        if(storage.empty())
+        if (storage.empty())
         {
             return false;
         }
@@ -210,7 +210,7 @@ struct Application
         {
             show(result.first);
         }
-        
+
         counter++;
 
         return true; // continue sequence
@@ -224,7 +224,7 @@ struct Application
         display->useTexture(texture);
         display->render(0);
     }
-    
+
     float resolution = 1.f;
 
     std::shared_ptr<spdlog::logger> logger;
@@ -233,7 +233,7 @@ struct Application
     std::shared_ptr<cv::VideoCapture> video;
     std::shared_ptr<acf::Detector> detector;
     std::shared_ptr<acf::GPUDetectionPipeline> pipeline;
-    
+
     std::size_t counter = 0;
 };
 
@@ -252,34 +252,32 @@ struct ApplicationBenchmark : public Application
     : Application(input,model,acfCalibration,minWidth,window,resolution)
     // clang-format on
     {
-        
     }
-    
-    virtual cv::Mat getFrameInput(ogles_gpgpu::FrameInput &input)
+
+    virtual cv::Mat getFrameInput(ogles_gpgpu::FrameInput& input)
     {
-        if(counter > 256)
+        if (counter > 256)
         {
             return cv::Mat();
         }
-        
+
         static cv::Mat frame = grab(); // for the benchmark we can repeat the first frame
         input = { { frame.cols, frame.rows }, void_ptr(frame.data), true, false, TEXTURE_FORMAT };
-        if(counter++ > 0)
+        if (counter++ > 0)
         {
             input.inputTexture = pipeline->getInputTexture();
             input.pixelBuffer = nullptr;
         }
-        
+
         return frame;
     }
 };
-
 
 int gauze_main(int argc, char** argv)
 {
     auto logger = util::Logger::create("acf-pipeline");
 
-    for(int i = 0; i < argc; i++)
+    for (int i = 0; i < argc; i++)
     {
         logger->info("arg[{}] = {}", i, argv[i]);
     }
@@ -328,7 +326,7 @@ int gauze_main(int argc, char** argv)
     }
 
     std::shared_ptr<Application> app;
-    if(doBenchmark)
+    if (doBenchmark)
     {
         app = std::make_shared<ApplicationBenchmark>(sInput, sModel, acfCalibration, minWidth, doWindow, resolution);
     }
@@ -342,29 +340,28 @@ int gauze_main(int argc, char** argv)
     app->setDoGlobalNMS(doGlobal);
 
     std::size_t count = 0;
-    aglet::GLContext::RenderDelegate delegate = [&]() -> bool
-    {
+    aglet::GLContext::RenderDelegate delegate = [&]() -> bool {
         bool status = app->update();
-        if(status)
+        if (status)
         {
             count++;
         }
         return status;
     };
 
-    double seconds = 0.0;    
+    double seconds = 0.0;
     { // Process all frames (main loop) and record the total time:
         util::ScopeTimeLogger timer = [&](double total) { seconds = total; };
         (*app->context)(delegate);
     }
 
-    const double fps = (seconds > 0.0) ? static_cast<double>(count)/seconds : 0.0;
+    const double fps = (seconds > 0.0) ? static_cast<double>(count) / seconds : 0.0;
     logger->info("ACF FULL: FPS={}", fps);
 
-    if(count > 0)
+    if (count > 0)
     {
         auto summary = app->pipeline->summary();
-        for(auto &entry : summary)
+        for (auto& entry : summary)
         {
             entry.second /= static_cast<double>(count);
             logger->info("\tACF STAGE {} = {}", entry.first, entry.second);
@@ -384,7 +381,7 @@ static std::shared_ptr<cv::VideoCapture> create(const std::string& filename)
     }
     else
     {
-        if(filename.find(".png") != std::string::npos)
+        if (filename.find(".png") != std::string::npos)
         {
             return std::make_shared<VideoCaptureImage>(filename);
         }

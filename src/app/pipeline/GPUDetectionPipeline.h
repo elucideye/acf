@@ -46,21 +46,20 @@ public:
 
     GLuint getInputTexture();
 
-    // This method receives an input frame descriptor (pixel buffer or texture ID) on which to run 
-    // ACF object detection.  The doDetection parameter is provided in order to allow the user to 
-    // control the duty cycle of the detector (perhaps adaptively).  The detection pipeline introduces 
+    // This method receives an input frame descriptor (pixel buffer or texture ID) on which to run
+    // ACF object detection.  The doDetection parameter is provided in order to allow the user to
+    // control the duty cycle of the detector (perhaps adaptively).  The detection pipeline introduces
     // two frames of latency so that the GPU->CPU overhead can be hidden.  For input frame N, the results
     // are returned for frame N-2 (along with the corresponding texture ID).
-    DetectionTex operator()(const ogles_gpgpu::FrameInput& frame, bool doDetection=true);
- 
+    DetectionTex operator()(const ogles_gpgpu::FrameInput& frame, bool doDetection = true);
+
     void operator+=(const DetectionCallback& callback);
 
     std::map<std::string, double> summary();
-    
+
     void setDoGlobalNMS(bool flag);
 
 protected:
-
     DetectionTex run(const FrameInput& frame2, bool doDetection);
     DetectionTex runSimple(const ogles_gpgpu::FrameInput& frame, bool doDetection = true);
     DetectionTex runFast(const ogles_gpgpu::FrameInput& frame, bool doDetection = true);

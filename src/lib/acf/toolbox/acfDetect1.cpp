@@ -64,7 +64,7 @@ public:
 };
 
 template <class T, int kDepth>
-class ParallelDetectionBody : public DetectionParams  
+class ParallelDetectionBody : public DetectionParams
 {
 public:
     ParallelDetectionBody(const T* chns, const T* thrs, DetectionSink* sink)
@@ -85,7 +85,7 @@ public:
                 float h = evaluate(chns + offset);
                 if (h > cascThr)
                 {
-                    sink->add({ c, r }, h); 
+                    sink->add({ c, r }, h);
                 }
             }
         }
@@ -176,7 +176,7 @@ const cv::Mat& Detector::Classifier::getScaledThresholds(int type) const
 }
 
 template <int kDepth>
-std::shared_ptr<DetectionParams> allocDetector(const MatP& I, const cv::Mat &thrs, DetectionSink* sink)
+std::shared_ptr<DetectionParams> allocDetector(const MatP& I, const cv::Mat& thrs, DetectionSink* sink)
 {
     switch (I.depth())
     {
@@ -192,7 +192,7 @@ std::shared_ptr<DetectionParams> allocDetector(const MatP& I, const cv::Mat &thr
     return nullptr; // unused: for static analyzer
 }
 
-std::shared_ptr<DetectionParams> allocDetector(const MatP& I, const cv::Mat &thrs, DetectionSink* sink, int depth)
+std::shared_ptr<DetectionParams> allocDetector(const MatP& I, const cv::Mat& thrs, DetectionSink* sink, int depth)
 {
     // Enforce compile time constants in inner tree search:
     switch (depth)
@@ -221,6 +221,7 @@ std::shared_ptr<DetectionParams> allocDetector(const MatP& I, const cv::Mat &thr
     return nullptr;
 }
 
+// clang-format off
 auto Detector::createDetector
 (
     const MatP& I,
@@ -230,6 +231,7 @@ auto Detector::createDetector
     int stride,
     DetectionSink* sink
 )
+// clang-format on
     const -> DetectionParamPtr
 {
     int modelHt = modelDsPad.height;
@@ -297,6 +299,7 @@ auto Detector::createDetector
 //
 // 3/21/2015: Rework arithmetic for row-major storage order
 
+// clang-format off
 void Detector::acfDetect1
 (
     const MatP& I,
@@ -307,6 +310,7 @@ void Detector::acfDetect1
     double cascThr,
     std::vector<Detection>& objects
 )
+// clang-format on
 {
     DetectionSink detections;
     auto detector = createDetector(I, rois, shrink, modelDsPad, stride, &detections);

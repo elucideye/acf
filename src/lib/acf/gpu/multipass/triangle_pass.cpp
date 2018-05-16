@@ -82,7 +82,7 @@ std::string fragmentShaderForTriangle(int blurRadius, bool doNorm = false, int p
     ss << "void main()\n";
     ss << "{\n";
     ss << "   vec4 sum = vec4(0.0);\n";
-    ss << "   vec4 center = texture2D(inputImageTexture, blurCoordinates[" << numberOfOffsets/2 << "]);\n";
+    ss << "   vec4 center = texture2D(inputImageTexture, blurCoordinates[" << numberOfOffsets / 2 << "]);\n";
 
     for (int currentBlurCoordinateIndex = 0; currentBlurCoordinateIndex < numberOfOffsets; currentBlurCoordinateIndex++)
     {

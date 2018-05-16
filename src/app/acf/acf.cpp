@@ -51,7 +51,7 @@ using ObjectDetectorPtr = std::shared_ptr<acf::ObjectDetector>;
 using AcfPtr = std::shared_ptr<acf::Detector>;
 using RectVec = std::vector<cv::Rect>;
 
-static void randomShapes(cv::Mat &image, int n);
+static void randomShapes(cv::Mat& image, int n);
 
 struct VideoSource
 {
@@ -65,16 +65,16 @@ struct VideoSource
     {
         filenames = util::cli::expand(filename);
     }
-    
-    VideoSource(int n) : m_n(n) // random frames
+
+    VideoSource(int n)
+        : m_n(n) // random frames
     {
-        
     }
 
     virtual Frame operator()(int i)
     {
         Frame frame;
-        if(filenames.size())
+        if (filenames.size())
         {
             frame.name = filenames[i];
             frame.image = cv::imread(filenames[i], cv::IMREAD_COLOR);
@@ -83,9 +83,9 @@ struct VideoSource
         {
             frame.name = std::to_string(i);
             frame.image = cv::Mat::zeros(640, 480, CV_8UC3);
-            randomShapes(frame.image, rand()%32);
+            randomShapes(frame.image, rand() % 32);
         }
-        
+
         return frame;
     }
 
@@ -244,7 +244,7 @@ int gauze_main(int argc, char** argv)
     }
 
     std::shared_ptr<VideoSource> video;
-    if(doRandom)
+    if (doRandom)
     {
         video = std::make_shared<VideoSource>(1000);
     }
@@ -308,9 +308,9 @@ int gauze_main(int argc, char** argv)
         // Get thread specific segmenter lazily:
         auto& detector = manager[std::this_thread::get_id()];
         assert(detector);
-        
+
         auto winSize = detector->getWindowSize();
-        if(!detector->getIsRowMajor())
+        if (!detector->getIsRowMajor())
         {
             std::swap(winSize.width, winSize.height);
         }
@@ -367,7 +367,7 @@ int gauze_main(int argc, char** argv)
                 {
                     maxScore = *iter;
                 }
-                
+
                 if (doPyramids)
                 {
                     // The "--pyramid" command line option can be used to visualize the
@@ -378,7 +378,7 @@ int gauze_main(int argc, char** argv)
                     // method in order to ensure the CPU pyramid will be computed for each
                     // frame.
 #if defined(ACF_DO_GPU)
-                    if(acf::GLDetector *handle = dynamic_cast<acf::GLDetector*>(detector.get()))
+                    if (acf::GLDetector* handle = dynamic_cast<acf::GLDetector*>(detector.get()))
                     {
                         cv::Mat Pcpu = handle->draw(false);
                         cv::Mat Pgpu = handle->draw(true);
@@ -452,18 +452,18 @@ int main(int argc, char** argv)
     {
         std::string home;
 #if !(defined(_WIN32) || defined(_WIN64))
-        home=getenv("HOME");
+        home = getenv("HOME");
 #endif
-        std::vector<char *> args(argc);
+        std::vector<char*> args(argc);
         args[0] = argv[0];
-        
+
         std::vector<std::string> storage(argc);
-        for(int i = 0; i < argc; i++)
+        for (int i = 0; i < argc; i++)
         {
             storage[i] = std::regex_replace(std::string(argv[i]), std::regex("HOME"), home);
             args[i] = const_cast<char*>(storage[i].c_str());
         }
-        
+
         return gauze_main(argc, &args.front());
     }
     catch (std::exception& e)
@@ -537,60 +537,63 @@ static cv::Rect2f operator*(const cv::Rect2f& roi, float scale)
     return { roi.x * scale, roi.y * scale, roi.width * scale, roi.height * scale };
 }
 
-static void randomEllipse(cv::Mat &image, int n)
+static void randomEllipse(cv::Mat& image, int n)
 {
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
-        const cv::Point2f center(rand()%image.cols, rand()%image.rows);
-        const cv::Size2f size(rand()%image.cols, rand()%image.rows);
-        const cv::RotatedRect ellipse(center, size, static_cast<float>(rand() % 1000)/1000.f * M_PI);
-        const cv::Scalar bgr(rand()%255, rand()%255, rand()%255);
+        const cv::Point2f center(rand() % image.cols, rand() % image.rows);
+        const cv::Size2f size(rand() % image.cols, rand() % image.rows);
+        const cv::RotatedRect ellipse(center, size, static_cast<float>(rand() % 1000) / 1000.f * M_PI);
+        const cv::Scalar bgr(rand() % 255, rand() % 255, rand() % 255);
         cv::ellipse(image, ellipse, bgr, -1);
     }
 }
 
-static void randomRectangle(cv::Mat &image, int n)
+static void randomRectangle(cv::Mat& image, int n)
 {
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
         const cv::Point p1(rand() % image.cols, rand() % image.rows);
         const cv::Point p2(rand() % image.cols, rand() % image.rows);
-        
-        if((rand() % 8) > 4)
+
+        if ((rand() % 8) > 4)
         {
             cv::randu(image(cv::Rect(p1, p2)), cv::Scalar::all(0), cv::Scalar::all(255));
         }
         else
         {
-            const cv::Scalar bgr(rand()%255, rand()%255, rand()%255);
+            const cv::Scalar bgr(rand() % 255, rand() % 255, rand() % 255);
             cv::rectangle(image, p1, p2, bgr, -1);
         }
     }
 }
 
-static void randomLines(cv::Mat &image, int n)
+static void randomLines(cv::Mat& image, int n)
 {
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
         const cv::Point u1(rand() % image.cols, rand() % image.rows);
         const cv::Point u2(rand() % image.cols, rand() % image.rows);
-        const cv::Scalar bgr(rand()%255, rand()%255, rand()%255);
-        cv::line(image, u1, u2, bgr, (rand() % 16)+1, 8);
+        const cv::Scalar bgr(rand() % 255, rand() % 255, rand() % 255);
+        cv::line(image, u1, u2, bgr, (rand() % 16) + 1, 8);
     }
 }
 
 // Provide a simple mechanism for testing the ACF pyramids (GPU and CPU)
 // without the need for reading actual images.  This was added initially
 // to aid testing on mobile devices.
-static void randomShapes(cv::Mat &image, int n)
+static void randomShapes(cv::Mat& image, int n)
 {
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
-        switch(rand()%3)
+        switch (rand() % 3)
         {
-            case 0: randomLines(image, 1);
-            case 1: randomRectangle(image, 1);
-            case 2: randomEllipse(image, 1);
+            case 0:
+                randomLines(image, 1);
+            case 1:
+                randomRectangle(image, 1);
+            case 2:
+                randomEllipse(image, 1);
         }
     }
 }
