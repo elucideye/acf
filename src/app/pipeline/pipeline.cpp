@@ -115,9 +115,15 @@ struct Application
         // http://answers.opencv.org/answers/761/revisions/
         video = create(input);
 
-        video->set(cv::CAP_PROP_FRAME_WIDTH, 1920.0);
-        video->set(cv::CAP_PROP_FRAME_HEIGHT, 1080.0);
+        // OpenCV doesn't provide a way to query available frame resolutions,
+        // but you can specify known resolutions like this:
+        //video->set(cv::CAP_PROP_FRAME_WIDTH, 1920.0);
+        //video->set(cv::CAP_PROP_FRAME_HEIGHT, 1080.0);
 
+        // You can also specify a *very high* resolution and it should settle for the highest valid resolution:
+        video->set(cv::CAP_PROP_FRAME_WIDTH, 16000.0);
+        video->set(cv::CAP_PROP_FRAME_HEIGHT, 16000.0);
+        
         // Create an OpenGL context:
         const auto size = getSize(*video);
         context = aglet::GLContext::create(aglet::GLContext::kAuto, window ? "acf" : "", size.width, size.height);
