@@ -163,12 +163,12 @@ const cv::Mat& Detector::Classifier::getScaledThresholds(int type) const
 {
     switch (type)
     {
-        case CV_32FC1:
-            CV_Assert(!thrs.empty());
-            return thrs;
         case CV_8UC1:
-            CV_Assert(!thrsU8.empty());
+            CV_Assert(!thrsU8.empty() && (thrsU8.type() == CV_8UC1));
             return thrsU8;
+        case CV_32FC1:
+            CV_Assert(!thrs.empty() && (thrs.type() == CV_32FC1));
+            return thrs;
         default:
             CV_Assert(type == CV_32FC1 || type == CV_8UC1);
     }
@@ -176,13 +176,15 @@ const cv::Mat& Detector::Classifier::getScaledThresholds(int type) const
 }
 
 template <int kDepth>
-std::shared_ptr<DetectionParams> allocDetector(const MatP& I, const cv::Mat &thrs, DetectionSink* sink)
+std::shared_ptr<DetectionParams> allocDetector(const MatP& I, const cv::Mat& thrs, DetectionSink* sink)
 {
     switch (I.depth())
     {
         case CV_8UC1:
+            CV_Assert(thrs.type() == CV_8UC1);
             return std::make_shared<ParallelDetectionBody<uint8_t, kDepth>>(I[0].ptr<uint8_t>(), thrs.ptr<uint8_t>(), sink);
         case CV_32FC1:
+            CV_Assert(thrs.type() == CV_32FC1);
             return std::make_shared<ParallelDetectionBody<float, kDepth>>(I[0].ptr<float>(), thrs.ptr<float>(), sink);
         default:
             CV_Assert(I.depth() == CV_8UC1 || I.depth() == CV_32FC1);
@@ -190,7 +192,7 @@ std::shared_ptr<DetectionParams> allocDetector(const MatP& I, const cv::Mat &thr
     return nullptr; // unused: for static analyzer
 }
 
-std::shared_ptr<DetectionParams> allocDetector(const MatP& I, const cv::Mat &thrs, DetectionSink* sink, int depth)
+std::shared_ptr<DetectionParams> allocDetector(const MatP& I, const cv::Mat& thrs, DetectionSink* sink, int depth)
 {
     // Enforce compile time constants in inner tree search:
     switch (depth)
@@ -219,6 +221,7 @@ std::shared_ptr<DetectionParams> allocDetector(const MatP& I, const cv::Mat &thr
     return nullptr;
 }
 
+// clang-format off
 auto Detector::createDetector
 (
     const MatP& I,
@@ -228,6 +231,7 @@ auto Detector::createDetector
     int stride,
     DetectionSink* sink
 )
+// clang-format on
     const -> DetectionParamPtr
 {
     int modelHt = modelDsPad.height;
@@ -295,6 +299,7 @@ auto Detector::createDetector
 //
 // 3/21/2015: Rework arithmetic for row-major storage order
 
+// clang-format off
 void Detector::acfDetect1
 (
     const MatP& I,
@@ -305,6 +310,7 @@ void Detector::acfDetect1
     double cascThr,
     std::vector<Detection>& objects
 )
+// clang-format on
 {
     DetectionSink detections;
     auto detector = createDetector(I, rois, shrink, modelDsPad, stride, &detections);

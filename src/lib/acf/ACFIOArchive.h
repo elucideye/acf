@@ -95,7 +95,7 @@ void Detector::Classifier::serialize(Archive& ar, const std::uint32_t version)
 
     if (Archive::is_loading::value)
     {
-        thrsU8 = thrs * 255.0; // precompute uint8_t thresholds
+        thrs.convertTo(thrsU8, CV_8UC1, 255.0f); // precompute uint8_t thresholds
     }
 }
 

@@ -83,7 +83,7 @@ int gauze_main(int argc, char** argv)
     acf::Detector acf(sInput);
 
     save_cpb(sOutput, acf);
-    
+
     return 0;
 }
 

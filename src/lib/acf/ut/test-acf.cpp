@@ -244,7 +244,7 @@ protected:
     // State:
     // 1) Allocates acf::Detector
     // 2) Allocates ogles_gpgpu::ACF
-    
+
     void initGPUAndCreatePyramid(acf::Detector::Pyramid& Pgpu, ogles_gpgpu::ACF::FeatureKind kind)
     {
         m_detector = create(modelFilename);
@@ -253,7 +253,7 @@ protected:
         acf::Detector::Pyramid Pcpu;
         m_detector->setIsTranspose(true);
         m_detector->computePyramid(m_IpT, Pcpu);
-        const int shrink = m_detector->opts.pPyramid->pChns->shrink.get();        
+        const int shrink = m_detector->opts.pPyramid->pChns->shrink.get();
         auto sizes = getPyramidSizes(Pcpu);
         static const bool doGray = false;
         ogles_gpgpu::Size2d inputSize(image.cols, image.rows);
@@ -265,7 +265,7 @@ protected:
         cv::Mat input = image;
 
         // Fill in the pyramid:
-        (*m_acf)({{ input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT});
+        (*m_acf)({ { input.cols, input.rows }, input.ptr(), true, 0, DFLT_TEXTURE_FORMAT });
         glFlush();
         m_acf->fill(Pgpu, Pcpu);
     }
@@ -584,7 +584,6 @@ TEST_F(ACFTest, ACFCaltechDetector)
     testPedestrianDetector(acfCaltechDetectorFilename, acfPedestrianImageFilename);
 }
 #endif // defined(ACF_SERIALIZE_WITH_CVMATIO)
-
 
 // ### utility ###
 

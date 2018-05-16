@@ -9,6 +9,9 @@ set(acf_srcs
   pipeline.cpp
   GPUDetectionPipeline.h
   GPUDetectionPipeline.cpp
+
+  VideoCaptureImage.h
+  VideoCaptureImage.cpp
   
   # Simple line segment shader for the usual green box annotations:
   lines.h
@@ -38,16 +41,6 @@ target_compile_definitions(${test_app} PUBLIC ACF_DO_GPU=1)
 set_property(TARGET ${test_app} PROPERTY FOLDER "app/console")
 install(TARGETS ${test_app} DESTINATION bin)
 
-set_target_properties(
-  ${test_app}
-  PROPERTIES
-  MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/plist.in" # file sharing
-  XCODE_ATTRIBUTE_PRODUCT_NAME "${test_app}"
-  XCODE_ATTRIBUTE_BUNDLE_IDENTIFIER "com.elucideye.acf.${test_app}"
-  XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.elucideye.acf.${test_app}"
-  XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2" # iPhone/iPad
-)
-
 #############
 ### TEST ####
 #############
@@ -58,7 +51,7 @@ gauze_add_test(
   NAME ${test_name}
   COMMAND ${test_app}
       --input=$<GAUZE_RESOURCE_FILE:${DRISHTI_FACES_FACE_IMAGE}>
-      --repeat=64
+      --repeat=600
       --model=$<GAUZE_RESOURCE_FILE:${DRISHTI_ASSETS_FACE_DETECTOR}>
       --minimum=128
       --calibration=0.01

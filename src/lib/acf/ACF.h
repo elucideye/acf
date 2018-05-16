@@ -449,7 +449,7 @@ public:
         Size2dVec& scaleshw
     );
     // clang-format on
-    
+
     static int convTri(const MatP& I, MatP& J, double r = 1.0, int s = 1);
 
     // clang-format off
@@ -466,7 +466,7 @@ public:
     );
     // clang-format on
 
-    // clang-format off    
+    // clang-format off
     static int gradientHist
     (
         const cv::Mat& M,
@@ -480,6 +480,16 @@ public:
         int full
     );
     // clang-format on
+
+    virtual void setDoParallel(bool flag)
+    {
+        m_doParallel = flag;
+    }
+
+    virtual bool getDoParallel() const
+    {
+        return m_doParallel;
+    }
 
     virtual void setDetectionScorePruneRatio(double ratio)
     {
@@ -515,7 +525,7 @@ public:
         DetectionVec& objects
     );
     // clang-format on
-    
+
     int bbNms(const DetectionVec& bbsIn, const Options::Nms& pNms, DetectionVec& bbs);
     int acfModify(const Detector::Modify& params);
 
@@ -593,6 +603,7 @@ protected:
     std::shared_ptr<spdlog::logger> m_streamLogger;
 
     double m_detectScorePruneRatio = 0.0;
+    bool m_doParallel = true;
 
     bool m_isLuv = false;
     bool m_isTranspose = false;

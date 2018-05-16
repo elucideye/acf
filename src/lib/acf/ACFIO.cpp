@@ -165,15 +165,15 @@ int Detector::deserialize(ParserNodeDetector& detector_)
             auto&& pJitter_ = opts_.create("pJitter", opts_->pJitter);
             pJitter_.parse<Field<double>, decltype((*pJitter_)->flip)>("flip", (*pJitter_)->flip);
         }
-        catch(...)
+        catch (...)
         {
             opts_->pJitter->flip.set("jitter", false, true, 0);
         }
 
         opts_.parse<Field<double>, decltype(opts_->winsSave)>("winsSave", opts_->winsSave);
     }
-    
-    clf.thrsU8 = clf.thrs * 255.0; // add uint8_t compatible thresholds
+
+    clf.thrs.convertTo(clf.thrsU8, CV_8UC1, 255.0f); // add uint8_t compatible thresholds
 
     return 0;
 }

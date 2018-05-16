@@ -37,7 +37,7 @@ public:
 
     cv::Mat draw(bool gpu); // debug routine
     void clear();
-    
+
 protected:
     void init(const cv::Mat& I);
     void initContext();

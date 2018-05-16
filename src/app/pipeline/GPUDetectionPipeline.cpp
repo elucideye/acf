@@ -14,6 +14,14 @@
 
 static void chooseBest(std::vector<cv::Rect>& objects, std::vector<double>& scores);
 
+#define ACF_DEBUG_PYRAMIDS 0
+
+#if ACF_DEBUG_PYRAMIDS
+#include <opencv2/highgui.hpp>
+static cv::Mat draw(const acf::Detector::Pyramid& pyramid);
+static void logPyramid(const std::string& filename, const acf::Detector::Pyramid& P);
+#endif
+
 template <typename Container>
 void push_fifo(Container& container, const typename Container::value_type& value, int size)
 {
@@ -74,6 +82,10 @@ struct GPUDetectionPipeline::Impl
 
     std::vector<DetectionCallback> callbacks;
 
+    bool doOptimizedPipeline = true;
+    bool doCpuACF = false;
+    bool doAnnotations = true;
+
     uint64_t frameIndex = 0;
     float ACFScale = 1.f;
     float acfCalibration = 0.f;
@@ -94,8 +106,7 @@ struct GPUDetectionPipeline::Impl
         double read = 0.0;
         double detect = 0.0;
         double complete = 0.0;
-    }
-    log;
+    } log;
 };
 
 GPUDetectionPipeline::GPUDetectionPipeline(DetectionPtr& detector, const cv::Size& inputSize, std::size_t n, int rotation, int minObjectWidth)
@@ -109,7 +120,7 @@ GPUDetectionPipeline::~GPUDetectionPipeline()
 {
     try
     {
-        if(impl && impl->scene.valid())
+        if (impl && impl->scene.valid())
         {
             // If this has already been retrieved it will throw
             impl->scene.get(); // block on any abandoned calls
@@ -118,6 +129,11 @@ GPUDetectionPipeline::~GPUDetectionPipeline()
     catch (std::exception& e)
     {
     }
+}
+
+GLuint GPUDetectionPipeline::getInputTexture()
+{
+    return impl->acf->getInputTexId();
 }
 
 void GPUDetectionPipeline::operator+=(const DetectionCallback& callback)
@@ -230,6 +246,14 @@ int GPUDetectionPipeline::computeDetectionWidth(const cv::Size& inputSizeUp) con
 void GPUDetectionPipeline::fill(acf::Detector::Pyramid& P)
 {
     impl->acf->fill(P, impl->P);
+
+#if ACF_DEBUG_PYRAMIDS
+    // One can compare CPU and GPU pyramids using logging like this:
+    //std::string home = ".";
+    //cv::Mat channels = impl->acf->getChannels();
+    //cv::imwrite(home + "/acf_channels.png", channels);
+    //logPyramid(home + "/acf_pyramid.png", P);
+#endif
 }
 
 void GPUDetectionPipeline::computeAcf(const ogles_gpgpu::FrameInput& frame, bool doLuv, bool doDetection)
@@ -247,7 +271,7 @@ void GPUDetectionPipeline::computeAcf(const ogles_gpgpu::FrameInput& frame, bool
 
 GLuint GPUDetectionPipeline::paint(const Detections& scene, GLuint inputTexture)
 {
-    //if(impl->lines)
+    if (scene.roi.size())
     {
         std::vector<std::array<float, 2>> segments;
         for (const auto& r : scene.roi)
@@ -316,24 +340,20 @@ int GPUDetectionPipeline::detect(const ogles_gpgpu::FrameInput& frame, Detection
     return 0;
 }
 
-std::pair<GLuint, Detections> GPUDetectionPipeline::operator()(const ogles_gpgpu::FrameInput& frame2, bool doDetection)
+std::pair<GLuint, Detections> GPUDetectionPipeline::runFast(const ogles_gpgpu::FrameInput& frame2, bool doDetection)
 {
     ogles_gpgpu::FrameInput frame1;
     frame1.size = frame2.size;
 
-    util::ScopeTimeLogger logger = [&](double elapsed) { impl->log.complete += elapsed; };
-    
     Detections scene2(impl->frameIndex), scene1, scene0, *outputScene = &scene2;
 
     if (impl->fifo->getBufferCount() > 0)
     {
         util::ScopeTimeLogger logger = [&](double elapsed) { impl->log.read += elapsed; };
-        
-        // read GPU results for frame n-1
 
-        // Here we always trigger GPU pipeline reads
-        // to ensure upright + redeuced grayscale images will
-        // be available for regression, even if we won't be using ACF detection.
+        // Read GPU results for frame n-1.
+        // Here we always trigger GPU pipeline reads to ensure upright + redeuced grayscale images
+        // will be available for regression, even if we won't be using ACF detection.
         impl->acf->getChannels();
 
         if (impl->acf->getChannelStatus())
@@ -365,14 +385,21 @@ std::pair<GLuint, Detections> GPUDetectionPipeline::operator()(const ogles_gpgpu
             scene0 = impl->scene.get();                     // scene n-2
             texture0 = (*impl->fifo)[-2]->getOutputTexId(); // texture n-2
 
-            outputTexture = paint(scene0, texture0);
             outputScene = &scene0;
+            if (impl->doAnnotations)
+            {
+                outputTexture = paint(scene0, texture0);
+            }
+            else
+            {
+                outputTexture = texture0;
+            }
         }
 
         // Run CPU detection + regression for frame n-1
         impl->scene = impl->threads->process([scene1, frame1, this]() {
             util::ScopeTimeLogger logger = [&](double elapsed) { impl->log.detect += elapsed; };
-            
+
             Detections sceneOut = scene1;
             detect(frame1, sceneOut, scene1.P != nullptr);
             return sceneOut;
@@ -390,25 +417,135 @@ std::pair<GLuint, Detections> GPUDetectionPipeline::operator()(const ogles_gpgpu
     // Add the current frame to FIFO
     impl->fifo->useTexture(texture2, 1);
     impl->fifo->render();
-
-    // Clear face motion estimate, update window
     push_fifo(impl->scenePrimitives, *outputScene, impl->history);
-
-    for (auto& c : impl->callbacks)
-    {
-        c(outputTexture, *outputScene);
-    }
 
     return std::make_pair(outputTexture, *outputScene);
 }
 
+auto GPUDetectionPipeline::runSimple(const ogles_gpgpu::FrameInput& frame1, bool doDetection) -> DetectionTex
+{
+    // Run GPU based processing on current thread and package results as a task for CPU
+    // processing so that it will be available on the next frame.  This method will compute
+    // ACF output using shaders on the GPU, and may optionally extract other GPU related
+    // features.
+    Detections scene1(impl->frameIndex), *outputScene = nullptr; // time: n+1 and n
+    preprocess(frame1, scene1, doDetection);
+
+    // Initialize input texture with ACF upright texture:
+    GLuint texture1 = impl->acf->first()->getOutputTexId(), outputTexture = 0;
+
+    detect(frame1, scene1, doDetection);
+
+    outputScene = &scene1;
+    if (impl->doAnnotations)
+    {
+        outputTexture = paint(scene1, texture1);
+    }
+    else
+    {
+        outputTexture = texture1;
+    }
+
+    // Add the current frame to FIFO
+    impl->fifo->useTexture(texture1, 1);
+    impl->fifo->render();
+    push_fifo(impl->scenePrimitives, *outputScene, impl->history);
+
+    return std::make_pair(outputTexture, *outputScene);
+}
+
+auto GPUDetectionPipeline::run(const FrameInput& frame2, bool doDetection) -> DetectionTex
+{
+    if (impl->doOptimizedPipeline)
+    {
+        return runFast(frame2, doDetection);
+    }
+    else
+    {
+        return runSimple(frame2, doDetection);
+    }
+}
+
+auto GPUDetectionPipeline::operator()(const FrameInput& frame2, bool doDetection) -> DetectionTex
+{
+    util::ScopeTimeLogger logger = [&](double elapsed) { impl->log.complete += elapsed; };
+
+    std::pair<GLuint, Detections> result = run(frame2, doDetection);
+
+    for (auto& c : impl->callbacks)
+    {
+        c(result.first, result.second);
+    }
+
+    return result;
+}
+
+void GPUDetectionPipeline::preprocess(const FrameInput& frame, Detections& scene, bool doDetection)
+{
+    if (impl->doCpuACF)
+    {
+        scene.P = createAcfCpu(frame, doDetection);
+    }
+    else
+    {
+        scene.P = createAcfGpu(frame, doDetection);
+    }
+}
+
+std::shared_ptr<acf::Detector::Pyramid> GPUDetectionPipeline::createAcfGpu(const FrameInput& frame, bool doDetection)
+{
+    computeAcf(frame, false, doDetection);
+
+    std::shared_ptr<decltype(impl->P)> P;
+
+    // Here we always trigger channel processing
+    // to ensure grayscale images will be available
+    // for regression, even if we won't be using ACF detection.
+    cv::Mat acf = impl->acf->getChannels();
+
+    if (doDetection)
+    {
+        assert(acf.type() == CV_8UC1);
+        assert(acf.channels() == 1);
+
+        if (impl->acf->getChannelStatus())
+        {
+            P = std::make_shared<decltype(impl->P)>();
+            fill(*P);
+        }
+    }
+
+    return P;
+}
+
+std::shared_ptr<acf::Detector::Pyramid> GPUDetectionPipeline::createAcfCpu(const FrameInput& frame, bool doDetection)
+{
+    computeAcf(frame, true, doDetection);
+
+    std::shared_ptr<decltype(impl->P)> P;
+    if (doDetection)
+    {
+        cv::Mat acf = impl->acf->getChannels();
+        assert(acf.type() == CV_8UC1);
+        assert(acf.channels() == 1);
+
+        P = std::make_shared<decltype(impl->P)>();
+
+        MatP LUVp = impl->acf->getLuvPlanar();
+        impl->detector->setIsLuv(true);
+        impl->detector->setIsTranspose(true);
+        impl->detector->computePyramid(LUVp, *P);
+    }
+
+    return P;
+}
+
 std::map<std::string, double> GPUDetectionPipeline::summary()
 {
-    return
-    {
-        {"read", impl->log.read},
-        {"detect", impl->log.detect},
-        {"complete", impl->log.complete}
+    return {
+        { "read", impl->log.read },
+        { "detect", impl->log.detect },
+        { "complete", impl->log.complete }
     };
 }
 
@@ -430,3 +567,41 @@ static void chooseBest(std::vector<cv::Rect>& objects, std::vector<double>& scor
         scores = { scores[best] };
     }
 }
+
+#if ACF_DEBUG_PYRAMIDS
+
+static cv::Mat draw(const acf::Detector::Pyramid& pyramid)
+{
+    cv::Mat canvas;
+    std::vector<cv::Mat> levels;
+    for (int i = 0; i < pyramid.nScales; i++)
+    {
+        // Concatenate the transposed faces, so they are compatible with the GPU layout
+        cv::Mat Ccpu;
+        std::vector<cv::Mat> images;
+        for (const auto& image : pyramid.data[i][0].get())
+        {
+            images.push_back(image.t());
+        }
+        cv::vconcat(images, Ccpu);
+
+        // Instead of upright:
+        //cv::vconcat(pyramid.data[i][0].get(), Ccpu);
+
+        if (levels.size())
+        {
+            cv::copyMakeBorder(Ccpu, Ccpu, 0, levels.front().rows - Ccpu.rows, 0, 0, cv::BORDER_CONSTANT);
+        }
+
+        levels.push_back(Ccpu);
+    }
+    cv::hconcat(levels, canvas);
+    return canvas;
+}
+
+static void logPyramid(const std::string& filename, const acf::Detector::Pyramid& P)
+{
+    cv::Mat canvas = draw(P);
+    cv::imwrite(filename, canvas);
+}
+#endif // ACF_DEBUG_PYRAMIDS

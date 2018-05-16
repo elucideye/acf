@@ -14,8 +14,8 @@
 
 #include <util/IndentingOStreamBuffer.h>
 #include <util/string_hash.h>
-
 #include <iomanip>
+#include <numeric> // for iota
 
 ACF_NAMESPACE_BEGIN
 
@@ -256,6 +256,14 @@ int Detector::operator()(const MatP& IpTranspose, std::vector<cv::Rect>& objects
     return (*this)(P, objects, scores);
 }
 
+static std::vector<int> create_random_indices(int n)
+{
+    std::vector<int> indices(n);
+    std::iota(indices.begin(), indices.end(), 0);
+    std::random_shuffle(indices.begin(), indices.end());
+    return indices;
+}
+
 // Multiscale search:
 int Detector::operator()(const Pyramid& P, std::vector<cv::Rect>& objects, std::vector<double>* scores)
 {
@@ -266,37 +274,59 @@ int Detector::operator()(const Pyramid& P, std::vector<cv::Rect>& objects, std::
     auto modelDs = *(opts.modelDs);
     auto shift = (modelDsPad - modelDs) / 2 - pad;
 
-    std::vector<Detection> bbs;
-    for (int i = 0; i < P.nScales; i++)
+    // Here we create random indices so that (on average) for each `const cv::Range &r` slice
+    // in the cv::parallel_for_(const cv::Range &r, ...) call, the total ACF Pyramid area
+    // for all levels (specified by Range::{start,end}) will be equal for every thread.
+    auto scales = create_random_indices(P.nScales);
+    std::vector<DetectionVec> bbs_(P.nScales);
+
+    std::function<void(const cv::Range& r)> worker = [&](const cv::Range& r) {
+        for (int j = r.start; j < r.end; j++)
+        {
+            int i = scales[j];
+
+            DetectionVec ds;
+
+            // ROI fields indicates row major storage, else column major:
+            if (P.rois.size() > i)
+            {
+                acfDetect1(P.data[i][0], P.rois[i], shrink, modelDsPad, *(opts.stride), *(opts.cascThr), ds);
+            }
+            else
+            {
+                acfDetect1(P.data[i][0], {}, shrink, modelDsPad, *(opts.stride), *(opts.cascThr), ds);
+            }
+
+            // Scale up the detections
+            for (auto& bb : ds)
+            {
+                cv::Size size(cv::Size2d(modelDs) / P.scales[i]);
+                bb.roi.x = double(bb.roi.x + shift.width) / P.scaleshw[i].width;
+                bb.roi.y = double(bb.roi.y + shift.height) / P.scaleshw[i].height;
+                bb.roi.width = size.width;
+                bb.roi.height = size.height;
+
+                std::swap(bb.roi.x, bb.roi.y);
+                std::swap(bb.roi.width, bb.roi.height);
+            }
+            std::copy(ds.begin(), ds.end(), std::back_inserter(bbs_[i]));
+        }
+    };
+
+    if (m_doParallel)
     {
-        DetectionVec ds;
-
-        // ROI fields indicates row major storage, else column major:
-        if (P.rois.size() > i)
-        {
-            acfDetect1(P.data[i][0], P.rois[i], shrink, modelDsPad, *(opts.stride), *(opts.cascThr), ds);
-        }
-        else
-        {
-            acfDetect1(P.data[i][0], {}, shrink, modelDsPad, *(opts.stride), *(opts.cascThr), ds);
-        }
-
-        // Scale up the detections
-        for (auto& bb : ds)
-        {
-            //std::cout << bb.weight << std::endl;
-            cv::Size size(cv::Size2d(modelDs) / P.scales[i]);
-            bb.roi.x = double(bb.roi.x + shift.width) / P.scaleshw[i].width;
-            bb.roi.y = double(bb.roi.y + shift.height) / P.scaleshw[i].height;
-            bb.roi.width = size.width;
-            bb.roi.height = size.height;
-
-            std::swap(bb.roi.x, bb.roi.y); // TODO: review
-
-            std::swap(bb.roi.width, bb.roi.height); // TRANSPOSE
-        }
-        std::copy(ds.begin(), ds.end(), std::back_inserter(bbs));
+        cv::parallel_for_({ 0, P.nScales }, worker);
     }
+    else
+    {
+        worker({ 0, P.nScales });
+    }
+
+    for (int i = 1; i < bbs_.size(); i++)
+    {
+        std::copy(bbs_[i].begin(), bbs_[i].end(), std::back_inserter(bbs_[0]));
+    }
+    auto& bbs = bbs_[0];
 
     if (m_doNms)
     {
