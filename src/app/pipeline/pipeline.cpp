@@ -39,10 +39,12 @@
 
   acf-pipeline \
       --input=0 \
-      --model=${SOME_PATH_VAR}/drishti-assets/drishti_face_gray_80x80.cpb
+      --model=${SOME_PATH_VAR}/drishti-assets/drishti_face_gray_80x80.cpb \
       --minimum=200 \
       --calibration=0.01 \
-      --window
+      --global \
+      --window \
+      --size=1920x1080
 
   In the above command, "minimum=200" means we are ignoring all faces
   less than 200 pixels wide.  You should set this to the largest value
@@ -76,6 +78,7 @@
 #include <ogles_gpgpu/common/proc/disp.h>
 
 #include <cxxopts.hpp>
+#include <string>
 
 // clang-format off
 #ifdef ANDROID
@@ -104,7 +107,8 @@ struct Application
         float acfCalibration,
         int minWidth,
         bool window,
-        float resolution
+        float resolution,
+        const cv::Size &sizeIn = {}
     ) : resolution(resolution)
     // clang-format on
     {
@@ -115,15 +119,20 @@ struct Application
         // http://answers.opencv.org/answers/761/revisions/
         video = create(input);
 
-        // OpenCV doesn't provide a way to query available frame resolutions,
-        // but you can specify known resolutions like this:
-        //video->set(cv::CAP_PROP_FRAME_WIDTH, 1920.0);
-        //video->set(cv::CAP_PROP_FRAME_HEIGHT, 1080.0);
-
-        // You can also specify a *very high* resolution and it should settle for the highest valid resolution:
-        video->set(cv::CAP_PROP_FRAME_WIDTH, 16000.0);
-        video->set(cv::CAP_PROP_FRAME_HEIGHT, 16000.0);
+        // ::::::::::::::::::: CAVEAT ::::::::::::::::::::::::::::::
+        // Using a MAX resolution approach will not work in all cases.
+        // It may lead to strange behavior: all gray, all black + very slow.
+        // You may have to specify the desired resolution explicitly as shown below
+        //video->set(cv::CAP_PROP_FRAME_WIDTH, 16000.0);
+        //video->set(cv::CAP_PROP_FRAME_HEIGHT, 16000.0);
         
+        if (sizeIn.area())
+        {
+            // If the resolution is known in advance you can set it explicitly like this:
+            video->set(cv::CAP_PROP_FRAME_WIDTH, static_cast<double>(sizeIn.width));
+            video->set(cv::CAP_PROP_FRAME_HEIGHT, static_cast<double>(sizeIn.height));
+        }
+
         // Create an OpenGL context:
         const auto size = getSize(*video);
         context = aglet::GLContext::create(aglet::GLContext::kAuto, window ? "acf" : "", size.width, size.height);
@@ -173,7 +182,7 @@ struct Application
     virtual cv::Mat grab()
     {
         cv::Mat frame;
-        (*video) >> frame;
+        (*video) >> frame; std::cout << "MU: " << cv::mean(frame) << std::endl;
         if (frame.channels() == 3)
         {
             // ogles_gpgpu supports both {BGR,RGB}A and NV{21,12} inputs, and
@@ -253,9 +262,10 @@ struct ApplicationBenchmark : public Application
      float acfCalibration,
      int minWidth,
      bool window,
-     float resolution
+     float resolution,
+     const cv::Size &size = {}
     )
-    : Application(input,model,acfCalibration,minWidth,window,resolution)
+    : Application(input,model,acfCalibration,minWidth,window,resolution,size)
     // clang-format on
     {
     }
@@ -279,6 +289,14 @@ struct ApplicationBenchmark : public Application
     }
 };
 
+static std::vector<std::string> split(const string& input, const string& regex) 
+{
+    // passing -1 as the submatch index parameter performs splitting
+    std::regex re(regex);
+    std::sregex_token_iterator first{ input.begin(), input.end(), re, -1 }, last;
+    return { first, last };
+}
+
 int gauze_main(int argc, char** argv)
 {
     auto logger = util::Logger::create("acf-pipeline");
@@ -293,12 +311,15 @@ int gauze_main(int argc, char** argv)
     std::string sInput, sOutput, sModel;
     int minWidth = 0, repeat = 1;
 
+    std::string sDimensions;
+
     const int argumentCount = argc;
     cxxopts::Options options("acf-pipeline", "GPU accelerated ACF object detection (see Piotr's toolbox)");
 
     // clang-format off
     options.add_options()
         ("i,input", "Input file", cxxopts::value<std::string>(sInput))
+        ("size", "Input video dimensions: wxh", cxxopts::value<std::string>(sDimensions))
         ("o,output", "Output directory", cxxopts::value<std::string>(sOutput))
         ("m,model", "Model file", cxxopts::value<std::string>(sModel))
         ("c,calibration", "ACF calibration", cxxopts::value<float>(acfCalibration))
@@ -319,6 +340,18 @@ int gauze_main(int argc, char** argv)
         return 0;
     }
 
+    cv::Size size; // video dimensions
+    if (!sDimensions.empty())
+    {
+        std::vector<std::string> dimensions = split(sDimensions, "x");
+        if (!dimensions.size())
+        {
+            logger->error("Must specify input dimensions in format: <width>x<height>, received {}", sDimensions);
+            return 1;
+        }
+        size = { std::stoi(dimensions[0]), std::stoi(dimensions[1]) };
+    }
+
     if (sModel.empty())
     {
         logger->error("Must specify a valid model");
@@ -334,11 +367,11 @@ int gauze_main(int argc, char** argv)
     std::shared_ptr<Application> app;
     if (doBenchmark)
     {
-        app = std::make_shared<ApplicationBenchmark>(sInput, sModel, acfCalibration, minWidth, doWindow, resolution);
+        app = std::make_shared<ApplicationBenchmark>(sInput, sModel, acfCalibration, minWidth, doWindow, resolution, size);
     }
     else
     {
-        app = std::make_shared<Application>(sInput, sModel, acfCalibration, minWidth, doWindow, resolution);
+        app = std::make_shared<Application>(sInput, sModel, acfCalibration, minWidth, doWindow, resolution, size);
     }
 
     app->setLogger(logger);
