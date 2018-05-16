@@ -37,17 +37,21 @@ public:
     using HighResolutionClock = std::chrono::high_resolution_clock;
     using TimePoint = HighResolutionClock::time_point; // <std::chrono::system_clock>;
     using DetectionPtr = std::shared_ptr<acf::Detector>;
+    using DetectionTex = std::pair<GLuint, Detections>;
     using DetectionCallback = std::function<void(GLuint texture, const Detections& detections)>;
+    using FrameInput = ogles_gpgpu::FrameInput;
 
     GPUDetectionPipeline(DetectionPtr& detector, const cv::Size& inputSize, std::size_t n, int rotation, int minObjectWidth);
     virtual ~GPUDetectionPipeline();
+
+    GLuint getInputTexture();
 
     // This method receives an input frame descriptor (pixel buffer or texture ID) on which to run 
     // ACF object detection.  The doDetection parameter is provided in order to allow the user to 
     // control the duty cycle of the detector (perhaps adaptively).  The detection pipeline introduces 
     // two frames of latency so that the GPU->CPU overhead can be hidden.  For input frame N, the results
     // are returned for frame N-2 (along with the corresponding texture ID).
-    std::pair<GLuint, Detections> operator()(const ogles_gpgpu::FrameInput& frame, bool doDetection=true);
+    DetectionTex operator()(const ogles_gpgpu::FrameInput& frame, bool doDetection=true);
  
     void operator+=(const DetectionCallback& callback);
 
@@ -56,6 +60,15 @@ public:
     void setDoGlobalNMS(bool flag);
 
 protected:
+
+    DetectionTex run(const FrameInput& frame2, bool doDetection);
+    DetectionTex runSimple(const ogles_gpgpu::FrameInput& frame, bool doDetection = true);
+    DetectionTex runFast(const ogles_gpgpu::FrameInput& frame, bool doDetection = true);
+
+    void preprocess(const ogles_gpgpu::FrameInput& frame, Detections& scene, bool doDetection);
+
+    std::shared_ptr<acf::Detector::Pyramid> createAcfGpu(const FrameInput& frame, bool doDetection);
+    std::shared_ptr<acf::Detector::Pyramid> createAcfCpu(const FrameInput& frame, bool doDetection);
 
     // Allow user defined object detection drawing via inheritance.
     virtual GLuint paint(const Detections& scene, GLuint inputTexture);

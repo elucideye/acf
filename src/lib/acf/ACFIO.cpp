@@ -173,7 +173,7 @@ int Detector::deserialize(ParserNodeDetector& detector_)
         opts_.parse<Field<double>, decltype(opts_->winsSave)>("winsSave", opts_->winsSave);
     }
     
-    clf.thrsU8 = clf.thrs * 255.0; // add uint8_t compatible thresholds
+    clf.thrs.convertTo(clf.thrsU8, CV_8UC1, 255.0f); // add uint8_t compatible thresholds
 
     return 0;
 }

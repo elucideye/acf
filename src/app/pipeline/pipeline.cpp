@@ -65,6 +65,7 @@
 #include <util/ScopeTimeLogger.h>
 
 #include "GPUDetectionPipeline.h"
+#include "VideoCaptureImage.h"
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
@@ -93,81 +94,6 @@ void* void_ptr(const T* ptr)
 static std::shared_ptr<cv::VideoCapture> create(const std::string& filename);
 static cv::Size getSize(cv::VideoCapture& video);
 
-class VideoCaptureImage : public cv::VideoCapture
-{
-public:
-    VideoCaptureImage(const cv::Mat &image, int frames=100)
-        : image(image)
-        , frames(frames)
-    {
-    }
-    
-    VideoCaptureImage(const std::string &filename, int frames=100)
-        : frames(frames)
-    {
-        image = cv::imread(filename, cv::IMREAD_COLOR);
-    }
-    
-    virtual ~VideoCaptureImage()
-    {
-        
-    }
-    
-    void setRepeat(int n)
-    {
-        frames = n;
-    }
-    
-    virtual bool grab ()
-    {
-        return false;
-    }
-    
-    virtual bool isOpened () const
-    {
-        return !image.empty();
-    }
-    
-    virtual void release()
-    {
-        image.release();
-    }
-    
-    virtual bool open (const cv::String &filename)
-    {
-        image = cv::imread(filename);
-        return !image.empty();
-    }
-    virtual bool read (cv::OutputArray image)
-    {
-        if(++index <= frames)
-        {
-            image.assign(this->image);
-            return true;
-        }
-        return false;
-    }
-    
-    double get(int propId) const
-    {
-        switch (propId)
-        {
-            case CV_CAP_PROP_FRAME_WIDTH:
-                return static_cast<double>(image.cols);
-            case CV_CAP_PROP_FRAME_HEIGHT:
-                return static_cast<double>(image.rows);
-            case CV_CAP_PROP_FRAME_COUNT:
-                return static_cast<double>(frames);
-            default:
-                return 0.0;
-        }
-    }
-    
-    cv::Mat image;
-    int frames = 0;
-    int index = -1;
-};
-
 struct Application
 {
     // clang-format off
@@ -188,6 +114,9 @@ struct Application
         // 3) "/fullpath/Image_%03d.png" == list of stills
         // http://answers.opencv.org/answers/761/revisions/
         video = create(input);
+
+        video->set(cv::CAP_PROP_FRAME_WIDTH, 1920.0);
+        video->set(cv::CAP_PROP_FRAME_HEIGHT, 1080.0);
 
         // Create an OpenGL context:
         const auto size = getSize(*video);
@@ -235,16 +164,10 @@ struct Application
         pipeline->setDoGlobalNMS(flag);
     }
 
-    bool update()
+    virtual cv::Mat grab()
     {
         cv::Mat frame;
         (*video) >> frame;
-
-        if (frame.empty())
-        {
-            return false; // indicate failure, exit loop
-        }
-
         if (frame.channels() == 3)
         {
             // ogles_gpgpu supports both {BGR,RGB}A and NV{21,12} inputs, and
@@ -257,8 +180,26 @@ struct Application
             cv::cvtColor(frame, frame, cv::COLOR_BGR2BGRA); // assume all others are GL_BGRA
 #endif
         }
+        return frame;
+    };
+    
+    virtual cv::Mat getFrameInput(ogles_gpgpu::FrameInput &input)
+    {
+        cv::Mat frame = grab();
+        input = { { frame.cols, frame.rows }, void_ptr(frame.data), true, false, TEXTURE_FORMAT };
+        return frame;
+    }
 
-        auto result = (*pipeline)({ { frame.cols, frame.rows }, void_ptr(frame.data), true, false, TEXTURE_FORMAT }, true);
+    virtual bool update()
+    {
+        ogles_gpgpu::FrameInput frame;
+        cv::Mat storage = getFrameInput(frame);
+        if(storage.empty())
+        {
+            return false;
+        }
+
+        auto result = (*pipeline)(frame, true);
 
         if (logger)
         {
@@ -275,7 +216,7 @@ struct Application
         return true; // continue sequence
     }
 
-    void show(GLuint texture)
+    virtual void show(GLuint texture)
     {
         auto& geometry = context->getGeometry();
         display->setOffset(geometry.tx, geometry.ty);
@@ -283,20 +224,56 @@ struct Application
         display->useTexture(texture);
         display->render(0);
     }
-
+    
     float resolution = 1.f;
 
     std::shared_ptr<spdlog::logger> logger;
-
     std::shared_ptr<aglet::GLContext> context;
     std::shared_ptr<ogles_gpgpu::Disp> display;
-
     std::shared_ptr<cv::VideoCapture> video;
     std::shared_ptr<acf::Detector> detector;
     std::shared_ptr<acf::GPUDetectionPipeline> pipeline;
     
     std::size_t counter = 0;
 };
+
+struct ApplicationBenchmark : public Application
+{
+    // clang-format off
+    ApplicationBenchmark
+    (
+     const std::string &input,
+     const std::string &model,
+     float acfCalibration,
+     int minWidth,
+     bool window,
+     float resolution
+    )
+    : Application(input,model,acfCalibration,minWidth,window,resolution)
+    // clang-format on
+    {
+        
+    }
+    
+    virtual cv::Mat getFrameInput(ogles_gpgpu::FrameInput &input)
+    {
+        if(counter > 256)
+        {
+            return cv::Mat();
+        }
+        
+        static cv::Mat frame = grab(); // for the benchmark we can repeat the first frame
+        input = { { frame.cols, frame.rows }, void_ptr(frame.data), true, false, TEXTURE_FORMAT };
+        if(counter++ > 0)
+        {
+            input.inputTexture = pipeline->getInputTexture();
+            input.pixelBuffer = nullptr;
+        }
+        
+        return frame;
+    }
+};
+
 
 int gauze_main(int argc, char** argv)
 {
@@ -307,7 +284,7 @@ int gauze_main(int argc, char** argv)
         logger->info("arg[{}] = {}", i, argv[i]);
     }
 
-    bool help = false, doWindow = false, doGlobal = false;
+    bool help = false, doWindow = false, doGlobal = false, doBenchmark = false;
     float resolution = 1.f, acfCalibration = 0.f;
     std::string sInput, sOutput, sModel;
     int minWidth = 0, repeat = 1;
@@ -321,6 +298,7 @@ int gauze_main(int argc, char** argv)
         ("o,output", "Output directory", cxxopts::value<std::string>(sOutput))
         ("m,model", "Model file", cxxopts::value<std::string>(sModel))
         ("c,calibration", "ACF calibration", cxxopts::value<float>(acfCalibration))
+        ("b,benchmark", "Run benchmark by repeating first input texture", cxxopts::value<bool>(doBenchmark))
         ("r,resolution", "Resolution", cxxopts::value<float>(resolution))
         ("g,global", "Globl nms", cxxopts::value<bool>(doGlobal))
         ("w,window", "Window", cxxopts::value<bool>(doWindow))
@@ -349,15 +327,24 @@ int gauze_main(int argc, char** argv)
         return 1;
     }
 
-    Application app(sInput, sModel, acfCalibration, minWidth, doWindow, resolution);
-    app.setLogger(logger);
-    app.setRepeat(repeat);
-    app.setDoGlobalNMS(doGlobal);
+    std::shared_ptr<Application> app;
+    if(doBenchmark)
+    {
+        app = std::make_shared<ApplicationBenchmark>(sInput, sModel, acfCalibration, minWidth, doWindow, resolution);
+    }
+    else
+    {
+        app = std::make_shared<Application>(sInput, sModel, acfCalibration, minWidth, doWindow, resolution);
+    }
+
+    app->setLogger(logger);
+    app->setRepeat(repeat);
+    app->setDoGlobalNMS(doGlobal);
 
     std::size_t count = 0;
     aglet::GLContext::RenderDelegate delegate = [&]() -> bool
     {
-        bool status = app.update();
+        bool status = app->update();
         if(status)
         {
             count++;
@@ -368,7 +355,7 @@ int gauze_main(int argc, char** argv)
     double seconds = 0.0;    
     { // Process all frames (main loop) and record the total time:
         util::ScopeTimeLogger timer = [&](double total) { seconds = total; };
-        (*app.context)(delegate);
+        (*app->context)(delegate);
     }
 
     const double fps = (seconds > 0.0) ? static_cast<double>(count)/seconds : 0.0;
@@ -376,7 +363,7 @@ int gauze_main(int argc, char** argv)
 
     if(count > 0)
     {
-        auto summary = app.pipeline->summary();
+        auto summary = app->pipeline->summary();
         for(auto &entry : summary)
         {
             entry.second /= static_cast<double>(count);

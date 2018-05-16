@@ -481,6 +481,16 @@ public:
     );
     // clang-format on
 
+    virtual void setDoParallel(bool flag)
+    {
+        m_doParallel = flag;
+    }
+
+    virtual bool getDoParallel() const
+    {
+        return m_doParallel;
+    }
+    
     virtual void setDetectionScorePruneRatio(double ratio)
     {
         m_detectionScorePruneRatio = ratio;
@@ -593,6 +603,7 @@ protected:
     std::shared_ptr<spdlog::logger> m_streamLogger;
 
     double m_detectScorePruneRatio = 0.0;
+    bool m_doParallel = true;
 
     bool m_isLuv = false;
     bool m_isTranspose = false;

@@ -64,7 +64,7 @@ public:
 };
 
 template <class T, int kDepth>
-class ParallelDetectionBody : public DetectionParams
+class ParallelDetectionBody : public DetectionParams  
 {
 public:
     ParallelDetectionBody(const T* chns, const T* thrs, DetectionSink* sink)
@@ -85,7 +85,7 @@ public:
                 float h = evaluate(chns + offset);
                 if (h > cascThr)
                 {
-                    sink->add({ c, r }, h);
+                    sink->add({ c, r }, h); 
                 }
             }
         }
@@ -163,12 +163,12 @@ const cv::Mat& Detector::Classifier::getScaledThresholds(int type) const
 {
     switch (type)
     {
-        case CV_32FC1:
-            CV_Assert(!thrs.empty());
-            return thrs;
         case CV_8UC1:
-            CV_Assert(!thrsU8.empty());
+            CV_Assert(!thrsU8.empty() && (thrsU8.type() == CV_8UC1));
             return thrsU8;
+        case CV_32FC1:
+            CV_Assert(!thrs.empty() && (thrs.type() == CV_32FC1));
+            return thrs;
         default:
             CV_Assert(type == CV_32FC1 || type == CV_8UC1);
     }
@@ -181,8 +181,10 @@ std::shared_ptr<DetectionParams> allocDetector(const MatP& I, const cv::Mat &thr
     switch (I.depth())
     {
         case CV_8UC1:
+            CV_Assert(thrs.type() == CV_8UC1);
             return std::make_shared<ParallelDetectionBody<uint8_t, kDepth>>(I[0].ptr<uint8_t>(), thrs.ptr<uint8_t>(), sink);
         case CV_32FC1:
+            CV_Assert(thrs.type() == CV_32FC1);
             return std::make_shared<ParallelDetectionBody<float, kDepth>>(I[0].ptr<float>(), thrs.ptr<float>(), sink);
         default:
             CV_Assert(I.depth() == CV_8UC1 || I.depth() == CV_32FC1);

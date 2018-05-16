@@ -450,7 +450,10 @@ int main(int argc, char** argv)
 {
     try
     {
-        const std::string home=getenv("HOME");
+        std::string home;
+#if !(defined(_WIN32) || defined(_WIN64))
+        home=getenv("HOME");
+#endif
         std::vector<char *> args(argc);
         args[0] = argv[0];
         
