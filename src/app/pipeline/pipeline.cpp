@@ -182,7 +182,7 @@ struct Application
     virtual cv::Mat grab()
     {
         cv::Mat frame;
-        (*video) >> frame; std::cout << "MU: " << cv::mean(frame) << std::endl;
+        (*video) >> frame;
         if (frame.channels() == 3)
         {
             // ogles_gpgpu supports both {BGR,RGB}A and NV{21,12} inputs, and

@@ -446,7 +446,7 @@ int Detector::getScales(int nPerOct, int nOctUp, const cv::Size& minDs, int shri
 
     for (int i = 0; i < nScales; i++)
     {
-        double s = std::pow(2.0, -double(i) / double(nPerOct + nOctUp));
+        double s = std::pow(2.0, -double(i) / double(nPerOct) + double(nOctUp));
         double s0 = (util::round(d0 * s / shrink) * shrink - 0.25 * shrink) / d0;
         double s1 = (util::round(d0 * s / shrink) * shrink + 0.25 * shrink) / d0;
         std::pair<double, double> best(0, std::numeric_limits<double>::max());

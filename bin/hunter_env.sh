@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #
 # Source: https://github.com/ruslo/hunter/blob/master/.travis.yml
 #
@@ -62,3 +62,7 @@ export PATH="${PWD}/_ci/cmake/bin:${PATH}"
 
 # Installed if toolchain is Android (otherwise directory doesn't exist)
 export ANDROID_NDK_r10e="${PWD}/_ci/android-ndk-r10e"
+export ANDROID_NDK_r11c="${PWD}/_ci/android-ndk-r11c"
+export ANDROID_NDK_r15c="${PWD}/_ci/android-ndk-r15c"
+export ANDROID_NDK_r16b="${PWD}/_ci/android-ndk-r16b"
+export ANDROID_NDK_r17="${PWD}/_ci/android-ndk-r17"
