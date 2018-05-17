@@ -197,3 +197,12 @@ HOWTO
 :: 
 
     [16:56:34.092 | thread:8703967691101883897 | acf-detect | info]: 1/1 /Users/dhirvonen/devel/elucideye//drishti-faces/lena512color.png = 1; score = 26.0038
+    
+============
+Contributors
+============
+
+This C++/OpenGL adaptation of the original ACF/toolbox project has benefited from contributions by:
+
+* Ruslan Baratov @ruslo: Numerous CMake and CI contributions, and of course, `Hunter <http://github.com/ruslo/hunter>`__
+* @JN-Jones: Several fixes where the C++ didn't match the matlab reference: `#67 <https://github.com/elucideye/acf/issues/67>`__,  `#62 <https://github.com/elucideye/acf/issues/62>`__
