@@ -360,7 +360,7 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
     // using simple uniform slicing will tend to starve some threads due to the nature of the
     // pyramid layout.  Randomizing the scale indices should do better.  More optimal strategies
     // may exist with further testing (work stealing, etc).
-    const auto scalesIndex = create_random_indices(nScales);
+    const auto scalesIndex = util::create_random_indices(nScales);
     
     auto isAIndex = isA;
     std::random_shuffle(isAIndex.begin(), isAIndex.end());
