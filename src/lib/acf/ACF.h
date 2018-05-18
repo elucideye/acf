@@ -660,6 +660,8 @@ inline void fuseChannels(Iterator begin, Iterator end, MatP& Ip)
     Ip.get() = stack;
 }
 
+std::vector<int> create_random_indices(int n);
+
 ACF_NAMESPACE_END
 
 void imResample(const MatP& A, MatP& B, const cv::Size& size, double nrm);

@@ -356,37 +356,55 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
         }
     }
 
-    util::ParallelHomogeneousLambda harness = [&](int j) {
-        const int i = isA[j];
-
-        int iR = isN[i - 1];
-        cv::Size sz1 = round(cv::Size2d(sz) * scales[i - 1] / double(shrink));
-        for (int j = 0; j < nTypes; j++)
+    // The per scale/type operations are easily parallelized, but with a parallel_for approach 
+    // using simple uniform slicing will tend to starve some threads due to the nature of the
+    // pyramid layout.  Randomizing the scale indices should do better.  More optimal strategies
+    // may exist with further testing (work stealing, etc).
+    const auto scalesIndex = create_random_indices(nScales);
+    
+    auto isAIndex = isA;
+    std::random_shuffle(isAIndex.begin(), isAIndex.end());
+    
+    cv::parallel_for_({ 0, int(isAIndex.size()) }, [&](const cv::Range &r) {
+        for(int k = r.start; k < r.end; k++)
         {
-            double ratio = std::pow(scales[i - 1] / scales[iR - 1], -lambdas[j]);
-            imResample(data[iR - 1][j], data[i - 1][j], sz1, ratio);
+            const int i = isAIndex[k];
+            const int iR = isN[i - 1];
+            const cv::Size sz1 = round(cv::Size2d(sz) * scales[i - 1] / double(shrink));
+            for (int j = 0; j < nTypes; j++)
+            {
+                double ratio = std::pow(scales[i - 1] / scales[iR - 1], -lambdas[j]);
+                imResample(data[iR - 1][j], data[i - 1][j], sz1, ratio);
+            }
         }
-        for (auto& img : data[i - 1])
-        {
-            convTri(img, img, smooth, 1);
-        }
-    };
+    });
 
-    cv::parallel_for_({ 0, int(isA.size()) }, harness);
+
+    cv::parallel_for_({ 0, int(scales.size()) }, [&](const cv::Range &r) {
+        for(int i = r.start; i < r.end; i++)
+        {
+            for (int j = 0; j < nTypes; j++)
+            {
+                convTri(data[scalesIndex[i]][j], data[scalesIndex[i]][j], smooth, 1);
+            }
+        }
+    });
 
     // TODO: test imPad
     if (pad.width || pad.height)
     {
-        for (int i = 0; i < nScales; i++)
-        {
-            for (int j = 0; j < nTypes; j++)
+        cv::parallel_for_({ 0, int(scales.size()) }, [&](const cv::Range &r) {
+            for (int i = r.start; i < r.end; i++)
             {
-                int y = pad.height / shrink;
-                int x = pad.width / shrink;
-                // TODO: check if rows need to be contiguous
-                copyMakeBorder(data[i][j], data[i][j], y, y, x, x, cv::BORDER_REFLECT);
+                for (int j = 0; j < nTypes; j++)
+                {
+                    int y = pad.height / shrink;
+                    int x = pad.width / shrink;
+                    // TODO: check if rows need to be contiguous
+                    copyMakeBorder(data[scalesIndex[i]][j], data[scalesIndex[i]][j], y, y, x, x, cv::BORDER_REFLECT);
+                }
             }
-        }
+        });
     }
 
     if (concat && nTypes)
