@@ -16,6 +16,7 @@
 #include <opencv2/core/core.hpp>
 
 #include <functional>
+#include <numeric>
 
 UTIL_NAMESPACE_BEGIN
 
@@ -107,6 +108,14 @@ public:
 protected:
     std::function<void(const cv::Range& r)> m_function;
 };
+
+inline std::vector<int> create_random_indices(int n)
+{
+    std::vector<int> indices(n);
+    std::iota(indices.begin(), indices.end(), 0);
+    std::random_shuffle(indices.begin(), indices.end());
+    return indices;
+}
 
 UTIL_NAMESPACE_END
 

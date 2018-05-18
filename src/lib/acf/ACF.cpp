@@ -14,6 +14,8 @@
 
 #include <util/IndentingOStreamBuffer.h>
 #include <util/string_hash.h>
+#include <util/Parallel.h>
+
 #include <iomanip>
 #include <numeric> // for iota
 
@@ -256,14 +258,6 @@ int Detector::operator()(const MatP& IpTranspose, std::vector<cv::Rect>& objects
     return (*this)(P, objects, scores);
 }
 
-static std::vector<int> create_random_indices(int n)
-{
-    std::vector<int> indices(n);
-    std::iota(indices.begin(), indices.end(), 0);
-    std::random_shuffle(indices.begin(), indices.end());
-    return indices;
-}
-
 // Multiscale search:
 int Detector::operator()(const Pyramid& P, std::vector<cv::Rect>& objects, std::vector<double>* scores)
 {
@@ -277,7 +271,7 @@ int Detector::operator()(const Pyramid& P, std::vector<cv::Rect>& objects, std::
     // Here we create random indices so that (on average) for each `const cv::Range &r` slice
     // in the cv::parallel_for_(const cv::Range &r, ...) call, the total ACF Pyramid area
     // for all levels (specified by Range::{start,end}) will be equal for every thread.
-    auto scales = create_random_indices(P.nScales);
+    auto scales = util::create_random_indices(P.nScales);
     std::vector<DetectionVec> bbs_(P.nScales);
 
     std::function<void(const cv::Range& r)> worker = [&](const cv::Range& r) {
