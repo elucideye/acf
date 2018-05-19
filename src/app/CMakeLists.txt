@@ -9,3 +9,5 @@ add_subdirectory(acf)
 if (ACF_BUILD_OGLES_GPGPU AND TARGET aglet::aglet)
   add_subdirectory(pipeline)
 endif()
+
+add_subdirectory(pyramid)
