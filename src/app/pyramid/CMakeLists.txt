@@ -1,7 +1,7 @@
 set(test_app acf-pyramid)
 
 ###############
-### mat2cpb ###
+### pyramid ###
 ###############
 
 add_executable(${test_app} pyramid.cpp)
