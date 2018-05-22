@@ -4,18 +4,18 @@
 cmake_minimum_required(VERSION 3.9) # CMAKE_INTERPROCEDURAL_OPTIMIZATION
 
 # By default, the source code for all managed dependencies will be removed after
-# building and installing to the cache.  This behavior is consistent with most 
-# installed libraries (i.e., /usr/local/lib/*), but it does prevent stepping 
-# through the dependencies in a debugger in cases where a problem is not 
-# contained within the acf project sources.  In such cases, you can set 
-# HUNTER_KEEP_PACKAGE_SOURCES=ON from the command line during the project 
+# building and installing to the cache.  This behavior is consistent with most
+# installed libraries (i.e., /usr/local/lib/*), but it does prevent stepping
+# through the dependencies in a debugger in cases where a problem is not
+# contained within the acf project sources.  In such cases, you can set
+# HUNTER_KEEP_PACKAGE_SOURCES=ON from the command line during the project
 # configuration and the source will be left for all packages when they are
-# created.  This setting must be used before a package is installed -- it 
+# created.  This setting must be used before a package is installed -- it
 # won't be applied retroactively to installed packages.  In order to re-install
 # a package with sources you can always remove the cache
-# (i.e., rm -rf ${HOME}/.hunter) or, less drastically you can modify the 
-# CONFIG-ID of an installed package to trigger the configuration and 
-# installation steps.  This can be done by modifying the input CMAKE_ARGS 
+# (i.e., rm -rf ${HOME}/.hunter) or, less drastically you can modify the
+# CONFIG-ID of an installed package to trigger the configuration and
+# installation steps.  This can be done by modifying the input CMAKE_ARGS
 # list in a hunter_config() call.  In the following example KEEP_SOURCES=1
 # is  added to trigger a re-installation:
 #
@@ -42,7 +42,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules")
 ############################
 
 option(ACF_USE_DRISHTI_UPLOAD "Use drishti upload configuration" OFF)
-option(DRISHTI_UPLOAD_IGNORE_SUBMODULES "Ignore submodules" ON) # override 
+option(DRISHTI_UPLOAD_IGNORE_SUBMODULES "Ignore submodules" ON) # override
 set(drishti_upload_init "${CMAKE_CURRENT_LIST_DIR}/drishti-upload/init.cmake") # cache upload
 
 if(ACF_USE_DRISHTI_UPLOAD)
@@ -59,7 +59,7 @@ if(ACF_USE_DRISHTI_UPLOAD)
       "Run this command if submodule is not initialized:\n"
       "  git submodule update --init --recursive ."
   )
-  endif()    
+  endif()
 else()
   set(ACF_HUNTER_GATE_URL "https://github.com/ruslo/hunter/archive/v0.20.75.tar.gz")
   set(ACF_HUNTER_GATE_SHA1 "e167074fe2feb478f675a91ba7f3e1c0120cdd64")
@@ -74,7 +74,7 @@ else()
     )
   else()
     # LOCAL: This is a local repository build and we are relying on a local
-    # config (instead of CI friendly drishti-upload) that is closer to the 
+    # config (instead of CI friendly drishti-upload) that is closer to the
     # current default versions in ${HUNTER_ROOT}/cmake/configs/default.cmake
     # *IF* we want to enable local project defaults then they would go in
     # "${CMAKE_CURRENT_LIST_DIR}/cmake/Hunter/config.cmake"
@@ -164,7 +164,7 @@ endif()
 
 # On CI platforms we won't have a usable GPU except for the Android emulator
 # We set a variable here to help us make decisions about dependencies later on.
-if(ANDROID OR NOT ${ACF_CI}) 
+if(ANDROID OR NOT ${ACF_CI})
   set(ACF_HAS_GPU TRUE)
 else()
   set(ACF_HAS_GPU FALSE)
@@ -230,7 +230,7 @@ message("ACF_ADD_TO_STRING : ${ACF_ADD_TO_STRING}")
 ## TEST DATA ###
 ################
 
-# Only download test data if tests are enabled and we are running 
+# Only download test data if tests are enabled and we are running
 # a recent enough version of Hunter to support hunter_private_data()
 if(ACF_BUILD_TESTS)
 
@@ -243,7 +243,7 @@ if(ACF_BUILD_TESTS)
   endif()
 
   set(acf_release_url "https://github.com/elucideye/acf/releases/download/v0.0.0")
-  
+
   hunter_private_data(
     URL "${acf_release_url}/AcfCaltech.Detector.mat"
     SHA1 "c19bfd560d66e748a88e48885e944ce6ba55c77a"
