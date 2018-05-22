@@ -38,15 +38,23 @@ git submodule update --init --recursive --quiet
 # Info about OS
 uname -a
 
+# Info about available disk space
+df -h $HOME
+
+# Disable autoupdate
+# * https://github.com/Homebrew/brew/blob/7d31a70373edae4d8e78d91a4cbc05324bebc3ba/Library/Homebrew/manpages/brew.1.md.erb#L202
+export HOMEBREW_NO_AUTO_UPDATE=1
+
 # Install Python 3
-# >> Error: python 2.7.14 is already installed \n To upgrade to 3.6.4_3, run `brew upgrade python`
-# if [[ "$(uname)" == "Darwin" ]] && [ ! $(which python3) ]; then travis_retry brew install python3; fi
-if [[ "$(uname)" == "Darwin" ]] && [ ! $(which python3) ]; then travis_retry brew upgrade python; fi
+if [[ "`uname`" == "Darwin" ]]; then travis_retry brew upgrade python; fi
+if [[ "`uname`" == "Darwin" ]]; then travis_retry brew install python3; fi
 
 # Install Python package 'requests'
 # 'easy_install3' is not installed by 'brew install python3' on OS X 10.9 Maverick
-if [[ "$(uname)" == "Darwin" ]]; then pip3 install requests; fi
-if [[ "$(uname)" == "Linux" ]]; then travis_retry pip3 install --user requests; fi
+if [[ "`uname`" == "Darwin" ]]; then pip3 install requests; fi
+if [[ "`uname`" == "Darwin" ]]; then pip3 install gitpython; fi
+if [[ "`uname`" == "Linux" ]]; then travis_retry pip3 install --user requests; fi
+if [[ "`uname`" == "Linux" ]]; then travis_retry pip3 install --user gitpython; fi
 
 # Install latest Polly toolchains and scripts
 wget https://github.com/ruslo/polly/archive/master.zip
