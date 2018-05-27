@@ -95,7 +95,7 @@ void rgbConvertMex(const MatP& I, MatP& J, int flag, double nrm);
 ACF_NAMESPACE_BEGIN
 
 // In general this function will support in place transformations, however, if we
-// are mapping from RGB to grayscale then we will have a channel reduction, and this
+// are mapping from RGB to grayscale then we will have a channel reduction
 int Detector::rgbConvert(const MatP& IIn, MatP& J, const std::string& colorSpace, bool useSingle, bool isLuv)
 {
     std::string cs;

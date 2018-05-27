@@ -109,10 +109,21 @@ struct GPUDetectionPipeline::Impl
     } log;
 };
 
-GPUDetectionPipeline::GPUDetectionPipeline(DetectionPtr& detector, const cv::Size& inputSize, std::size_t n, int rotation, int minObjectWidth)
+GPUDetectionPipeline::GPUDetectionPipeline
+(
+    DetectionPtr& detector,
+    const cv::Size& inputSize,
+    std::size_t n,
+    int rotation,
+    int minObjectWidth,
+    bool useLatency,
+    bool doCpuACF
+)
 {
     impl = util::make_unique<Impl>(detector);
     impl->minObjectWidth = minObjectWidth;
+    impl->doOptimizedPipeline = useLatency;
+    impl->doCpuACF = doCpuACF;
     init(inputSize);
 }
 

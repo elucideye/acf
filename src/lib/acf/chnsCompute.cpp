@@ -136,7 +136,14 @@ ACF_NAMESPACE_BEGIN
 
 static int addChn(Detector::Channels& chns, const MatP& data, const std::string& name, const std::string& padWith, int h, int w);
 
-int Detector::chnsCompute(const MatP& IIn, const Options::Pyramid::Chns& pChnsIn, Detector::Channels& chns, bool isInit, MatLoggerType pLogger)
+int Detector::chnsCompute
+(
+    const MatP& IIn,
+    const Options::Pyramid::Chns& pChnsIn,
+    Detector::Channels& chns,
+    bool isInit,
+    MatLoggerType pLogger
+)
 {
     Options::Pyramid::Chns pChns = pChnsIn;
     if (!pChnsIn.complete.has || (pChnsIn.complete.get() != 1) || IIn.empty())
@@ -218,8 +225,8 @@ int Detector::chnsCompute(const MatP& IIn, const Options::Pyramid::Chns& pChnsIn
         // Compute color channels:
         auto p = pChns.pColor.get();
         std::string nm = "color channels";
-        rgbConvert(I, I, p.colorSpace, pChnsIn.isLuv);
-
+        rgbConvert(I, I, p.colorSpace, true, pChnsIn.isLuv);
+        
         if (I.channels())
         {
             convTri(I, I, p.smooth, 1);

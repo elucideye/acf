@@ -20,6 +20,33 @@
 #include <string>
 #include <iomanip>
 
+static cv::Mat load_as_float(const std::string &filename)
+{
+    cv::Mat I8u = cv::imread(filename, cv::IMREAD_ANYCOLOR), I32f;
+    
+    if(I8u.empty())
+    {
+        throw std::runtime_error("load_as_float: empty input");
+    }
+
+    switch(I8u.channels())
+    {
+        case 4:
+            cv::cvtColor(I8u, I8u, cv::COLOR_BGRA2RGB); // toolbox expects RGB
+            I8u.convertTo(I32f, CV_32FC3, 1.0f/255.0f);   // ... and CV_32FC3
+        case 3:
+            cv::cvtColor(I8u, I8u, cv::COLOR_BGR2RGB); // toolbox expects RGB
+            I8u.convertTo(I32f, CV_32FC3, 1.0f/255.0f);  // ... and CV_32FC3
+            break;
+        case 1:
+            I8u.convertTo(I32f, CV_32FC1, 1.0f/255.0f); // allow grayscale input
+            break;
+        default:
+            throw std::runtime_error("load_as_float: unsupported channels");
+    }
+    return I32f;
+}
+
 int gauze_main(int argc, char** argv)
 {
     const auto argumentCount = argc;
@@ -63,16 +90,19 @@ int gauze_main(int argc, char** argv)
 
     std::string base = sOutput + "/" + util::basename(sInput);
     
-    cv::Mat I8uc3 = cv::imread(sInput, cv::IMREAD_COLOR), I32fc3;
-    cv::cvtColor(I8uc3, I8uc3, cv::COLOR_BGR2RGB); // toolbox expects RGB
-    I8uc3.convertTo(I32fc3, CV_32FC3, 1.0/255.0);  // ... and CV_32FC3
-    
-    // Create a TRANSPOSE + planar format image for compatibility with the
-    // original MATLAB (column major) SIMD code.
-    MatP Ip(I32fc3.t());
     acf::Detector acf;
     acf::Detector::Pyramid pyramid;
     acf.chnsPyramid({}, nullptr, pyramid, true, {});  // get defaults, i.e.: pPyramid=chnsPyramid();
+    
+    cv::Mat I32f = load_as_float(sInput);
+    
+    // Create a TRANSPOSE + planar format image for compatibility with the
+    // original MATLAB (column major) SIMD code.
+    MatP Ip(I32f.t());
+    
+    // Request grayscale colorspace using the following:
+    //pyramid.pPyramid.pChns->pColor->colorSpace = { "colorspace", "gray" };
+    
     acf.chnsPyramid(Ip, &pyramid.pPyramid, pyramid, true, {}); // compute the pyramid
     
     int i = 0, j = 0, k = 0;

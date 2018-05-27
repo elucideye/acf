@@ -108,7 +108,9 @@ struct Application
         int minWidth,
         bool window,
         float resolution,
-        const cv::Size &sizeIn = {}
+        const cv::Size &sizeIn = {},
+        bool useLatency = true,
+        bool doCpuAcf = false
     ) : resolution(resolution)
     // clang-format on
     {
@@ -135,7 +137,13 @@ struct Application
 
         // Create an OpenGL context:
         const auto size = getSize(*video);
-        context = aglet::GLContext::create(aglet::GLContext::kAuto, window ? "acf" : "", size.width, size.height);
+        context = aglet::GLContext::create
+        (
+            aglet::GLContext::kAuto,
+            window ? "acf" : "",
+            size.width,
+            size.height
+        );
 
         // Create an object detector:
         detector = std::make_shared<acf::Detector>(model);
@@ -149,7 +157,16 @@ struct Application
         }
 
         // Create the asynchronous scheduler:
-        pipeline = std::make_shared<acf::GPUDetectionPipeline>(detector, size, 5, 0, minWidth);
+        pipeline = std::make_shared<acf::GPUDetectionPipeline>
+        (
+            detector,
+            size,
+            5,
+            0,
+            minWidth,
+            useLatency,
+            doCpuAcf
+        );
 
         // Instantiate an ogles_gpgpu display class that will draw to the
         // default texture (0) which will be managed by aglet (typically glfw)
@@ -257,15 +274,17 @@ struct ApplicationBenchmark : public Application
     // clang-format off
     ApplicationBenchmark
     (
-     const std::string &input,
-     const std::string &model,
-     float acfCalibration,
-     int minWidth,
-     bool window,
-     float resolution,
-     const cv::Size &size = {}
+        const std::string &input,
+        const std::string &model,
+        float acfCalibration,
+        int minWidth,
+        bool window,
+        float resolution,
+        const cv::Size &size = {},
+        bool useLatency = true,
+        bool doCpuAcf = false
     )
-    : Application(input,model,acfCalibration,minWidth,window,resolution,size)
+    : Application(input,model,acfCalibration,minWidth,window,resolution,size,useLatency,doCpuAcf)
     // clang-format on
     {
     }
@@ -306,7 +325,12 @@ int gauze_main(int argc, char** argv)
         logger->info("arg[{}] = {}", i, argv[i]);
     }
 
-    bool help = false, doWindow = false, doGlobal = false, doBenchmark = false;
+    bool help = false;
+    bool doWindow = false;
+    bool doGlobal = false;
+    bool doBenchmark = false;
+    bool doSimple = false; // no latency
+    bool doCpuAcf = false;
     float resolution = 1.f, acfCalibration = 0.f;
     std::string sInput, sOutput, sModel;
     int minWidth = 0, repeat = 1;
@@ -329,6 +353,8 @@ int gauze_main(int argc, char** argv)
         ("w,window", "Window", cxxopts::value<bool>(doWindow))
         ("M,minimum", "Minimum object width", cxxopts::value<int>(minWidth))
         ("R,repeat", "Repeat the input video R times", cxxopts::value<int>(repeat))
+        ("cpu", "Do CPU ACF", cxxopts::value<bool>(doCpuAcf))
+        ("simple", "Use pipeline with latency", cxxopts::value<bool>(doSimple))
         ("h,help", "Help message", cxxopts::value<bool>(help))
         ;
     // clang-format on
@@ -367,11 +393,33 @@ int gauze_main(int argc, char** argv)
     std::shared_ptr<Application> app;
     if (doBenchmark)
     {
-        app = std::make_shared<ApplicationBenchmark>(sInput, sModel, acfCalibration, minWidth, doWindow, resolution, size);
+        app = std::make_shared<ApplicationBenchmark>
+        (
+            sInput,
+            sModel,
+            acfCalibration,
+            minWidth,
+            doWindow,
+            resolution,
+            size,
+            !doSimple,
+            doCpuAcf
+        );
     }
     else
     {
-        app = std::make_shared<Application>(sInput, sModel, acfCalibration, minWidth, doWindow, resolution, size);
+        app = std::make_shared<Application>
+        (
+            sInput,
+            sModel,
+            acfCalibration,
+            minWidth,
+            doWindow,
+            resolution,
+            size,
+            !doSimple,
+            doCpuAcf
+        );
     }
 
     app->setLogger(logger);

@@ -41,7 +41,16 @@ public:
     using DetectionCallback = std::function<void(GLuint texture, const Detections& detections)>;
     using FrameInput = ogles_gpgpu::FrameInput;
 
-    GPUDetectionPipeline(DetectionPtr& detector, const cv::Size& inputSize, std::size_t n, int rotation, int minObjectWidth);
+    GPUDetectionPipeline
+    (
+        DetectionPtr& detector,
+        const cv::Size& inputSize,
+        std::size_t n,
+        int rotation,
+        int minObjectWidth,
+        bool useLatency = true,
+        bool doCpuACF = false
+    );
     virtual ~GPUDetectionPipeline();
 
     GLuint getInputTexture();
