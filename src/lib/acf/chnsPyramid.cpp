@@ -151,7 +151,14 @@ cv::Size round(const cv::Size_<T>& size)
  *  (const Options::Pyramid*) p == nullptr
  */
 
-int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid& pyramid, bool isInit, MatLoggerType pLogger)
+int Detector::chnsPyramid
+(
+    const MatP& Iin,
+    const Options::Pyramid* pIn,
+    Pyramid& pyramid,
+    bool isInit,
+    MatLoggerType pLogger
+)
 {
     // % get default parameters pPyramid
     //if(nargin==2), p=varargin{1}; else p=[]; end
@@ -163,7 +170,8 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
 
     if (!p.complete.has || (p.complete != 1) || Iin.empty())
     {
-        // 'pChns',{},'nPerOct',8,'nOctUp',0,'nApprox',-1,'lambdas',[],'pad',[0 0],'minDs',[16 16],'smooth',1,'concat',1,'complete',1};
+        // 'pChns',{},,'nOctUp',0,'nApprox',-1,'lambdas',[],'pad',[0 0], ...
+        // 'minDs',[16 16],'smooth',1,'concat',1,'complete',1};
         Options::Pyramid dfs;
         dfs.nPerOct = { "nPerOct", 8 };
         dfs.nOctUp = { "nOctUp", 0 };
@@ -216,25 +224,24 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
     // Convert I to appropriate color space (or simply normalize):
     const std::string& cs = pChns.pColor->colorSpace;
     cv::Size sz = Iin.size();
-
     MatP I, pI, MO;
-    if (sz.area() && Iin.channels() == 1 && (cs.compare("gray") == 0 || cs.compare("orig") == 0))
+    if (sz.area() && Iin.channels() == 1 && (cs == "gray" || cs == "orig"))
     {
-        I = Iin;
-        I.push_back(I[0]);
-        I.push_back(I[0]); // i.e., repmat
-        pI = I;            // shallow copy
+        // NOTE: Here we replicate the original Matlab behavior of repeating
+        // the grayscale in 3 channels and then converting that to grayscale
+        // later treating it as a color image, even though this will produce
+        // a different single channel image in rgbConvert()
+        //
+        // I=I(:,:,[1 1 1]); warning('Converting image to color');
+        pI.create(Iin.size(), Iin.depth(), 3);
+        cv::repeat(Iin[0], 3, 1, pI.base());
     }
     else
     {
         pI = Iin; // shallow copy
         if (Iin.channels() > 3)
         {
-            if (Iin.channels() > 3)
-            {
-                std::copy(pI.begin() + 3, pI.end(), std::back_inserter(MO));
-            }
-
+            std::copy(pI.begin() + 3, pI.end(), std::back_inserter(MO));
             while (pI.channels() > 3)
             {
                 pI.pop_back();
@@ -246,6 +253,7 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
     {
         rgbConvert(pI, I, cs, true, m_isLuv);
     }
+    
     pChns.pColor->colorSpace = std::string("orig");
 
     auto& info = pyramid.info;
@@ -319,6 +327,7 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
                 s.resize(nTypes);
             }
         }
+
         std::copy(chns.data.begin(), chns.data.end(), data[i - 1].begin());
     }
 
@@ -328,7 +337,7 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
         std::vector<int> is;
         for (int i = (1 + nOctUp * nPerOct); i <= nScales; i += (nApprox + 1))
         {
-            is.push_back(i);
+            is.push_back(i-1);
         }
 
         CV_Assert(is.size() >= 2);
@@ -342,11 +351,13 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
         for (int j = 0; j < nTypes; j++)
         {
             f0[j] = sum(data[is[0]][j]) / double(numel(data[is[0]][j]));
+            CV_Assert(!std::isnan(f0[j]));
         }
 
         for (int j = 0; j < nTypes; j++)
         {
             f1[j] = sum(data[is[1]][j]) / double(numel(data[is[1]][j]));
+            CV_Assert(!std::isnan(f1[j]));
         }
 
         lambdas.resize(nTypes);
@@ -400,8 +411,8 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
                 {
                     int y = pad.height / shrink;
                     int x = pad.width / shrink;
-                    // TODO: check if rows need to be contiguous
-                    copyMakeBorder(data[scalesIndex[i]][j], data[scalesIndex[i]][j], y, y, x, x, cv::BORDER_REFLECT);
+                    auto &I = data[scalesIndex[i]][j];
+                    copyMakeBorder(I, I, y, y, x, x, cv::BORDER_REFLECT);
                 }
             }
         });
@@ -442,7 +453,16 @@ int Detector::chnsPyramid(const MatP& Iin, const Options::Pyramid* pIn, Pyramid&
 using DoubleVec = std::vector<double>;
 using Size2dVec = std::vector<cv::Size2d>;
 
-int Detector::getScales(int nPerOct, int nOctUp, const cv::Size& minDs, int shrink, const cv::Size& sz, DoubleVec& scales, Size2dVec& scaleshw)
+int Detector::getScales
+(
+    int nPerOct,
+    int nOctUp,
+    const cv::Size& minDs,
+    int shrink,
+    const cv::Size& sz,
+    DoubleVec& scales,
+    Size2dVec& scaleshw
+)
 {
     // set each scale s such that max(abs(round(sz*s/shrink)*shrink-sz*s)) is
     // minimized without changing the smaller dim of sz (tricky algebra)

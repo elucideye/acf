@@ -415,7 +415,7 @@ void imResample(const MatP& A, MatP& B, const cv::Size& size, double nrm)
             break;
         }
         default:
-            CV_Error(-1, "Unsupported types");
+            throw std::runtime_error("imResample: Unsupported types");
     }
 }
 
