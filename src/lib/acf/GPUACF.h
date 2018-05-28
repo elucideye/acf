@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <array>
+#include <functional>
 
 // clang-format off
 namespace spdlog { class logger; }
@@ -47,6 +48,8 @@ public:
     ACF(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth = 0, int shrink = 4);
     ~ACF();
 
+    // Platform specify OpenGL bindings (e.g., windows DLL + glewInit())
+    static void updateGL();
     static void tryEnablePlatformOptimizations();
 
     void setUsePBO(bool flag);

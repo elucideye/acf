@@ -8,7 +8,7 @@ set(acf_ut_srcs test-acf.cpp)
 
 add_executable(${test_app} ${acf_ut_srcs})
 set_property(TARGET ${test_app} PROPERTY FOLDER "app/tests")
-target_link_libraries(${test_app} PUBLIC acf GTest::gtest ${OpenCV_LIBS})
+target_link_libraries(${test_app} PUBLIC acf acf_util acf_shaders GTest::gtest ${OpenCV_LIBS})
 
 if (ACF_BUILD_OGLES_GPGPU AND TARGET aglet::aglet)
   target_link_libraries(${test_app} PUBLIC aglet::aglet)
@@ -26,3 +26,12 @@ gauze_add_test(
   "$<GAUZE_RESOURCE_FILE:${ACF_CALTECH_DETECTOR_MAT}>"
   "$<GAUZE_RESOURCE_FILE:${ACF_PEDESTRIAN_IMAGE}>"
 )
+
+if(WIN32 OR CYGWIN)
+  set_property(
+    TEST ${test_name}
+    PROPERTY
+    ENVIRONMENT
+    "PATH=$<TARGET_FILE_DIR:acf>;$ENV{PATH}"
+   )
+endif()

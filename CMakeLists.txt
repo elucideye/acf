@@ -94,7 +94,7 @@ endif()
 ###################
 
 # See https://github.com/hunter-packages/check_ci_tag when changing VERSION
-project(acf VERSION 0.1.11)
+project(acf VERSION 0.1.12)
 
 set(ACF_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
@@ -102,6 +102,15 @@ if(CMAKE_INTERPROCEDURAL_OPTIMIZATION)
   set(CMAKE_POLICY_DEFAULT_CMP0069 NEW) # for 3rd parties added by add_subdirectory
   cmake_policy(SET CMP0069 NEW)
 endif()
+
+### RPATH ###
+if (APPLE)
+  set(ACF_ORIGIN "@loader_path")
+else()
+  set(ACF_ORIGIN "$ORIGIN")
+endif()
+set(CMAKE_INSTALL_RPATH "${ACF_ORIGIN}/../lib" "${ACF_ORIGIN}")
+
 
 string(COMPARE EQUAL "${CMAKE_SYSTEM_NAME}" "Linux" is_linux)
 
@@ -154,29 +163,11 @@ endif()
 #### Testing ###
 ################
 
-string(COMPARE EQUAL "$ENV{TRAVIS}" "true" travis_ci)
-string(COMPARE EQUAL "$ENV{APPVEYOR}" "True" appveyor_ci)
-if(travis_ci OR appveyor_ci)
-  set(ACF_CI TRUE)
-else()
-  set(ACF_CI FALSE)
-endif()
-
-# On CI platforms we won't have a usable GPU except for the Android emulator
-# We set a variable here to help us make decisions about dependencies later on.
-if(ANDROID OR NOT ${ACF_CI})
-  set(ACF_HAS_GPU TRUE)
-else()
-  set(ACF_HAS_GPU FALSE)
-endif()
+option(ACF_HAS_GPU "Drishti has GPU" ON)
 
 if(ACF_BUILD_TESTS)
-  if(IOS AND ACF_CI)
-    # do not run test on CI (TODO: remote device testing)
-  else()
-    enable_testing()
-  endif()
-
+  enable_testing()
+  
   hunter_add_package(gauze)
   find_package(gauze CONFIG REQUIRED)
 
@@ -214,17 +205,7 @@ endif()
 if(ACF_SERIALIZE_WITH_CEREAL)
   #### std::to_string ####
   try_compile(ACF_HAVE_TO_STRING "${CMAKE_BINARY_DIR}/compile_tests" "${PROJECT_SOURCE_DIR}/cmake/to_string.cpp")
-  if(ACF_HAVE_TO_STRING)
-    set(ACF_ADD_TO_STRING OFF)
-  else()
-    set(ACF_ADD_TO_STRING ON)
-  endif()
-else(ACF_USE_CEREAL)
-  # This is never needed when CEREAL extensions are disabled
-  set(ACF_ADD_TO_STRING OFF)
 endif(ACF_SERIALIZE_WITH_CEREAL)
-
-message("ACF_ADD_TO_STRING : ${ACF_ADD_TO_STRING}")
 
 ################
 ## TEST DATA ###

@@ -44,6 +44,7 @@ GLDetector::GLDetector(const std::string& filename, int maxSize)
     // Iniialize the OpenGL context:
     m_impl->context = aglet::GLContext::create(aglet::GLContext::kAuto);
     CV_Assert(m_impl->context && (*m_impl->context));
+    ogles_gpgpu::ACF::updateGL();
 
     // Safeguard for FBO allocation failures here:
     m_impl->maxTextureSize = maxSize;

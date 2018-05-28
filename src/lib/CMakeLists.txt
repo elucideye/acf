@@ -10,37 +10,58 @@
 find_package(sugar CONFIG REQUIRED)
 sugar_include(.)
 
+
+### acf_util ###
+add_library(acf_util ${ACF_UTIL_SRCS} ${ACF_UTIL_HDRS})
+target_link_libraries(acf_util PUBLIC spdlog::spdlog ${OpenCV_LIBS})
+
+### acf_shaders ###
+add_library(acf_shaders ${ACF_GPU_SRCS} ${ACF_GPU_HDRS})
+target_link_libraries(acf_shaders PUBLIC spdlog::spdlog ${OpenCV_LIBS})
+
+### acf ###
 if(ACF_BUILD_SHARED_SDK)
   set(acf_lib_type SHARED)
 else()
   set(acf_lib_type STATIC)
 endif()
-
-add_library(acf ${acf_lib_type} ${ACF_SRCS} ${ACF_HDRS} ${ACF_HDRS_PUBLIC})
+  
+add_library(acf ${acf_lib_type}
+  ${ACF_SRCS}
+  ${ACF_HDRS}
+  ${ACF_HDRS_PUBLIC}
+)
 target_link_libraries(acf
   PUBLIC ${ACF_3RDPARTY_PKG_LIBS}
-  PRIVATE ${ACF_3RDPARTY_PKG_LIBS_}
+  PRIVATE ${ACF_3RDPARTY_PKG_LIBS_} acf_util acf_shaders
 )
-target_compile_definitions(acf PUBLIC _USE_MATH_DEFINES)  # define M_PI_2 for Visual Studio
 target_compile_definitions(acf PUBLIC ACF_DO_HALF=1)  # half precision serialization
 if(ACF_SERIALIZE_WITH_CVMATIO)
   target_compile_definitions(acf PUBLIC ACF_SERIALIZE_WITH_CVMATIO=1)
 endif()
-if(ACF_ADD_TO_STRING)
-  target_compile_definitions(acf PUBLIC ACF_ADD_TO_STRING=1)
-endif()
+
+target_include_directories(acf
+  PUBLIC
+  "$<BUILD_INTERFACE:${ACF_ROOT_DIR}/src/lib/>"
+  "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>"
+)
+
+foreach(lib acf_util acf_shaders acf)
+  target_include_directories(${lib} PUBLIC "$<BUILD_INTERFACE:${ACF_ROOT_DIR}/src/lib/>")
+  if(MSVC)
+    target_compile_definitions(${lib} PUBLIC _USE_MATH_DEFINES) # define M_PI_2 for Visual Studio
+    target_compile_definitions(${lib} PUBLIC NOMINMAX=1) # avoid std::{min,max}() conflicts
+  endif()  
+  if(NOT ACF_HAVE_TO_STRING)
+    target_compile_definitions(${lib} PUBLIC ACF_ADD_TO_STRING=1)
+  endif()  
+endforeach()
 
 ### Generate the export header
 include(GenerateExportHeader)
 set(acf_export_dir "${CMAKE_BINARY_DIR}/acf")
 set(acf_export_header "${acf_export_dir}/acf_export.h")
 generate_export_header(acf EXPORT_FILE_NAME "${acf_export_header}")
-
-target_include_directories(acf
-  PUBLIC
-  "$<BUILD_INTERFACE:${ACF_ROOT_DIR}/src/lib/>"
-  "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>"
-  )
 
 string(COMPARE EQUAL "${CMAKE_OSX_SYSROOT}" "iphoneos" is_ios)
 if(NOT is_ios)
@@ -94,7 +115,7 @@ configure_package_config_file(
 #   * header location after install: <prefix>/include/acf/ACF.h
 #   * headers can be included by C++ code `#include <acf/ACF.h>`
 install(
-    TARGETS acf
+    TARGETS acf acf_util acf_shaders
     EXPORT "${targets_export_name}"
     LIBRARY DESTINATION "lib"
     ARCHIVE DESTINATION "lib"

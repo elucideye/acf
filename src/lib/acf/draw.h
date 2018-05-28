@@ -17,7 +17,7 @@
 
 ACF_NAMESPACE_BEGIN
 
-cv::Mat draw(acf::Detector::Pyramid& pyramid);
+cv::Mat ACF_EXPORT draw(acf::Detector::Pyramid& pyramid);
 
 ACF_NAMESPACE_END
 
