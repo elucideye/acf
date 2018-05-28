@@ -143,7 +143,9 @@ struct Application
             window ? "acf" : "",
             size.width,
             size.height
-        );
+        ); 
+
+        ogles_gpgpu::ACF::updateGL();
 
         // Create an object detector:
         detector = std::make_shared<acf::Detector>(model);

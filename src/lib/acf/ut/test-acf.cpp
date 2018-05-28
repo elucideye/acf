@@ -53,16 +53,10 @@ int gauze_main(int argc, char** argv)
 #endif
 // clang-format on
 
-// clang-format off
-#if defined(ACF_DO_GPU)
-#  include <acf/GPUACF.h>
-#  include <aglet/GLContext.h>
-#endif
-// clang-format on
-
 #include <acf/ACF.h>
 #include <acf/MatP.h>
 #include <acf/draw.h>
+#include <acf/gpu/triangle_opt.h>
 #include <util/Logger.h>
 #include <io/cereal_pba.h>
 #include <util/ScopeTimeLogger.h>
@@ -77,6 +71,21 @@ int gauze_main(int argc, char** argv)
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+
+// clang-format off
+#if defined(ACF_DO_GPU)
+#  include <acf/GPUACF.h>
+#  include <aglet/GLContext.h>
+
+static int gWidth = 640;
+static int gHeight = 480;
+#if defined(OGLES_GPGPU_OPENGL_ES3)
+static aglet::GLContext::GLVersion gVersion = aglet::GLContext::kGLES30;
+#else // defined(OGLES_GPGPU_OPENGL_ES3)
+static aglet::GLContext::GLVersion gVersion = aglet::GLContext::kGLES20;
+#endif // defined(OGLES_GPGPU_OPENGL_ES3)
+#endif // defined(ACF_DO_GPU)
+// clang-format on
 
 #include <fstream>
 #include <memory>
@@ -95,6 +104,10 @@ int gauze_main(int argc, char** argv)
 #define BEGIN_EMPTY_NAMESPACE namespace {
 #define END_EMPTY_NAMESPACE }
 // clang-format on
+
+#if defined(ACF_DO_GPU)
+
+#endif // defined(ACF_DO_GPU)
 
 BEGIN_EMPTY_NAMESPACE
 
@@ -125,12 +138,13 @@ protected:
         // * RGB channel order
         loadACFInput(imageFilename);
 
-        // TODO: we need to load ground truth output for each shader
-        // (some combinations could be tested, but that is probably excessive!)
-        // truth = loadImage(truthFilename);
+// TODO: we need to load ground truth output for each shader
+// (some combinations could be tested, but that is probably excessive!)
+// truth = loadImage(truthFilename);
 #if defined(ACF_DO_GPU)
         m_context = aglet::GLContext::create(aglet::GLContext::kAuto);
         CV_Assert(m_context && (*m_context));
+        ogles_gpgpu::ACF::updateGL();
 #endif
     }
 
@@ -258,6 +272,8 @@ protected:
         static const bool doGray = false;
         ogles_gpgpu::Size2d inputSize(image.cols, image.rows);
 
+        // For _WIN{32,64} we need to call glewInit() from within the DLL
+ 
         m_acf = std::make_shared<ogles_gpgpu::ACF>(nullptr, inputSize, sizes, kind, doGray, shrink);
         m_acf->setRotation(0);
         m_acf->setDoLuvTransfer(false);
@@ -636,3 +652,49 @@ static bool isEqual(const acf::Detector& a, const acf::Detector& b)
 }
 
 END_EMPTY_NAMESPACE
+
+#if defined(ACF_DO_GPU)
+TEST(ACFShaderTest, TriangleOptProcPass)
+{
+    auto context = aglet::GLContext::create(aglet::GLContext::kAuto, {}, gWidth, gHeight, gVersion);
+    (*context)();
+    ASSERT_TRUE(context && (*context));
+    ASSERT_EQ(glGetError(), GL_NO_ERROR);
+    if (context && *context)
+    {
+        cv::Mat test = cv::imread(imageFilename, cv::IMREAD_COLOR);
+        CV_Assert(test.channels() == 3);
+        cv::cvtColor(test, test, cv::COLOR_BGR2BGRA); // add alpha
+
+        glActiveTexture(GL_TEXTURE0);
+        ogles_gpgpu::VideoSource video;
+        ogles_gpgpu::TriangleOptProc triangle(4);
+
+        video.set(&triangle);
+        video({ test.cols, test.rows }, test.ptr<void>(), true, 0, DFLT_TEXTURE_FORMAT);
+
+        cv::Mat result_gpu;
+        ogles_gpgpu::ACF::getImage(triangle, result_gpu);
+        ASSERT_FALSE(result_gpu.empty());
+
+        std::vector<float> kernel{ 1.f, 2.f, 3.f, 4.f, 5.f, 4.f, 3.f, 2.f, 1.f };
+        float total = static_cast<float>((4 + 1) * (4 + 1));
+        for (auto& k : kernel)
+        {
+            k /= total;
+        }
+        cv::Mat result_cpu;
+        cv::sepFilter2D(test, result_cpu, CV_8UC1, kernel, kernel);
+
+        cv::cvtColor(result_gpu, result_gpu, cv::COLOR_BGRA2BGR); // drop alpha
+        cv::cvtColor(result_cpu, result_cpu, cv::COLOR_BGRA2BGR); // drop alpha
+        cv::Mat result_cpu_1d = result_cpu.reshape(1, 1);
+        cv::Mat result_gpu_1d = result_gpu.reshape(1, 1);
+
+        double RMSE = cv::norm(result_cpu_1d, result_gpu_1d, cv::NORM_L2);
+        RMSE /= std::sqrt(static_cast<double>(result_cpu_1d.total()));
+
+        ASSERT_LE(RMSE, 2.0); // we can tolerate some difference for speed
+    }
+}
+#endif // defined(ACF_DO_GPU)

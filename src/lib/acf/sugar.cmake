@@ -60,22 +60,27 @@ sugar_files(ACF_HDRS_PUBLIC
   )
 
 if(ACF_BUILD_OGLES_GPGPU)
-  sugar_files(ACF_HDRS_PUBLIC 
-    GPUACF.h
-    )
-  sugar_files(ACF_HDRS
+  # Public GPUACF classes added to the main library
+  sugar_files(ACF_HDRS_PUBLIC GPUACF.h)
+  sugar_files(ACF_SRCS GPUACF.cpp)
+
+  # All other shaders to in the acf_shaders utility lib for reuse
+  sugar_files(ACF_GPU_HDRS
     gpu/gradhist.h
     gpu/multipass/triangle_pass.h
+    gpu/multipass/triangle_opt_pass.h
     gpu/swizzle2.h
     gpu/triangle.h
+    gpu/triangle_opt.h    
     gpu/binomial.h
-    )
-  sugar_files(ACF_SRCS
-    GPUACF.cpp
+  )
+  sugar_files(ACF_GPU_SRCS
     gpu/gradhist.cpp
     gpu/multipass/triangle_pass.cpp
+    gpu/multipass/triangle_opt_pass.cpp
     gpu/swizzle2.cpp
     gpu/triangle.cpp
+    gpu/triangle_opt.cpp
     gpu/binomial.cpp
-    )
+  )
 endif()

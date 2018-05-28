@@ -17,25 +17,40 @@ TOOLCHAIN="${1}"
 CONFIG="${2}"
 INSTALL="${3}"
 
+if [[ $(uname) == "Linux" ]]; then
+    GAUZE_ANDROID_EMULATOR_GPU=swiftshader
+else
+    GAUZE_ANDROID_EMULATOR_GPU=host
+fi
+
+if [[ ${TRAVIS} == "true" ]]; then
+    GAUZE_ANDROID_USE_EMULATOR=YES # remote test w/ emulator
+else
+    GAUZE_ANDROID_USE_EMULATOR=NO # support local host testing on a real device
+fi
+
 # '--ios-{multiarch,combined}' do nothing for non-iOS builds
 polly_args=(
-    --toolchain ${TOOLCHAIN}
-    --config ${CONFIG}
+    --toolchain "${TOOLCHAIN}"
+    --config "${CONFIG}"
     --verbose
     --ios-multiarch --ios-combined
+    --archive acf
+    --jobs 2
+    "${TEST}"
+    "${INSTALL}"
     --fwd
+    ACF_USE_DRISHTI_UPLOAD=YES
+    ACF_BUILD_SHARED_SDK=${BUILD_SHARED}
     ACF_BUILD_TESTS=YES
     ACF_BUILD_EXAMPLES=YES
     ACF_COPY_3RDPARTY_LICENSES=ON
-    ACF_USE_DRISHTI_UPLOAD=ON
-    GAUZE_ANDROID_USE_EMULATOR=YES
+    ACF_HAS_GPU=${GPU}
+    GAUZE_ANDROID_USE_EMULATOR=${GAUZE_ANDROID_USE_EMULATOR}
+    GAUZE_ANDROID_EMULATOR_GPU=${GAUZE_ANDROID_EMULATOR_GPU}
+    GAUZE_ANDROID_EMULATOR_PARTITION_SIZE=40
     HUNTER_CONFIGURATION_TYPES=${CONFIG}
     HUNTER_SUPPRESS_LIST_OF_FILES=ON
-    --archive acf
-    --jobs 2
-    --test
-    --verbose
-    ${INSTALL}
 )
 
 polly.py ${polly_args[@]} --reconfig

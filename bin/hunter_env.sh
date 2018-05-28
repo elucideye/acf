@@ -38,23 +38,17 @@ git submodule update --init --recursive --quiet
 # Info about OS
 uname -a
 
-# Info about available disk space
-df -h $HOME
-
-# Disable autoupdate
-# * https://github.com/Homebrew/brew/blob/7d31a70373edae4d8e78d91a4cbc05324bebc3ba/Library/Homebrew/manpages/brew.1.md.erb#L202
-export HOMEBREW_NO_AUTO_UPDATE=1
-
 # Install Python 3
-if [[ "`uname`" == "Darwin" ]]; then travis_retry brew upgrade python; fi
-if [[ "`uname`" == "Darwin" ]]; then travis_retry brew install python3; fi
+# >> Error: python 2.7.14 is already installed \n To upgrade to 3.6.4_3, run `brew upgrade python`
+# if [[ "$(uname)" == "Darwin" ]] && [ ! $(which python3) ]; then travis_retry brew install python3; fi
+if [[ "$(uname)" == "Darwin" ]] && [ ! $(which python3) ]; then travis_retry brew upgrade python; fi
 
 # Install Python package 'requests'
 # 'easy_install3' is not installed by 'brew install python3' on OS X 10.9 Maverick
-if [[ "`uname`" == "Darwin" ]]; then pip3 install requests; fi
-if [[ "`uname`" == "Darwin" ]]; then pip3 install gitpython; fi
-if [[ "`uname`" == "Linux" ]]; then travis_retry pip3 install --user requests; fi
-if [[ "`uname`" == "Linux" ]]; then travis_retry pip3 install --user gitpython; fi
+if [[ "$(uname)" == "Darwin" ]]; then pip3 install requests; fi
+if [[ "$(uname)" == "Darwin" ]]; then pip3 install gitpython; fi
+if [[ "$(uname)" == "Linux" ]]; then travis_retry pip3 install --user requests; fi
+if [[ "$(uname)" == "Linux" ]]; then travis_retry pip3 install --user gitpython; fi
 
 # Install latest Polly toolchains and scripts
 wget https://github.com/ruslo/polly/archive/master.zip
@@ -62,15 +56,19 @@ unzip -o master.zip
 POLLY_ROOT="${PWD}/polly-master"
 export PATH="${POLLY_ROOT}/bin:${PATH}"
 
-# Install dependencies (CMake, Android NDK)
-install-ci-dependencies.py
-
-# Tune locations
-export PATH="${PWD}/_ci/cmake/bin:${PATH}"
-
 # Installed if toolchain is Android (otherwise directory doesn't exist)
 export ANDROID_NDK_r10e="${PWD}/_ci/android-ndk-r10e"
 export ANDROID_NDK_r11c="${PWD}/_ci/android-ndk-r11c"
 export ANDROID_NDK_r15c="${PWD}/_ci/android-ndk-r15c"
 export ANDROID_NDK_r16b="${PWD}/_ci/android-ndk-r16b"
 export ANDROID_NDK_r17="${PWD}/_ci/android-ndk-r17"
+
+# Install dependencies (CMake, Android NDK)
+if [[ ${TRAVIS} == "true" ]]; then
+    install-ci-dependencies.py --prune-archives
+else
+    install-ci-dependencies.py
+fi
+
+# Tune locations
+export PATH="${PWD}/_ci/cmake/bin:${PATH}"

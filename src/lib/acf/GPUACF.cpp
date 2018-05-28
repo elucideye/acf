@@ -28,7 +28,7 @@
 // acf specific shader
 #include <acf/gpu/swizzle2.h>
 #include <acf/gpu/gradhist.h>
-#include <acf/gpu/triangle.h>
+#include <acf/gpu/triangle_opt.h>
 
 #include <util/convert.h>
 #include <util/timing.h>
@@ -89,23 +89,23 @@ struct ACF::Impl
         rotationProc = util::make_unique<ogles_gpgpu::GainProc>();
         rgb2luvProc = util::make_unique<ogles_gpgpu::Rgb2LuvProc>();
         pyramidProc = util::make_unique<ogles_gpgpu::PyramidProc>(scales);
-        gradProc = util::make_unique<ogles_gpgpu::GradProc>(1.0);
-        normProc = util::make_unique<ogles_gpgpu::TriangleProc>(5, true, 0.005f);
+        gradProc = util::make_unique<ogles_gpgpu::GradProc>(1.0f);
+        normProc = util::make_unique<ogles_gpgpu::TriangleOptProc>(5, true, 0.005f);
         gradHistProcA = util::make_unique<ogles_gpgpu::GradHistProc>(6, 0, 1.0f);
         gradHistProcB = util::make_unique<ogles_gpgpu::GradHistProc>(6, 4, 1.0f);
 
         // Strategic smoothing:
-        smoothProc = util::make_unique<SmoothProc>(1.0);
-        smoothNormGradProc = util::make_unique<SmoothProc>(1.0);
-        smoothGradHistProcA = util::make_unique<SmoothProc>(1.0);
-        smoothGradHistProcB = util::make_unique<SmoothProc>(1.0);
+        smoothProc = util::make_unique<SmoothProc>(1.0f);
+        smoothNormGradProc = util::make_unique<SmoothProc>(2.0f);
+        smoothGradHistProcA = util::make_unique<SmoothProc>(2.0f);
+        smoothGradHistProcB = util::make_unique<SmoothProc>(2.0f);
 
         // Reduction:
         reduceRgbProc = util::make_unique<ogles_gpgpu::GainProc>();
         reduceLuvProc = util::make_unique<ogles_gpgpu::GainProc>();
-        reduceNormGradProc = util::make_unique<ogles_gpgpu::GainProc>();
-        reduceGradHistProcA = util::make_unique<ogles_gpgpu::GainProc>();
-        reduceGradHistProcB = util::make_unique<ogles_gpgpu::GainProc>();
+        reduceNormGradProc = util::make_unique<ogles_gpgpu::GainProc>(1.2f);
+        reduceGradHistProcA = util::make_unique<ogles_gpgpu::GainProc>(1.2f);
+        reduceGradHistProcB = util::make_unique<ogles_gpgpu::GainProc>(1.2f);
 
         // Reduce base image to highest resolution used in pyramid:
         reduceRgbProc->setOutputSize(scales[0].width, scales[0].height);
@@ -284,7 +284,7 @@ struct ACF::Impl
     std::unique_ptr<ogles_gpgpu::Rgb2LuvProc> rgb2luvProc;
     std::unique_ptr<ogles_gpgpu::PyramidProc> pyramidProc;
     std::unique_ptr<ogles_gpgpu::GradProc> gradProc;          // (1.0);
-    std::unique_ptr<ogles_gpgpu::TriangleProc> normProc;      // (5, true, 0.005);
+    std::unique_ptr<ogles_gpgpu::TriangleOptProc> normProc;   // (5, true, 0.005);
     std::unique_ptr<ogles_gpgpu::GradHistProc> gradHistProcA; // (6, 0, 1.f);
     std::unique_ptr<ogles_gpgpu::GradHistProc> gradHistProcB; // (6, 4, 1.f);
 
@@ -321,6 +321,13 @@ struct ACF::Impl
 };
 
 // ::::::::::: PUBLIC ::::::::::::::
+void ACF::updateGL()
+{
+#if defined(_WIN32) || defined(_WIN64)
+    // A windows DLL must call glewInit() from within the library (not the application layer)
+    CV_Assert(wglGetCurrentContext() != NULL && GLEW_OK == glewInit());
+#endif
+}
 
 // { 1280 x 960 } x 0.25 => 320x240
 ACF::ACF(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth, int shrink)

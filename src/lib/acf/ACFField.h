@@ -24,8 +24,9 @@ template <typename T>
 struct ACF_EXPORT Field
 {
     Field()
+        : has(false)
     {
-        has = false;
+
     }
     Field(const T& t)
         : value(t)
@@ -34,15 +35,13 @@ struct ACF_EXPORT Field
     }
     Field(const std::string& name, const T& value, bool)
         : value(value)
-        , isLeaf(true)
         , name(name)
         , has(true)
+        , isLeaf(true)
     {
     }
 
-    ~Field()
-    {
-    }
+    ~Field() = default;
 
     Field<T>& operator=(const std::pair<std::string, T>& src)
     {

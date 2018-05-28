@@ -6,7 +6,7 @@ endif()
 
 include(sugar_files)
 
-sugar_files(ACF_HDRS
+sugar_files(ACF_UTIL_HDRS
   IndentingOStreamBuffer.h
   LazyParallelResource.h
   Line.h
@@ -23,7 +23,7 @@ sugar_files(ACF_HDRS
   timing.h
   )
 
-sugar_files(ACF_SRCS
+sugar_files(ACF_UTIL_SRCS
   Logger.cpp
   arithmetic.cpp
   convert.cpp

@@ -19,7 +19,7 @@ set(acf_srcs
 )
 
 add_executable(${test_app} ${acf_srcs})
-target_link_libraries(${test_app} PUBLIC acf cxxopts::cxxopts ${OpenCV_LIBS})
+target_link_libraries(${test_app} PUBLIC acf acf_util cxxopts::cxxopts ${OpenCV_LIBS})
 
 # cross platform testing
 hunter_add_package(gauze)
@@ -51,9 +51,18 @@ gauze_add_test(
   NAME ${test_name}
   COMMAND ${test_app}
       --input=$<GAUZE_RESOURCE_FILE:${DRISHTI_FACES_FACE_IMAGE}>
-      --repeat=600
+      --repeat=5
       --model=$<GAUZE_RESOURCE_FILE:${DRISHTI_ASSETS_FACE_DETECTOR}>
       --minimum=128
       --calibration=0.01
       --global
 )
+
+if(WIN32 OR CYGWIN)
+  set_property(
+    TEST ${test_name}
+    PROPERTY
+    ENVIRONMENT
+    "PATH=$<TARGET_FILE_DIR:acf>;$ENV{PATH}"
+   )
+endif()

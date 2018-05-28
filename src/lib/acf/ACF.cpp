@@ -385,7 +385,8 @@ std::ostream& operator<<(std::ostream& os, const Detector::Options::Pyramid::Chn
     os << src.binSize << std::endl;
     os << src.nOrients << std::endl;
     os << src.softBin << std::endl;
-    os << src.useHog;
+    os << src.useHog << std::endl;
+    os << src.clipHog;
     return os;
 }
 
@@ -525,6 +526,7 @@ void Detector::Options::Pyramid::Chns::GradHist::merge(const GradHist& src, int 
     nOrients.merge(src.nOrients, checkExtra);
     softBin.merge(src.softBin, checkExtra);
     useHog.merge(src.useHog, checkExtra);
+    clipHog.merge(src.clipHog, checkExtra);
 }
 
 void Detector::Options::Pyramid::Chns::Custom::merge(const Custom& src, int checkExtra)
@@ -618,5 +620,19 @@ void Detector::Options::merge(const Options& src, int checkExtra)
     pNms.merge(src.pNms, checkExtra);
     pPyramid.merge(src.pPyramid, checkExtra);
 }
+
+template ACF_EXPORT struct acf::Field<int>;
+template ACF_EXPORT struct acf::Field<double>;
+template ACF_EXPORT struct acf::Field<std::string>;
+template ACF_EXPORT struct acf::Field<std::vector<double>>;
+template ACF_EXPORT struct acf::Field<acf::Detector::Options>;
+template ACF_EXPORT struct acf::Field<acf::Detector::Options::Boost::Tree>;
+template ACF_EXPORT struct acf::Field<acf::Detector::Options::Jitter>;
+template ACF_EXPORT struct acf::Field<acf::Detector::Options::Pyramid>;
+template ACF_EXPORT struct acf::Field<acf::Detector::Options::Nms>;
+template ACF_EXPORT struct acf::Field<acf::Detector::Options::Pyramid::Chns>;
+template ACF_EXPORT struct acf::Field<acf::Detector::Options::Pyramid::Chns::Color>;
+template ACF_EXPORT struct acf::Field<acf::Detector::Options::Pyramid::Chns::GradMag>;
+template ACF_EXPORT struct acf::Field<acf::Detector::Options::Pyramid::Chns::GradHist>;
 
 ACF_NAMESPACE_END

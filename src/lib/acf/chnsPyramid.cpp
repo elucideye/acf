@@ -253,7 +253,7 @@ int Detector::chnsPyramid
     {
         rgbConvert(pI, I, cs, true, m_isLuv);
     }
-    
+
     pChns.pColor->colorSpace = std::string("orig");
 
     auto& info = pyramid.info;
@@ -337,7 +337,7 @@ int Detector::chnsPyramid
         std::vector<int> is;
         for (int i = (1 + nOctUp * nPerOct); i <= nScales; i += (nApprox + 1))
         {
-            is.push_back(i-1);
+            is.push_back(i - 1);
         }
 
         CV_Assert(is.size() >= 2);
@@ -367,17 +367,17 @@ int Detector::chnsPyramid
         }
     }
 
-    // The per scale/type operations are easily parallelized, but with a parallel_for approach 
+    // The per scale/type operations are easily parallelized, but with a parallel_for approach
     // using simple uniform slicing will tend to starve some threads due to the nature of the
     // pyramid layout.  Randomizing the scale indices should do better.  More optimal strategies
     // may exist with further testing (work stealing, etc).
     const auto scalesIndex = util::create_random_indices(nScales);
-    
+
     auto isAIndex = isA;
     std::random_shuffle(isAIndex.begin(), isAIndex.end());
-    
-    cv::parallel_for_({ 0, int(isAIndex.size()) }, [&](const cv::Range &r) {
-        for(int k = r.start; k < r.end; k++)
+
+    cv::parallel_for_({ 0, int(isAIndex.size()) }, [&](const cv::Range& r) {
+        for (int k = r.start; k < r.end; k++)
         {
             const int i = isAIndex[k];
             const int iR = isN[i - 1];
@@ -390,9 +390,8 @@ int Detector::chnsPyramid
         }
     });
 
-
-    cv::parallel_for_({ 0, int(scales.size()) }, [&](const cv::Range &r) {
-        for(int i = r.start; i < r.end; i++)
+    cv::parallel_for_({ 0, int(scales.size()) }, [&](const cv::Range& r) {
+        for (int i = r.start; i < r.end; i++)
         {
             for (int j = 0; j < nTypes; j++)
             {
@@ -404,14 +403,14 @@ int Detector::chnsPyramid
     // TODO: test imPad
     if (pad.width || pad.height)
     {
-        cv::parallel_for_({ 0, int(scales.size()) }, [&](const cv::Range &r) {
+        cv::parallel_for_({ 0, int(scales.size()) }, [&](const cv::Range& r) {
             for (int i = r.start; i < r.end; i++)
             {
                 for (int j = 0; j < nTypes; j++)
                 {
                     int y = pad.height / shrink;
                     int x = pad.width / shrink;
-                    auto &I = data[scalesIndex[i]][j];
+                    auto& I = data[scalesIndex[i]][j];
                     copyMakeBorder(I, I, y, y, x, x, cv::BORDER_REFLECT);
                 }
             }
