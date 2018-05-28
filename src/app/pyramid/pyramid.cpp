@@ -47,6 +47,21 @@ static cv::Mat load_as_float(const std::string& filename)
     return I32f;
 }
 
+template <typename T>
+struct FixedNum
+{
+    FixedNum(const T& value, int width) : value(value), width(width) {}
+    T value;
+    int width = 4;
+};
+
+template <typename T>
+std::ostream & operator <<(std::ostream &os, const FixedNum<T> &num)
+{
+    os << std::setfill('0') << std::setw(num.width) << num.value;
+    return os;
+}
+
 int gauze_main(int argc, char** argv)
 {
     const auto argumentCount = argc;
@@ -58,7 +73,7 @@ int gauze_main(int argc, char** argv)
     // ### Command line parsing ###
     // ############################
 
-    std::string sInput, sOutput;
+    std::string sInput, sOutput, colorspace;
 
     cxxopts::Options options("acf-pyramid", "Create ACF pyramids on the command line");
 
@@ -66,6 +81,7 @@ int gauze_main(int argc, char** argv)
     options.add_options()
         ("i,input", "Input file", cxxopts::value<std::string>(sInput))
         ("o,output", "Output directory", cxxopts::value<std::string>(sOutput))
+        ("colorspace", "Specify the colorspace: gray, luv", cxxopts::value<std::string>(colorspace))
         ("h,help", "Print help message");
     // clang-format on
 
@@ -101,7 +117,10 @@ int gauze_main(int argc, char** argv)
     MatP Ip(I32f.t());
 
     // Request grayscale colorspace using the following:
-    //pyramid.pPyramid.pChns->pColor->colorSpace = { "colorspace", "gray" };
+    if (!colorspace.empty())
+    {
+        pyramid.pPyramid.pChns->pColor->colorSpace = { "colorspace", colorspace };
+    }
 
     acf.chnsPyramid(Ip, &pyramid.pPyramid, pyramid, true, {}); // compute the pyramid
 
@@ -120,7 +139,7 @@ int gauze_main(int argc, char** argv)
                 I8uc1 = I8uc1.t();
 
                 std::stringstream ss;
-                ss << base << std::setw(4) << std::setfill('0') << i << "_" << j << "_" << k << ".png";
+                ss << base << "_" << FixedNum<int>(i,4) << "_" << FixedNum<int>(j,4) << "_" << FixedNum<int>(k,4) << ".png";
                 cv::imwrite(ss.str(), I8uc1);
             }
         }
