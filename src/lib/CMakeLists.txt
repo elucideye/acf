@@ -31,6 +31,9 @@ add_library(acf ${acf_lib_type}
   ${ACF_HDRS}
   ${ACF_HDRS_PUBLIC}
 )
+
+add_library(${PROJECT_NAME}::acf ALIAS acf)
+
 target_link_libraries(acf
   PUBLIC ${ACF_3RDPARTY_PKG_LIBS}
   PRIVATE ${ACF_3RDPARTY_PKG_LIBS_} acf_util acf_shaders
