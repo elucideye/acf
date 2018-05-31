@@ -25,12 +25,15 @@ if(ACF_BUILD_SHARED_SDK)
 else()
   set(acf_lib_type STATIC)
 endif()
-  
+
 add_library(acf ${acf_lib_type}
   ${ACF_SRCS}
   ${ACF_HDRS}
   ${ACF_HDRS_PUBLIC}
 )
+
+add_library(${PROJECT_NAME}::acf ALIAS acf)
+
 target_link_libraries(acf
   PUBLIC ${ACF_3RDPARTY_PKG_LIBS}
   PRIVATE ${ACF_3RDPARTY_PKG_LIBS_} acf_util acf_shaders
@@ -51,10 +54,10 @@ foreach(lib acf_util acf_shaders acf)
   if(MSVC)
     target_compile_definitions(${lib} PUBLIC _USE_MATH_DEFINES) # define M_PI_2 for Visual Studio
     target_compile_definitions(${lib} PUBLIC NOMINMAX=1) # avoid std::{min,max}() conflicts
-  endif()  
+  endif()
   if(NOT ACF_HAVE_TO_STRING)
     target_compile_definitions(${lib} PUBLIC ACF_ADD_TO_STRING=1)
-  endif()  
+  endif()
 endforeach()
 
 ### Generate the export header
@@ -136,7 +139,7 @@ install(
 install(
   FILES
   "${acf_export_header}"
-  ${ACF_HDRS_PUBLIC}  
+  ${ACF_HDRS_PUBLIC}
   DESTINATION "${include_install_dir}/${PROJECT_NAME}"
 )
 
