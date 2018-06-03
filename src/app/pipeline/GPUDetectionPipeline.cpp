@@ -170,7 +170,7 @@ void GPUDetectionPipeline::init(const cv::Size& inputSize)
     initACF(inputSizeUp);                 // initialize ACF first (configure opengl platform extensions)
     initFIFO(inputSizeUp, impl->history); // keep last N frames
 
-    impl->lines.prepare(inputSizeUp.width, inputSizeUp.height, (GLenum)GL_RGBA);
+    impl->lines.prepare(inputSizeUp.width, inputSizeUp.height, static_cast<GLenum>(GL_RGBA));
 }
 
 // ### ACF ###

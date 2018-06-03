@@ -16,8 +16,8 @@ template <class oT>
 oT* rgb2luv_setup(oT z, oT* mr, oT* mg, oT* mb, oT& minu, oT& minv, oT& un, oT& vn)
 {
     // set constants for conversion
-    const oT y0 = (oT)((6.0 / 29) * (6.0 / 29) * (6.0 / 29));
-    const oT a = (oT)((29.0 / 3) * (29.0 / 3) * (29.0 / 3));
+    const auto y0 = (oT)((6.0 / 29) * (6.0 / 29) * (6.0 / 29));
+    const auto a = (oT)((29.0 / 3) * (29.0 / 3) * (29.0 / 3));
     un = (oT)0.197833;
     vn = (oT)0.468331;
     mr[0] = (oT)0.430574 * z;
@@ -125,8 +125,8 @@ void rgb2luv_sse(iT* I, float* J, int n, float nrm)
         // compute RGB -> XYZ
         for (int j = 0; j < 3; j++)
         {
-            __m128 _mr, _mg, _mb, *_J = (__m128*)(J1 + j * n);
-            __m128 *_pR = (__m128*)R1, *_pG = (__m128*)G1, *_pB = (__m128*)B1;
+            __m128 _mr, _mg, _mb, *_J = reinterpret_cast<__m128*>(J1 + j * n);
+            auto *_pR = reinterpret_cast<__m128*>(R1), *_pG = reinterpret_cast<__m128*>(G1), *_pB = reinterpret_cast<__m128*>(B1);
             _mr = SET(mr[j]);
             _mg = SET(mg[j]);
             _mb = SET(mb[j]);
@@ -146,9 +146,9 @@ void rgb2luv_sse(iT* I, float* J, int n, float nrm)
             _cun = SET(13 * un);
             _cvn = SET(13 * vn);
             __m128 *_pX, *_pY, *_pZ, _x, _y, _z;
-            _pX = (__m128*)J1;
-            _pY = (__m128*)(J1 + n);
-            _pZ = (__m128*)(J1 + 2 * n);
+            _pX = reinterpret_cast<__m128*>(J1);
+            _pY = reinterpret_cast<__m128*>(J1 + n);
+            _pZ = reinterpret_cast<__m128*>(J1 + 2 * n);
             for (i1 = i; i1 < n1; i1 += 4)
             {
                 _x = *_pX;
@@ -164,12 +164,12 @@ void rgb2luv_sse(iT* I, float* J, int n, float nrm)
             // perform lookup for L and finalize computation of U and V
             for (i1 = i; i1 < n1; i1++)
             {
-                J[i1] = lTable[(int)J[i1]];
+                J[i1] = lTable[static_cast<int>(J[i1])];
             }
             __m128 *_pL, *_pU, *_pV, _l, _cminu, _cminv;
-            _pL = (__m128*)J1;
-            _pU = (__m128*)(J1 + n);
-            _pV = (__m128*)(J1 + 2 * n);
+            _pL = reinterpret_cast<__m128*>(J1);
+            _pU = reinterpret_cast<__m128*>(J1 + n);
+            _pV = reinterpret_cast<__m128*>(J1 + 2 * n);
             _cminu = SET(minu);
             _cminv = SET(minv);
             for (i1 = i; i1 < n1; i1 += 4)
@@ -193,7 +193,7 @@ void rgb2hsv(iT* I, oT* J, int n, oT nrm)
     iT *R = I, *G = R + n, *B = G + n;
     for (int i = 0; i < n; i++)
     {
-        const oT r = (oT) * (R++), g = (oT) * (G++), b = (oT) * (B++);
+        const auto r = (oT) * (R++), g = (oT) * (G++), b = (oT) * (B++);
         oT h, s, v, minv, maxv;
         if (r == g && g == b)
         {
@@ -257,7 +257,7 @@ void rgb2gray(double* I, float* J, int n, float nrm)
     double mr = .2989360213 * nrm, mg = .5870430745 * nrm, mb = .1140209043 * nrm;
     for (i = 0; i < n; i++)
     {
-        *(GR++) = (float)(*(R++) * mr + *(G++) * mg + *(B++) * mb);
+        *(GR++) = static_cast<float>(*(R++) * mr + *(G++) * mg + *(B++) * mb);
     }
 }
 
@@ -275,7 +275,7 @@ void normalize(iT* I, oT* J, int n, oT nrm)
 template <class iT, class oT>
 oT* rgbConvert(iT* I, int n, int d, int flag, oT nrm)
 {
-    oT* J = (oT*)wrMalloc(n * (flag == 0 ? (d == 1 ? 1 : d / 3) : d) * sizeof(oT));
+    auto* J = (oT*)wrMalloc(n * (flag == 0 ? (d == 1 ? 1 : d / 3) : d) * sizeof(oT));
     int i, n1 = d * (n < 1000 ? n / 10 : 100);
     oT thr = oT(1.001);
     if (flag > 1 && nrm == 1)
@@ -389,7 +389,7 @@ void rgbConvertMex(const MatP& I, MatP& J, int flag, double nrm)
     // {3,"hsv"}
     // {4,"orig"}
     const int channels = (flag > 0) ? 3 : 1;
-    const float* pI = I.ptr<float>();
+    const auto* pI = I.ptr<float>();
 
     // Only allocate a new image for non-in-place transformations
     // otherwise we prune the channels after conversion.

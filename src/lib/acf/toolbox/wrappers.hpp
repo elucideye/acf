@@ -30,7 +30,7 @@ inline void wrFree(void* ptr)
 
 #else
 
-#include <stdlib.h>
+#include <cstdlib>
 // wrapper functions if compiling from C/C++
 inline void wrError(const char* errormsg)
 {

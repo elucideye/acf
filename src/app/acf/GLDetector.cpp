@@ -24,7 +24,7 @@ static cv::Mat cvtAnyTo8UC4(const cv::Mat& input);
 struct GLDetector::Impl
 {
     ogles_gpgpu::ACF::FeatureKind featureKind;
-    GLint maxTextureSize;
+    GLint maxTextureSize{};
     cv::Size size;
     acf::Detector::Pyramid Pcpu;
     acf::Detector::Pyramid Pgpu;

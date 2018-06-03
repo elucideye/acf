@@ -12,7 +12,7 @@
 #include <util/Line.h> // for csv_reader
 
 #include <locale>
-#include <stdio.h>
+#include <cstdio>
 
 UTIL_NAMESPACE_BEGIN
 
@@ -25,7 +25,7 @@ void tokenize(const std::string& input, std::vector<std::string>& tokens)
 
 std::string basename(const std::string& name, const std::string& ext)
 {
-    size_t pos = name.rfind("/");
+    size_t pos = name.rfind('/');
 
     if (pos != std::string::npos)
     {

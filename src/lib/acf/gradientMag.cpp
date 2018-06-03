@@ -86,22 +86,22 @@ void gradMag(const cv::Mat& I, cv::Mat& M, cv::Mat& O, int d, bool full)
 {
     M.create(I.size(), I.type());
     O.create(I.size(), I.type());
-    float* i = const_cast<float*>(I.ptr<float>());
-    float* m = M.ptr<float>();
-    float* o = O.ptr<float>();
+    auto* i = const_cast<float*>(I.ptr<float>());
+    auto* m = M.ptr<float>();
+    auto* o = O.ptr<float>();
     gradMag(i, m, o, M.cols, M.rows, M.channels(), full);
 }
 
 void gradMagNorm(cv::Mat& M, const cv::Mat& S, float norm) // operates on M
 {
-    float* m = M.ptr<float>();
-    float* s = const_cast<float*>(S.ptr<float>());
+    auto* m = M.ptr<float>();
+    auto* s = const_cast<float*>(S.ptr<float>());
     gradMagNorm(m, s, M.cols, M.rows, norm);
 }
 
 ACF_NAMESPACE_BEGIN
 
-int Detector::gradientMag(const cv::Mat& I, cv::Mat& M, cv::Mat& O, int channel, int normRad, double normConst, int full, MatLoggerType logger)
+int Detector::gradientMag(const cv::Mat& I, cv::Mat& M, cv::Mat& O, int channel, int normRad, double normConst, int full, const MatLoggerType& logger)
 {
     if (I.empty())
     {

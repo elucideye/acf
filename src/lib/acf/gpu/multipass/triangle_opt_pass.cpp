@@ -87,8 +87,8 @@ static std::string fragmentShaderForOptimizedTriangle(int blurRadius, bool doNor
         GLfloat firstWeight = standardTriangleWeights[currentBlurCoordinateIndex * 2 + 1];
         GLfloat secondWeight = standardTriangleWeights[currentBlurCoordinateIndex * 2 + 2];
         GLfloat optimizedWeight = firstWeight + secondWeight;
-        int index1 = (unsigned long)((currentBlurCoordinateIndex * 2) + 1);
-        int index2 = (unsigned long)((currentBlurCoordinateIndex * 2) + 2);
+        int index1 = static_cast<unsigned long>((currentBlurCoordinateIndex * 2) + 1);
+        int index2 = static_cast<unsigned long>((currentBlurCoordinateIndex * 2) + 2);
         ss << "   sum += texture2D(inputImageTexture, blurCoordinates[" << index1 << "]) * " << optimizedWeight << ";\n";
         ss << "   sum += texture2D(inputImageTexture, blurCoordinates[" << index2 << "]) * " << optimizedWeight << ";\n";
     }
@@ -144,7 +144,7 @@ std::string vertexShaderForOptimizedTriangle(int blurRadius)
     ss << "attribute vec4 inputTextureCoordinate;\n";
     ss << "uniform float texelWidthOffset;\n";
     ss << "uniform float texelHeightOffset;\n\n";
-    ss << "varying vec2 blurCoordinates[" << (unsigned long)(1 + (numberOfOptimizedOffsets * 2)) << "];\n\n";
+    ss << "varying vec2 blurCoordinates[" << static_cast<unsigned long>(1 + (numberOfOptimizedOffsets * 2)) << "];\n\n";
     ss << "void main()\n";
     ss << "{\n";
     ss << "   gl_Position = position;\n";
@@ -152,8 +152,8 @@ std::string vertexShaderForOptimizedTriangle(int blurRadius)
     ss << "   blurCoordinates[0] = inputTextureCoordinate.xy;\n";
     for (int currentOptimizedOffset = 0; currentOptimizedOffset < numberOfOptimizedOffsets; currentOptimizedOffset++)
     {
-        int x1 = (unsigned long)((currentOptimizedOffset * 2) + 1);
-        int x2 = (unsigned long)((currentOptimizedOffset * 2) + 2);
+        int x1 = static_cast<unsigned long>((currentOptimizedOffset * 2) + 1);
+        int x2 = static_cast<unsigned long>((currentOptimizedOffset * 2) + 2);
         const auto& optOffset = optimizedTriangleOffsets[currentOptimizedOffset];
 
         ss << "   blurCoordinates[" << x1 << "] = inputTextureCoordinate.xy + singleStepOffset * " << optOffset << ";\n";
@@ -214,8 +214,8 @@ void TriangleOptProcPass::getUniforms()
     FilterProcBase::getUniforms();
 
     // calculate pixel delta values
-    pxDx = 1.0f / (float)outFrameW;
-    pxDy = 1.0f / (float)outFrameH;
+    pxDx = 1.0f / static_cast<float>(outFrameW);
+    pxDy = 1.0f / static_cast<float>(outFrameH);
 
     shParamUInputTex = shader->getParam(UNIF, "inputImageTexture");
     shParamUTexelWidthOffset = shader->getParam(UNIF, "texelWidthOffset");

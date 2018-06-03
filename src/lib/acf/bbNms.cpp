@@ -94,7 +94,7 @@ using namespace string_hash;
 
 ACF_NAMESPACE_BEGIN
 
-typedef Detector::Detection Detection;
+using Detection = Detector::Detection;
 
 static std::vector<Detection> nmsMs(const std::vector<Detection>& bbsIn, double thr, const std::vector<double>& radii)
 {
@@ -199,12 +199,12 @@ static void nms1(const std::vector<Detection>& bbsIn, std::vector<Detection>& bb
     {
         case "max"_hash:
         {
-            bbs = nmsMax(bbsIn, pNms.overlap, 0, ovrDnm);
+            bbs = nmsMax(bbsIn, pNms.overlap, false, ovrDnm);
         }
         break;
         case "maxg"_hash:
         {
-            bbs = nmsMax(bbsIn, pNms.overlap, 1, ovrDnm);
+            bbs = nmsMax(bbsIn, pNms.overlap, true, ovrDnm);
         }
         break;
         case "ms"_hash:

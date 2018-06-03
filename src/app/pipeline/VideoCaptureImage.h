@@ -16,17 +16,17 @@
 class VideoCaptureImage : public cv::VideoCapture
 {
 public:
-    VideoCaptureImage(const cv::Mat& image, int frames = 100);
+    VideoCaptureImage(cv::Mat  image, int frames = 100);
     VideoCaptureImage(const std::string& filename, int frames = 100);
-    virtual ~VideoCaptureImage();
+    ~VideoCaptureImage() override;
 
     void setRepeat(int n);
-    virtual bool grab();
-    virtual bool isOpened() const;
-    virtual void release();
-    virtual bool open(const cv::String& filename);
-    virtual bool read(cv::OutputArray image);
-    double get(int propId) const;
+    bool grab() override;
+    bool isOpened() const override;
+    void release() override;
+    bool open(const cv::String& filename) override;
+    bool read(cv::OutputArray image) override;
+    double get(int propId) const override;
 
     cv::Mat image;
     int frames = 0;

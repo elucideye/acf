@@ -19,13 +19,13 @@ ACF_NAMESPACE_BEGIN
 
 struct Detections
 {
-    Detections() {}
+    Detections() = default;
     Detections(std::uint64_t frameIndex)
         : frameIndex(frameIndex)
     {
     }
 
-    std::uint64_t frameIndex;
+    std::uint64_t frameIndex{};
     cv::Mat image;
     std::vector<cv::Rect> roi;
     std::shared_ptr<acf::Detector::Pyramid> P;

@@ -6,8 +6,8 @@
 *******************************************************************************/
 #include <acf/toolbox/wrappers.hpp>
 
-#include <string.h>
-typedef unsigned char uchar;
+#include <cstring>
+using uchar = unsigned char;
 
 // pad A by [pt,pb,pl,pr] and store result in B
 template <class T>
@@ -71,9 +71,9 @@ void imPad(T* A, T* B, int h, int w, int d, int pt, int pb, int pl, int pr, int 
     // build lookup table for xs and ys if necessary
     if (useLookup)
     {
-        xs = (int*)wrMalloc(wb * sizeof(int));
+        xs = reinterpret_cast<int*>(wrMalloc(wb * sizeof(int)));
         int h2 = (pt + 1) * 2 * h;
-        ys = (int*)wrMalloc(hb * sizeof(int));
+        ys = reinterpret_cast<int*>(wrMalloc(hb * sizeof(int)));
         int w2 = (pl + 1) * 2 * w;
         if (flag == 2)
         {

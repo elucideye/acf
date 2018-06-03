@@ -9,11 +9,11 @@
 #include <acf/toolbox/wrappers.hpp>
 #include <acf/toolbox/sse.hpp>
 
-#include <string.h>
-#include <math.h>
+#include <cstring>
+#include <cmath>
 #include <typeinfo>
 
-typedef unsigned char uchar;
+using uchar = unsigned char;
 
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -40,8 +40,8 @@ void resampleCoef(int ha, int hb, int& n, int*& yas, int*& ybs, T*& wts, int bd[
     }
     // initialize memory
     wts = (T*)alMalloc(nMax * sizeof(T), 16);
-    yas = (int*)alMalloc(nMax * sizeof(int), 16);
-    ybs = (int*)alMalloc(nMax * sizeof(int), 16);
+    yas = reinterpret_cast<int*>(alMalloc(nMax * sizeof(int), 16));
+    ybs = reinterpret_cast<int*>(alMalloc(nMax * sizeof(int), 16));
     if (ds)
     {
         for (int yb = 0; yb < hb; yb++)
@@ -97,7 +97,7 @@ void resampleCoef(int ha, int hb, int& n, int*& yas, int*& ybs, T*& wts, int bd[
         {
             // create coefficients for upsampling
             T yaf = (T(.5) + yb) * sInv - T(.5);
-            int ya = (int)floor(yaf);
+            auto ya = (int)floor(yaf);
             wt = 1;
             if (ya >= 0 && ya < ha - 1)
             {
@@ -130,7 +130,7 @@ void resample(T* A, T* B, int ha, int hb, int wa, int wb, int d, T r)
 
     int hn, wn, x, x1, y, z, xa, xb, ya;
     T *A0, *A1, *A2, *A3, *B0, wt, wt1;
-    T* C = (T*)alMalloc((ha + 4) * sizeof(T), 16);
+    auto* C = (T*)alMalloc((ha + 4) * sizeof(T), 16);
     for (y = ha; y < ha + 4; y++)
     {
         C[y] = 0;
@@ -393,10 +393,10 @@ void imResample(const MatP& A, MatP& B, const cv::Size& size, double nrm)
     switch (A.depth())
     {
         case CV_32F:
-            resample((float*)A.ptr(), (float*)B.ptr(), ha, hb, wa, wb, d, float(nrm));
+            resample((float*)A.ptr(), reinterpret_cast<float*>(B.ptr()), ha, hb, wa, wb, d, float(nrm));
             break;
         case CV_64F:
-            resample((double*)A.ptr(), (double*)B.ptr(), ha, hb, wa, wb, d, double(nrm));
+            resample((double*)A.ptr(), reinterpret_cast<double*>(B.ptr()), ha, hb, wa, wb, d, double(nrm));
             break;
         case CV_8U:
         {
@@ -406,7 +406,7 @@ void imResample(const MatP& A, MatP& B, const cv::Size& size, double nrm)
                 A[i].convertTo(A1[i], A1[i].type());
             }
 
-            resample((float*)A1.ptr(), (float*)B1.ptr(), ha, hb, wa, wb, A.channels(), float(nrm));
+            resample(reinterpret_cast<float*>(A1.ptr()), reinterpret_cast<float*>(B1.ptr()), ha, hb, wa, wb, A.channels(), float(nrm));
 
             for (int i = 0; i < B.channels(); i++)
             {

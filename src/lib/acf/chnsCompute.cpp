@@ -142,7 +142,7 @@ int Detector::chnsCompute
     const Options::Pyramid::Chns& pChnsIn,
     Detector::Channels& chns,
     bool isInit,
-    MatLoggerType pLogger
+    const MatLoggerType& pLogger
 )
 {
     Options::Pyramid::Chns pChns = pChnsIn;

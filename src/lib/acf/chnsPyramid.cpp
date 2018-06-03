@@ -157,7 +157,7 @@ int Detector::chnsPyramid
     const Options::Pyramid* pIn,
     Pyramid& pyramid,
     bool isInit,
-    MatLoggerType pLogger
+    const MatLoggerType& pLogger
 )
 {
     // % get default parameters pPyramid
@@ -263,7 +263,7 @@ int Detector::chnsPyramid
     // Get scales at which to compute features and list of real/approx scales:
     getScales(nPerOct, nOctUp, minDs, shrink, sz, scales, scaleshw);
 
-    int nScales = static_cast<int>(scales.size());
+    auto nScales = static_cast<int>(scales.size());
     std::vector<int> isR, isA, isN(nScales, 0), *isRA[2] = { &isR, &isA };
     for (int i = 0; i < nScales; i++)
     {

@@ -28,7 +28,7 @@ public:
     {
         setBase(base);
     }
-    virtual const char* getProcName()
+    const char* getProcName() override
     {
         return "GradHistProc";
     }
@@ -41,18 +41,18 @@ public:
     }
 
 private:
-    virtual const char* getFragmentShaderSource()
+    const char* getFragmentShaderSource() override
     {
         return fshaderGradHistSrcN;
     }
-    virtual void getUniforms()
+    void getUniforms() override
     {
         FilterProcBase::getUniforms();
         shParamStrength = shader->getParam(UNIF, "strength");
         shParamUIndex = shader->getParam(UNIF, "index");
         shParamUNOrientations = shader->getParam(UNIF, "nOrientations");
     }
-    virtual void setUniforms()
+    void setUniforms() override
     {
         FilterProcBase::setUniforms();
         glUniform1f(shParamStrength, strength);
@@ -64,9 +64,9 @@ private:
     float strength = 1.0;
     int index[4] = { 0, 1, 2, 3 };
 
-    GLint shParamStrength;
-    GLint shParamUIndex;
-    GLint shParamUNOrientations;
+    GLint shParamStrength{};
+    GLint shParamUIndex{};
+    GLint shParamUNOrientations{};
 
     static const char* fshaderGradHistSrcN; // fragment shader source
 };

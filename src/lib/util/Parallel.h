@@ -27,7 +27,7 @@ public:
         : m_functions(functions)
     {
     }
-    void operator()(const cv::Range& range) const
+    void operator()(const cv::Range& range) const override
     {
         for (int i = range.start; i < range.end; i++)
         {
@@ -62,7 +62,7 @@ public:
         other.m_function = nullptr;
     }
 
-    void operator()(const cv::Range& range) const
+    void operator()(const cv::Range& range) const override
     {
         for (int i = range.start; i < range.end; i++)
         {
@@ -97,7 +97,7 @@ public:
         other.m_function = nullptr;
     }
 
-    void operator()(const cv::Range& range) const
+    void operator()(const cv::Range& range) const override
     {
         m_function(range);
     }

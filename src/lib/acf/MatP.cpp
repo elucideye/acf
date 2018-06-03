@@ -12,10 +12,8 @@
 #include <acf/MatP.h>
 
 MatP::MatP(const MatP& src)
-    : data(src.data)
-    , planes(src.planes)
-{
-}
+     
+= default;
 
 MatP::MatP(const cv::Mat& src)
 {
