@@ -149,7 +149,7 @@ protected:
     }
 
     // Cleanup
-    virtual ~ACFTest()
+    ~ACFTest() override
     {
         util::Logger::drop("test-acf");
     }
@@ -160,10 +160,10 @@ protected:
     }
 
     // Called after constructor for each test
-    virtual void SetUp() {}
+    void SetUp() override {}
 
     // Called after destructor for each test
-    virtual void TearDown() {}
+    void TearDown() override {}
 
     std::shared_ptr<acf::Detector> getDetector()
     {
@@ -678,7 +678,7 @@ TEST(ACFShaderTest, TriangleOptProcPass)
         ASSERT_FALSE(result_gpu.empty());
 
         std::vector<float> kernel{ 1.f, 2.f, 3.f, 4.f, 5.f, 4.f, 3.f, 2.f, 1.f };
-        float total = static_cast<float>((4 + 1) * (4 + 1));
+        auto total = static_cast<float>((4 + 1) * (4 + 1));
         for (auto& k : kernel)
         {
             k /= total;

@@ -17,7 +17,7 @@ ACF_NAMESPACE_BEGIN
 // #################### PortableBinary[IO]Archive ###################
 // ##################################################################
 
-typedef cereal::PortableBinaryOutputArchive OArchive;
+using OArchive = cereal::PortableBinaryOutputArchive;
 template ACF_EXPORT void Detector::serialize<OArchive>(OArchive& ar, const std::uint32_t);
 template ACF_EXPORT void Detector::Options::serialize<OArchive>(OArchive& ar, const std::uint32_t);
 template ACF_EXPORT void Detector::Options::Boost::serialize<OArchive>(OArchive& ar, const std::uint32_t);
@@ -30,7 +30,7 @@ template ACF_EXPORT void Detector::Options::Pyramid::Chns::Color::serialize<OArc
 template ACF_EXPORT void Detector::Options::Pyramid::Chns::GradMag::serialize<OArchive>(OArchive& ar, const std::uint32_t);
 template ACF_EXPORT void Detector::Options::Pyramid::Chns::GradHist::serialize<OArchive>(OArchive& ar, const std::uint32_t);
 
-typedef cereal::PortableBinaryInputArchive IArchive;
+using IArchive = cereal::PortableBinaryInputArchive;
 template ACF_EXPORT void Detector::serialize<IArchive>(IArchive& ar, const std::uint32_t version);
 template ACF_EXPORT void Detector::Options::serialize<IArchive>(IArchive& ar, const std::uint32_t version);
 template ACF_EXPORT void Detector::Options::Boost::serialize<IArchive>(IArchive& ar, const std::uint32_t version);

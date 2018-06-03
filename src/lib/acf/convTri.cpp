@@ -112,7 +112,7 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include <math.h>
+#include <cmath>
 
 ACF_NAMESPACE_BEGIN
 float round(const float& x)
@@ -145,8 +145,8 @@ void convConst(const MatP& A, MatP& B, const std::string& type, float p, int s)
     int m = std::min(ns[0], ns[1]);
     int r = util::round(p);
 
-    float* a = const_cast<float*>(A.ptr<float>());
-    float* b = B.ptr<float>();
+    auto* a = const_cast<float*>(A.ptr<float>());
+    auto* b = B.ptr<float>();
 
     // perform appropriate type of convolution
     if (!type.compare("convBox"))

@@ -11,8 +11,8 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <string.h>
-#include <assert.h>
+#include <cstring>
+#include <cassert>
 
 #define PI 3.14159265f
 
@@ -47,9 +47,9 @@ void grad1(float* I, float* Gx, float* Gy, int h, int w, int x)
     }
     else
     {
-        _G = (__m128*)Gx;
-        _Ip = (__m128*)Ip;
-        _In = (__m128*)In;
+        _G = reinterpret_cast<__m128*>(Gx);
+        _Ip = reinterpret_cast<__m128*>(Ip);
+        _In = reinterpret_cast<__m128*>(In);
         _r = SET(r);
         for (y = 0; y < h; y += 4)
         {
@@ -77,7 +77,7 @@ void grad1(float* I, float* Gx, float* Gy, int h, int w, int x)
         GRADY(.5f);
     }
     _r = SET(.5f);
-    _G = (__m128*)Gy;
+    _G = reinterpret_cast<__m128*>(Gy);
     for (; y + 4 < h - 1; y += 4, Ip += 4, In += 4, Gy += 4)
     {
         *_G++ = MUL(SUB(LDu(*In), LDu(*Ip)), _r);
@@ -134,7 +134,7 @@ public:
     const static int n = 10000, b = 10;
 
 private:
-    float a[n * 2 + b * 2];
+    float a[n * 2 + b * 2]{};
     float* a1 = a + n + b;
 
     ACosTable()
@@ -175,16 +175,16 @@ void gradMag(float* I, float* M, float* O, int h, int w, int d, bool full)
     int x, y, y1, c, h4, s;
     float *Gx, *Gy, *M2;
     __m128 *_Gx, *_Gy, *_M2, _m;
-    float acMult = float(ACosTable::n);
+    auto acMult = float(ACosTable::n);
     // allocate memory for storing one column of output (padded so h4%4==0)
     h4 = (h % 4 == 0) ? h : h - (h % 4) + 4;
     s = d * h4 * sizeof(float);
-    M2 = (float*)alMalloc(s, 16);
-    _M2 = (__m128*)M2;
-    Gx = (float*)alMalloc(s, 16);
-    _Gx = (__m128*)Gx;
-    Gy = (float*)alMalloc(s, 16);
-    _Gy = (__m128*)Gy;
+    M2 = reinterpret_cast<float*>(alMalloc(s, 16));
+    _M2 = reinterpret_cast<__m128*>(M2);
+    Gx = reinterpret_cast<float*>(alMalloc(s, 16));
+    _Gx = reinterpret_cast<__m128*>(Gx);
+    Gy = reinterpret_cast<float*>(alMalloc(s, 16));
+    _Gy = reinterpret_cast<__m128*>(Gy);
 
     __m128 upper = SET(static_cast<float>(ACosTable::getInstance().max()));
     __m128 lower = SET(static_cast<float>(ACosTable::getInstance().min()));
@@ -224,11 +224,11 @@ void gradMag(float* I, float* M, float* O, int h, int w, int d, bool full)
         };
         memcpy(M + x * h, M2, h * sizeof(float));
         // compute and store gradient orientation (O) via table lookup
-        if (O != 0)
+        if (O != nullptr)
         {
             for (y = 0; y < h; y++)
             {
-                O[x * h + y] = ACosTable::getInstance()[(int)Gx[y]];
+                O[x * h + y] = ACosTable::getInstance()[static_cast<int>(Gx[y])];
             }
 
             if (full)
@@ -260,8 +260,8 @@ void gradMagNorm(float* M, float* S, int h, int w, float norm)
 {
     __m128 *_pM, *_pS, _norm;
     int i = 0, n = h * w, n4 = n / 4;
-    _pS = (__m128*)S;
-    _pM = (__m128*)M;
+    _pS = reinterpret_cast<__m128*>(S);
+    _pM = reinterpret_cast<__m128*>(M);
     _norm = SET(norm);
     bool sse = !(size_t(M) & 15) && !(size_t(S) & 15);
     if (sse)
@@ -288,15 +288,15 @@ void gradQuantize(float* O, float* M, int* O0, int* O1, float* M0, float* M1, in
     __m128i _o0, _o1, *_O0, *_O1;
     __m128 _o, _od, _m, *_M0, *_M1;
     // define useful constants
-    const float oMult = (float)nOrients / (full ? 2 * PI : PI);
+    const float oMult = static_cast<float>(nOrients) / (full ? 2 * PI : PI);
     const int oMax = nOrients * nb;
-    const __m128 _norm = SET(norm), _oMult = SET(oMult), _nbf = SET((float)nb);
+    const __m128 _norm = SET(norm), _oMult = SET(oMult), _nbf = SET(static_cast<float>(nb));
     const __m128i _oMax = SET(oMax), _nb = SET(nb);
     // perform the majority of the work with sse
-    _O0 = (__m128i*)O0;
-    _O1 = (__m128i*)O1;
-    _M0 = (__m128*)M0;
-    _M1 = (__m128*)M1;
+    _O0 = reinterpret_cast<__m128i*>(O0);
+    _O1 = reinterpret_cast<__m128i*>(O1);
+    _M0 = reinterpret_cast<__m128*>(M0);
+    _M1 = reinterpret_cast<__m128*>(M1);
 
     if (interpolate)
     {
@@ -338,7 +338,7 @@ void gradQuantize(float* O, float* M, int* O0, int* O1, float* M0, float* M1, in
         for (; i < n; i++)
         {
             o = O[i] * oMult;
-            o0 = (int)o;
+            o0 = static_cast<int>(o);
             od = o - o0;
             o0 *= nb;
             if (o0 >= oMax)
@@ -362,7 +362,7 @@ void gradQuantize(float* O, float* M, int* O0, int* O1, float* M0, float* M1, in
         for (; i < n; i++)
         {
             o = O[i] * oMult;
-            o0 = (int)(o + .5f);
+            o0 = static_cast<int>(o + .5f);
             o0 *= nb;
             if (o0 >= oMax)
             {
@@ -380,15 +380,15 @@ void gradQuantize(float* O, float* M, int* O0, int* O1, float* M0, float* M1, in
 void gradHist(float* M, float* O, float* H, int h, int w, int bin, int nOrients, int softBin, bool full)
 {
     const int hb = h / bin, wb = w / bin, h0 = hb * bin, w0 = wb * bin, nb = wb * hb;
-    const float s = (float)bin, sInv = 1 / s, sInv2 = 1 / s / s;
+    const float s = static_cast<float>(bin), sInv = 1 / s, sInv2 = 1 / s / s;
     float *H0, *H1, *M0, *M1;
     int x, y;
     int *O0, *O1;
     float xb, init;
-    O0 = (int*)alMalloc(h * sizeof(int), 16);
-    M0 = (float*)alMalloc(h * sizeof(float), 16);
-    O1 = (int*)alMalloc(h * sizeof(int), 16);
-    M1 = (float*)alMalloc(h * sizeof(float), 16);
+    O0 = reinterpret_cast<int*>(alMalloc(h * sizeof(int), 16));
+    M0 = reinterpret_cast<float*>(alMalloc(h * sizeof(float), 16));
+    O1 = reinterpret_cast<int*>(alMalloc(h * sizeof(int), 16));
+    M1 = reinterpret_cast<float*>(alMalloc(h * sizeof(float), 16));
     // main loop
     for (x = 0; x < w0; x++)
     {
@@ -525,7 +525,7 @@ void gradHist(float* M, float* O, float* H, int h, int w, int bin, int nOrients,
                 xb = init;
             }
             hasLf = xb >= 0;
-            xb0 = hasLf ? (int)xb : -1;
+            xb0 = hasLf ? static_cast<int>(xb) : -1;
 
             if (xb0 >= (wb - 1))
             {
@@ -570,7 +570,7 @@ void gradHist(float* M, float* O, float* H, int h, int w, int bin, int nOrients,
             {
                 for (;; y++)
                 {
-                    yb0 = (int)yb;
+                    yb0 = static_cast<int>(yb);
                     if (yb0 >= hb - 1)
                     {
                         break;
@@ -593,7 +593,7 @@ void gradHist(float* M, float* O, float* H, int h, int w, int bin, int nOrients,
             {
                 for (;; y++)
                 {
-                    yb0 = (int)yb;
+                    yb0 = static_cast<int>(yb);
                     if (yb0 >= hb - 1)
                     {
                         break;
@@ -618,7 +618,7 @@ void gradHist(float* M, float* O, float* H, int h, int w, int bin, int nOrients,
             // final rows, no bottom bin
             for (; y < h0; y++)
             {
-                yb0 = (int)yb;
+                yb0 = static_cast<int>(yb);
                 GHinit;
                 if (hasLf)
                 {
@@ -676,7 +676,7 @@ float* hogNormMatrix(float* H, int nOrients, int hb, int wb, int bin)
     float *N, *N1, *n;
     int o, x, y, dx, dy, hb1 = hb + 1, wb1 = wb + 1;
     float eps = 1e-4f / 4 / bin / bin / bin / bin; // precise backward equality
-    N = (float*)wrCalloc(hb1 * wb1, sizeof(float));
+    N = reinterpret_cast<float*>(wrCalloc(hb1 * wb1, sizeof(float)));
     N1 = N + hb1 + 1;
     for (o = 0; o < nOrients; o++)
     {
@@ -824,7 +824,7 @@ void hog(float* M, float* O, float* H, int h, int w, int binSize, int nOrients, 
     float *N, *R;
     const int hb = h / binSize, wb = w / binSize; /*, nb=hb*wb; */
     // compute unnormalized gradient histograms
-    R = (float*)wrCalloc(wb * hb * nOrients, sizeof(float));
+    R = reinterpret_cast<float*>(wrCalloc(wb * hb * nOrients, sizeof(float)));
     gradHist(M, O, R, h, w, binSize, nOrients, softBin, full);
     // compute block normalization values
     N = hogNormMatrix(R, nOrients, hb, wb, binSize);
@@ -841,10 +841,10 @@ void fhog(float* M, float* O, float* H, int h, int w, int binSize, int nOrients,
     float *N, *R1, *R2;
     int o, x;
     // compute unnormalized constrast sensitive histograms
-    R1 = (float*)wrCalloc(wb * hb * nOrients * 2, sizeof(float));
+    R1 = reinterpret_cast<float*>(wrCalloc(wb * hb * nOrients * 2, sizeof(float)));
     gradHist(M, O, R1, h, w, binSize, nOrients * 2, softBin, true);
     // compute unnormalized contrast insensitive histograms
-    R2 = (float*)wrCalloc(wb * hb * nOrients, sizeof(float));
+    R2 = reinterpret_cast<float*>(wrCalloc(wb * hb * nOrients, sizeof(float)));
     for (o = 0; o < nOrients; o++)
     {
         for (x = 0; x < nb; x++)

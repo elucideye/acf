@@ -92,8 +92,8 @@ void gradHist(const cv::Mat& M, const cv::Mat& O, MatP& H, int bin, int nOrients
     H.create({ M.cols / bin, M.rows / bin }, M.depth(), nOrients);
     H.setTo<float>(0.f);
 
-    float* m = const_cast<float*>(M.ptr<float>());
-    float* o = const_cast<float*>(O.ptr<float>());
+    auto* m = const_cast<float*>(M.ptr<float>());
+    auto* o = const_cast<float*>(O.ptr<float>());
 
     int w = M.cols;
     int h = M.rows;

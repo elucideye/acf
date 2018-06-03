@@ -15,7 +15,7 @@
 
 using namespace std;
 
-typedef unsigned int uint32;
+using uint32 = unsigned int;
 
 ACF_NAMESPACE_BEGIN
 
@@ -46,15 +46,15 @@ public:
     cv::Size winSize; // possibly transposed
     cv::Size size1;
     cv::Point step1;
-    int stride;
-    int shrink;
-    int rowStride;
+    int stride{};
+    int shrink{};
+    int rowStride{};
     std::vector<uint32_t> cids;
-    const uint32* fids;
+    const uint32* fids{};
     const float* hs = nullptr;
-    int nTrees;
-    int nTreeNodes;
-    float cascThr;
+    int nTrees{};
+    int nTreeNodes{};
+    float cascThr{};
     const uint32_t* child = nullptr;
 
     MatP I;
@@ -75,7 +75,7 @@ public:
         CV_Assert(thrs);
     }
 
-    virtual void operator()(const cv::Range& range) const
+    void operator()(const cv::Range& range) const override
     {
         for (int c = 0; c < size1.width; c += step1.x)
         {
@@ -108,7 +108,7 @@ public:
         }
     }
 
-    float evaluate(uint32_t row, uint32_t col) const
+    float evaluate(uint32_t row, uint32_t col) const override
     {
         int offset = (row * stride / shrink) + (col * stride / shrink) * rowStride;
         return evaluate(chns + offset);
@@ -241,7 +241,7 @@ auto Detector::createDetector
     int height = chnsSize.height;
     int width = chnsSize.width;
     int nChns = I.channels();
-    int rowStride = static_cast<int>(I[0].step1());
+    auto rowStride = static_cast<int>(I[0].step1());
 
     if (!m_isRowMajor)
     {
@@ -249,8 +249,8 @@ auto Detector::createDetector
         std::swap(modelHt, modelWd);
     }
 
-    const int height1 = (int)ceil(float(height * shrink - modelHt + 1) / stride);
-    const int width1 = (int)ceil(float(width * shrink - modelWd + 1) / stride);
+    const auto height1 = static_cast<int>(ceil(float(height * shrink - modelHt + 1) / stride));
+    const auto width1 = static_cast<int>(ceil(float(width * shrink - modelWd + 1) / stride));
 
     // Precompute channel offsets:
     std::vector<uint32_t> cids;
@@ -305,7 +305,7 @@ void Detector::acfDetect1
     const MatP& I,
     const RectVec& rois,
     int shrink,
-    cv::Size modelDsPad,
+    const cv::Size& modelDsPad,
     int stride,
     double cascThr,
     std::vector<Detection>& objects
@@ -324,11 +324,11 @@ void Detector::acfDetect1
         std::swap(roi.x, roi.y);
         std::swap(roi.width, roi.height);
 #endif
-        objects.push_back(Detection(roi, hit.second));
+        objects.emplace_back(roi, hit.second);
     }
 }
 
-float Detector::evaluate(const MatP& I, int shrink, cv::Size modelDsPad, int stride) const
+float Detector::evaluate(const MatP& I, int shrink, const cv::Size& modelDsPad, int stride) const
 {
     auto detector = createDetector(I, {}, shrink, modelDsPad, stride, nullptr);
     detector->cascThr = 0.f;
@@ -341,7 +341,7 @@ static UInt32Vec computeChannelIndex(const RectVec& rois, uint32 rowStride, int 
 {
 #if GPU_ACF_TRANSPOSE
     assert(rois.size() > 1);
-    int nChns = static_cast<int>(rois.size());
+    auto nChns = static_cast<int>(rois.size());
     int chnStride = rois[1].x - rois[0].x;
 
     UInt32Vec cids(nChns * modelWd * modelHt);

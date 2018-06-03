@@ -378,7 +378,7 @@ int gauze_main(int argc, char** argv)
                     // method in order to ensure the CPU pyramid will be computed for each
                     // frame.
 #if defined(ACF_DO_GPU)
-                    if (acf::GLDetector* handle = dynamic_cast<acf::GLDetector*>(detector.get()))
+                    if (auto* handle = dynamic_cast<acf::GLDetector*>(detector.get()))
                     {
                         cv::Mat Pcpu = handle->draw(false);
                         cv::Mat Pgpu = handle->draw(true);
@@ -504,7 +504,7 @@ static bool writeAsJson(const std::string& filename, const std::vector<cv::Rect>
     if (ofs)
     {
         cereal::JSONOutputArchive oa(ofs);
-        typedef decltype(oa) Archive; // needed by macro
+        using Archive = decltype(oa); // needed by macro
         oa << GENERIC_NVP("objects", objects);
     }
     return ofs.good();

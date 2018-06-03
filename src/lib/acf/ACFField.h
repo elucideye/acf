@@ -15,6 +15,7 @@
 #include <acf/acf_common.h>
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <cassert>
 
@@ -24,20 +25,18 @@ template <typename T>
 struct ACF_EXPORT Field
 {
     Field()
-        : has(false)
-    {
-
-    }
-    Field(const T& t)
-        : value(t)
+         
+    = default;
+    Field(T  t)
+        : value(std::move(t))
         , has(true)
     {
     }
-    Field(const std::string& name, const T& value, bool)
+    Field(std::string  name, const T& value, bool)
         : value(value)
-        , name(name)
+        , name(std::move(name))
         , has(true)
-        , isLeaf(true)
+         
     {
     }
 
@@ -130,7 +129,7 @@ struct ACF_EXPORT Field
         ar& isLeaf;
     }
 
-    T value;
+    T value{};
     std::string name;
     bool has = false;
     bool isLeaf = true;

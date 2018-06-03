@@ -187,7 +187,7 @@ struct Application
 
     void setRepeat(int n)
     {
-        if (VideoCaptureImage* cap = dynamic_cast<VideoCaptureImage*>(video.get()))
+        if (auto* cap = dynamic_cast<VideoCaptureImage*>(video.get()))
         {
             cap->setRepeat(n);
         }
@@ -291,7 +291,7 @@ struct ApplicationBenchmark : public Application
     {
     }
 
-    virtual cv::Mat getFrameInput(ogles_gpgpu::FrameInput& input)
+    cv::Mat getFrameInput(ogles_gpgpu::FrameInput& input) override
     {
         if (counter > 256)
         {

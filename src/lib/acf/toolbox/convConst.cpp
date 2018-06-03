@@ -8,7 +8,7 @@
 #include <acf/toolbox/wrappers.hpp>
 #include <acf/toolbox/sse.hpp>
 
-#include <string.h>
+#include <cstring>
 
 #include <opencv2/core/core.hpp>
 
@@ -99,7 +99,7 @@ void convBox(float* I, float* O, int h, int w, int d, int r, int s)
         h1 = h0 + 4;
     }
     w0 = (w / s) * s;
-    float* T = (float*)alMalloc(h1 * sizeof(float), 16);
+    auto* T = reinterpret_cast<float*>(alMalloc(h1 * sizeof(float), 16));
     while (d-- > 0)
     {
         // initialize T
@@ -233,7 +233,7 @@ void conv11(float* I, float* O, int h, int w, int d, int side, int s)
 {
     const float nrm = 0.25f;
     int i, j;
-    float *I0, *I1, *T = (float*)alMalloc(h * sizeof(float), 16);
+    float *I0, *I1, *T = reinterpret_cast<float*>(alMalloc(h * sizeof(float), 16));
     for (int d0 = 0; d0 < d; d0++)
     {
         for (i = s / 2; i < w; i += s)
@@ -362,7 +362,7 @@ void convTri(float* I, float* O, int h, int w, int d, int r, int s)
         h1 = h0 + 4;
     }
     w0 = (w / s) * s;
-    float *T = (float*)alMalloc(2 * h1 * sizeof(float), 16), *U = T + h1;
+    float *T = reinterpret_cast<float*>(alMalloc(2 * h1 * sizeof(float), 16)), *U = T + h1;
     while (d-- > 0)
     {
         // initialize T and U
@@ -498,7 +498,7 @@ void convTri1(float* I, float* O, int h, int w, int d, float p, int s)
 {
     const float nrm = 1.0f / ((p + 2) * (p + 2));
     int i, j, h0 = h - (h % 4);
-    float *Il, *Im, *Ir, *T = (float*)alMalloc(h * sizeof(float), 16);
+    float *Il, *Im, *Ir, *T = reinterpret_cast<float*>(alMalloc(h * sizeof(float), 16));
     for (int d0 = 0; d0 < d; d0++)
     {
         for (i = s / 2; i < w; i += s)
@@ -595,7 +595,7 @@ void convMax(float* I, float* O, int h, int w, int d, int r)
         r = h - 1;
     }
     int m = 2 * r + 1;
-    float* T = (float*)alMalloc(m * 2 * sizeof(float), 16);
+    auto* T = reinterpret_cast<float*>(alMalloc(m * 2 * sizeof(float), 16));
     for (int d0 = 0; d0 < d; d0++)
     {
         for (int x = 0; x < w; x++)

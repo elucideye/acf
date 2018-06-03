@@ -16,8 +16,8 @@ BEGIN_OGLES_GPGPU
 
 TriangleOptProc::TriangleOptProc(int radius, bool doNorm, float normConst)
 {
-    TriangleOptProcPass* triPass1 = new TriangleOptProcPass(1, radius, doNorm);
-    TriangleOptProcPass* triPass2 = new TriangleOptProcPass(2, radius, doNorm, normConst);
+    auto* triPass1 = new TriangleOptProcPass(1, radius, doNorm);
+    auto* triPass2 = new TriangleOptProcPass(2, radius, doNorm, normConst);
 
     procPasses.push_back(triPass1);
     procPasses.push_back(triPass2);

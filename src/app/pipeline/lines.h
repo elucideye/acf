@@ -47,7 +47,7 @@ protected:
 
     std::vector<Point2d> points;
     std::array<float, 3> color = { { 0.f, 1.f, 0.f } };
-    Mat44f MVP;
+    Mat44f MVP{};
 };
 
 class LineProc : public ogles_gpgpu::FilterProcBase
@@ -55,17 +55,17 @@ class LineProc : public ogles_gpgpu::FilterProcBase
 public:
     using Point2d = std::array<float, 2>;
 
-    LineProc() {}
+    LineProc() = default;
 
-    virtual const char* getProcName()
+    const char* getProcName() override
     {
         return "LineProc";
     }
-    virtual const char* getFragmentShaderSource()
+    const char* getFragmentShaderSource() override
     {
         return fshaderLineSrc;
     }
-    virtual void filterRenderDraw();
+    void filterRenderDraw() override;
 
     void setLineSegments(const std::vector<Point2d>& segments);
 

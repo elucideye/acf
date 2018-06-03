@@ -531,7 +531,7 @@ cv::Mat ACF::getImage(ProcInterface& proc, cv::Mat& frame)
     if (dynamic_cast<MemTransferOptimized*>(proc.getMemTransferObj()))
     {
         MemTransfer::FrameDelegate delegate = [&](const Size2d& size, const void* pixels, size_t bytesPerRow) {
-            frame = cv::Mat(size.height, size.width, CV_8UC4, (void*)pixels, bytesPerRow).clone();
+            frame = cv::Mat(size.height, size.width, CV_8UC4, const_cast<void*>(pixels), bytesPerRow).clone();
         };
         proc.getResultData(delegate);
     }
@@ -651,8 +651,8 @@ void ACF::fill(acf::Detector::Pyramid& pyramid)
 
     // Build ACF input:
     const auto regions = getCropRegions();
-    const int levelCount = static_cast<int>(regions.size());
-    const int channelCount = static_cast<int>(regions.front().size());
+    const auto levelCount = static_cast<int>(regions.size());
+    const auto channelCount = static_cast<int>(regions.front().size());
 
     pyramid.nScales = int(levelCount);
 

@@ -30,10 +30,10 @@ public:
     using DetectorPtr = std::shared_ptr<acf::Detector>;
 
     GLDetector(const std::string& filename, int maxSize = 2048);
-    ~GLDetector();
+    ~GLDetector() override;
 
     // Virtual API:
-    virtual int operator()(const cv::Mat& input, RectVec& objects, DoubleVec* scores = 0);
+    int operator()(const cv::Mat& input, RectVec& objects, DoubleVec* scores = nullptr) override;
 
     cv::Mat draw(bool gpu); // debug routine
     void clear();

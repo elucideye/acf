@@ -35,7 +35,7 @@ public:
     /**
      * Return the processors name.
      */
-    virtual const char* getProcName()
+    const char* getProcName() override
     {
         return "TriangleOptProc";
     }

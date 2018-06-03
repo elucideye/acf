@@ -19,9 +19,9 @@
 class ACF_EXPORT MatP
 {
 public:
-    typedef cv::Mat value_type;
+    using value_type = cv::Mat;
 
-    MatP() {}
+    MatP() = default;
     MatP(const MatP& src);
     MatP(const cv::Mat& src);
     MatP(const cv::Size& size, int depth, int channels, bool transpose = false);

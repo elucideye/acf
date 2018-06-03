@@ -30,7 +30,7 @@ public:
         : swizzleKind(swizzleKind)
     {
     }
-    virtual const char* getProcName()
+    const char* getProcName() override
     {
         return "MergeProc";
     }
@@ -42,13 +42,13 @@ public:
     /**
      * Perform a standard shader initialization.
      */
-    virtual int init(int inW, int inH, unsigned int order, bool prepareForExternalInput);
-    virtual void useTexture(GLuint id, GLuint useTexUnit = 1, GLenum target = GL_TEXTURE_2D, int position = 0);
+    int init(int inW, int inH, unsigned int order, bool prepareForExternalInput) override;
+    void useTexture(GLuint id, GLuint useTexUnit = 1, GLenum target = GL_TEXTURE_2D, int position = 0) override;
 
 private:
     SwizzleKind swizzleKind = kSwizzleABC1;
 
-    virtual const char* getFragmentShaderSource()
+    const char* getFragmentShaderSource() override
     {
         switch (swizzleKind)
         {

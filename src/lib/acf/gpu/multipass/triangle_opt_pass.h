@@ -53,16 +53,16 @@ public:
     /**
      * Return the processors name.
      */
-    virtual const char* getProcName()
+    const char* getProcName() override
     {
         return "TriangleOptProcPass";
     }
 
-    virtual void filterShaderSetup(const char* vShaderSrc, const char* fShaderSrc, GLenum target);
-    virtual void setUniforms();
-    virtual void getUniforms();
-    virtual const char* getFragmentShaderSource();
-    virtual const char* getVertexShaderSource();
+    void filterShaderSetup(const char* vShaderSrc, const char* fShaderSrc, GLenum target) override;
+    void setUniforms() override;
+    void getUniforms() override;
+    const char* getFragmentShaderSource() override;
+    const char* getVertexShaderSource() override;
 
 private:
     bool doNorm = false;
@@ -75,8 +75,8 @@ private:
 
     int _blurRadiusInPixels = 0.0; // start 0 (uninitialized)
 
-    GLint shParamUTexelWidthOffset;
-    GLint shParamUTexelHeightOffset;
+    GLint shParamUTexelWidthOffset{};
+    GLint shParamUTexelHeightOffset{};
 
     std::string vshaderTriangleSrc;
     std::string fshaderTriangleSrc;

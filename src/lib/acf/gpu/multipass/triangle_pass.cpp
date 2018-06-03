@@ -46,7 +46,7 @@ std::string vertexShaderForTriangle(int blurRadius)
     ss << "attribute vec4 inputTextureCoordinate;\n";
     ss << "uniform float texelWidthOffset;\n";
     ss << "uniform float texelHeightOffset;\n\n";
-    ss << "varying vec2 blurCoordinates[" << (unsigned long)(numberOfOptimizedOffsets) << "];\n\n";
+    ss << "varying vec2 blurCoordinates[" << static_cast<unsigned long>(numberOfOptimizedOffsets) << "];\n\n";
     ss << "void main()\n";
     ss << "{\n";
     ss << "   gl_Position = position;\n";
@@ -87,7 +87,7 @@ std::string fragmentShaderForTriangle(int blurRadius, bool doNorm = false, int p
     for (int currentBlurCoordinateIndex = 0; currentBlurCoordinateIndex < numberOfOffsets; currentBlurCoordinateIndex++)
     {
         GLfloat weight = standardTriangleWeights[currentBlurCoordinateIndex];
-        int index = (unsigned long)((currentBlurCoordinateIndex));
+        int index = static_cast<unsigned long>((currentBlurCoordinateIndex));
         ss << "   sum += texture2D(inputImageTexture, blurCoordinates[" << index << "]) * " << std::fixed << weight << ";\n";
     }
 
@@ -147,8 +147,8 @@ void TriangleProcPass::getUniforms()
     FilterProcBase::getUniforms();
 
     // calculate pixel delta values
-    pxDx = 1.0f / (float)outFrameW; // input or output?
-    pxDy = 1.0f / (float)outFrameH;
+    pxDx = 1.0f / static_cast<float>(outFrameW); // input or output?
+    pxDy = 1.0f / static_cast<float>(outFrameH);
 
     shParamUInputTex = shader->getParam(UNIF, "inputImageTexture");
     shParamUTexelWidthOffset = shader->getParam(UNIF, "texelWidthOffset");

@@ -12,7 +12,7 @@
 #ifndef __acf_ACF_h__
 #define __acf_ACF_h__
 
-#include <stdio.h>
+#include <cstdio>
 
 #include <acf/acf_export.h>
 #include <acf/acf_common.h>
@@ -27,6 +27,7 @@
 #include <cassert>
 #include <iostream>
 #include <functional>
+#include <utility>
 
 ACF_NAMESPACE_BEGIN
 
@@ -39,17 +40,17 @@ struct ParserNode;
 class ACF_EXPORT Detector : public acf::ObjectDetector
 {
 public:
-    typedef ParserNode<Detector> ParserNodeDetector;
-    typedef std::vector<cv::Size2d> Size2dVec;
-    typedef std::vector<double> RealVec;
-    typedef std::vector<cv::Rect> RectVec;
-    typedef std::function<int(const cv::Mat&, const std::string& tag)> MatLoggerType;
+    using ParserNodeDetector = ParserNode<acf::Detector>;
+    using Size2dVec = std::vector<cv::Size2d>;
+    using RealVec = std::vector<double>;
+    using RectVec = std::vector<cv::Rect>;
+    using MatLoggerType = std::function<int (const cv::Mat &, const std::string &)>;
 
-    Detector() {}
+    Detector() = default;
     Detector(const Detector& src);
     Detector(std::istream& is, const std::string& hint = {});
     Detector(const std::string& filename);
-    virtual ~Detector();
+    ~Detector() override;
 
     bool good() const { return m_good; }
     explicit operator bool() const { return m_good; }
@@ -289,7 +290,7 @@ public:
 
         std::vector<double> errs;
         std::vector<double> losses;
-        int treeDepth;
+        int treeDepth{};
 
         cv::Mat thrsU8; // prescaled threshold (x255) for uint8_t input
         const cv::Mat& getScaledThresholds(int type) const;
@@ -334,7 +335,7 @@ public:
         const Options::Pyramid::Chns& pChns,
         Channels& chns,
         bool isInit = false,
-        MatLoggerType pLogger = {}
+        const MatLoggerType& pLogger = {}
     );
     // clang-format on
 
@@ -396,7 +397,7 @@ public:
         void merge(const Modify& src, int mode);
     };
 
-    cv::Size getWindowSize() const
+    cv::Size getWindowSize() const override
     {
         return opts.modelDs.get();
     }
@@ -409,11 +410,11 @@ public:
     static void computeChannels(const MatP& Ip, MatP& Ip2, MatLoggerType pLlogger = {});
 
     // (((((((( Detection ))))))))
-    int operator()(const cv::Mat& I, RectVec& objects, RealVec* scores = 0);
-    int operator()(const MatP& I, RectVec& objects, RealVec* scores = 0);
+    int operator()(const cv::Mat& I, RectVec& objects, RealVec* scores = nullptr) override;
+    int operator()(const MatP& I, RectVec& objects, RealVec* scores = nullptr) override;
 
     // Multiscale search:
-    virtual int operator()(const Pyramid& P, RectVec& objects, RealVec* scores = 0);
+    virtual int operator()(const Pyramid& P, RectVec& objects, RealVec* scores = nullptr);
 
     // clang-format off
     int chnsPyramid
@@ -422,7 +423,7 @@ public:
         const Options::Pyramid* pPyramid,
         Pyramid& pyramid,
         bool isInit = false,
-        MatLoggerType pLogger = {}
+        const MatLoggerType& pLogger = {}
     );
     // clang-format on
 
@@ -462,7 +463,7 @@ public:
         int normRad = 0,
         double normConst = 0.005,
         int full = 0,
-        MatLoggerType logger = {}
+        const MatLoggerType& logger = {}
     );
     // clang-format on
 
@@ -491,14 +492,14 @@ public:
         return m_doParallel;
     }
 
-    virtual void setDetectionScorePruneRatio(double ratio)
+    void setDetectionScorePruneRatio(double ratio) override
     {
         m_detectionScorePruneRatio = ratio;
     }
 
     struct ACF_EXPORT Detection
     {
-        Detection() {}
+        Detection() = default;
         Detection(const cv::Rect& r, double s)
             : roi(r)
             , score(s)
@@ -519,7 +520,7 @@ public:
         const MatP& chns,
         const RectVec& rois,
         int shrink,
-        cv::Size modelDsPad,
+        const cv::Size& modelDsPad,
         int stride,
         double cascThr,
         DetectionVec& objects
@@ -530,7 +531,7 @@ public:
     int acfModify(const Detector::Modify& params);
 
     float evaluate(const cv::Mat& I) const;
-    float evaluate(const MatP& I, int shrink, cv::Size modelDsPad, int stride) const;
+    float evaluate(const MatP& I, int shrink, const cv::Size& modelDsPad, int stride) const;
 
     // (((((((( I/O ))))))))
     int initializeOpts();
@@ -566,7 +567,7 @@ public:
 
     void setLogger(MatLoggerType logger)
     {
-        m_logger = logger;
+        m_logger = std::move(logger);
     }
 
     void setStreamLogger(std::shared_ptr<spdlog::logger>& logger)

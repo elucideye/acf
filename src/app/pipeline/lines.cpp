@@ -100,11 +100,11 @@ void main()
 
 static void imageToTexture(ogles_gpgpu::Mat44f &MVP, int width, int height)
 {
-    for(int y = 0; y < 4; y++)
+    for(auto & y : MVP.data)
     {
         for(int x = 0; x < 4; x++)
         {
-            MVP.data[y][x] = 0.f;
+            y[x] = 0.f;
         }
     }
     MVP.data[0][0] = 2.f / static_cast<float>(width);
@@ -118,7 +118,7 @@ static void imageToTexture(ogles_gpgpu::Mat44f &MVP, int width, int height)
 
 void LineProc::filterRenderDraw()
 {
-    ogles_gpgpu::Mat44f MVP;
+    ogles_gpgpu::Mat44f MVP{};
     imageToTexture(MVP, getOutFrameW(), getOutFrameH());
   
     ogles_gpgpu::FilterProcBase::filterRenderDraw();

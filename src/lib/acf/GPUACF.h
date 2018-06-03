@@ -46,7 +46,7 @@ public:
     using SizeVec = std::vector<Size2d>;
 
     ACF(void* glContext, const Size2d& size, const SizeVec& scales, FeatureKind kind, int grayWidth = 0, int shrink = 4);
-    ~ACF();
+    ~ACF() override;
 
     // Platform specify OpenGL bindings (e.g., windows DLL + glewInit())
     static void updateGL();
@@ -66,8 +66,8 @@ public:
 
     const std::array<int, 4>& getChannelOrder();
 
-    virtual void preConfig();
-    virtual void postConfig();
+    void preConfig() override;
+    void postConfig() override;
     static cv::Mat getImage(ProcInterface& proc);
     static cv::Mat getImage(ProcInterface& proc, cv::Mat& frame);
 

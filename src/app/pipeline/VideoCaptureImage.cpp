@@ -1,7 +1,9 @@
 #include "VideoCaptureImage.h"
 
-VideoCaptureImage::VideoCaptureImage(const cv::Mat& image, int frames)
-    : image(image)
+#include <utility>
+
+VideoCaptureImage::VideoCaptureImage(cv::Mat  image, int frames)
+    : image(std::move(image))
     , frames(frames)
 {
 }
