@@ -407,7 +407,7 @@ public:
     void computePyramid(const MatP& Ip, Pyramid& P);
 
     static void computeChannels(const cv::Mat& I, MatP& Ip2, MatLoggerType pLogger = {});
-    static void computeChannels(const MatP& Ip, MatP& Ip2, MatLoggerType pLlogger = {});
+    static void computeChannels(const MatP& Ip, MatP& Ip2, const MatLoggerType& pLlogger = {});
 
     // (((((((( Detection ))))))))
     int operator()(const cv::Mat& I, RectVec& objects, RealVec* scores = nullptr) override;

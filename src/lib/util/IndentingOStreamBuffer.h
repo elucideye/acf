@@ -23,7 +23,7 @@ class IndentingOStreambuf : public std::streambuf
     std::ostream* myOwner;
 
 protected:
-    virtual int overflow(int ch)
+    int overflow(int ch) override
     {
         if (myIsAtStartOfLine && ch != '\n')
         {
@@ -38,7 +38,7 @@ public:
         : myDest(dest)
         , myIsAtStartOfLine(true)
         , myIndent(indent, ' ')
-        , myOwner(NULL)
+        , myOwner(nullptr)
     {
     }
 
@@ -50,9 +50,9 @@ public:
     {
         myOwner->rdbuf(this);
     }
-    virtual ~IndentingOStreambuf()
+    ~IndentingOStreambuf() override
     {
-        if (myOwner != NULL)
+        if (myOwner != nullptr)
         {
             myOwner->rdbuf(myDest);
         }

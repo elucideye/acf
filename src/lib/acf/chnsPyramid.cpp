@@ -128,6 +128,7 @@
 #include <util/acf_math.h>
 
 #include <opencv2/imgproc/imgproc.hpp>
+#include <random>
 
 ACF_NAMESPACE_BEGIN
 
@@ -374,7 +375,7 @@ int Detector::chnsPyramid
     const auto scalesIndex = util::create_random_indices(nScales);
 
     auto isAIndex = isA;
-    std::random_shuffle(isAIndex.begin(), isAIndex.end());
+    std::shuffle(isAIndex.begin(), isAIndex.end(), std::mt19937(std::random_device()()));
 
     cv::parallel_for_({ 0, int(isAIndex.size()) }, [&](const cv::Range& r) {
         for (int k = r.start; k < r.end; k++)

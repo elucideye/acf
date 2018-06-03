@@ -27,6 +27,7 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <utility>
 
 #define ACF_DO_DEBUG_LOAD 0
 #define ACF_USE_INDENTING_STREAM 0
@@ -86,8 +87,8 @@ std::ostream& operator<<(std::ostream& os, const Field<std::vector<T2>>& src)
 
 #if ACF_SERIALIZE_WITH_CVMATIO
 
-typedef std::vector<MatlabIOContainer> VecContainer;
-typedef std::vector<VecContainer> VecVecContainer;
+using VecContainer = std::vector<MatlabIOContainer>;
+using VecVecContainer = std::vector<VecContainer>;
 
 template <typename T1, typename T2>
 struct Cast
@@ -204,7 +205,7 @@ struct Finder<Field<T1>, Field<T2>>
 template <typename T>
 struct ParserNode
 {
-    ParserNode() {}
+    ParserNode() = default;
 
     ParserNode(const ParserNode& node)
         : m_name(node.m_name)
@@ -225,8 +226,8 @@ struct ParserNode
         log();
     }
 
-    ParserNode(const std::string& name, T& object, VecContainer& variables)
-        : m_name(name)
+    ParserNode(std::string  name, T& object, VecContainer& variables)
+        : m_name(std::move(name))
         , m_object(&object)
         , m_variables(variables)
     {
