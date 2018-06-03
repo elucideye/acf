@@ -102,9 +102,9 @@ static void imageToTexture(ogles_gpgpu::Mat44f &MVP, int width, int height)
 {
     for(auto & y : MVP.data)
     {
-        for(int x = 0; x < 4; x++)
+        for(float & x : y)
         {
-            y[x] = 0.f;
+            x = 0.f;
         }
     }
     MVP.data[0][0] = 2.f / static_cast<float>(width);

@@ -17,6 +17,7 @@
 
 #include <functional>
 #include <numeric>
+#include <random>
 
 UTIL_NAMESPACE_BEGIN
 
@@ -113,7 +114,7 @@ inline std::vector<int> create_random_indices(int n)
 {
     std::vector<int> indices(n);
     std::iota(indices.begin(), indices.end(), 0);
-    std::random_shuffle(indices.begin(), indices.end());
+    std::shuffle(indices.begin(), indices.end(), std::mt19937(std::random_device()()));
     return indices;
 }
 

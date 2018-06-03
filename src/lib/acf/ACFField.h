@@ -32,8 +32,8 @@ struct ACF_EXPORT Field
         , has(true)
     {
     }
-    Field(std::string  name, const T& value, bool)
-        : value(value)
+    Field(std::string  name, T  value, bool)
+        : value(std::move(value))
         , name(std::move(name))
         , has(true)
          

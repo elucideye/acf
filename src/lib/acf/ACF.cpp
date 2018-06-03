@@ -18,6 +18,7 @@
 
 #include <iomanip>
 #include <numeric> // for iota
+#include <utility>
 
 ACF_NAMESPACE_BEGIN
 
@@ -171,10 +172,10 @@ void Detector::computeChannels(const cv::Mat& I, MatP& Ip2, MatLoggerType pLogge
     }
 
     MatP Ip(If);
-    computeChannels(Ip, Ip2, pLogger);
+    computeChannels(Ip, Ip2, std::move(pLogger));
 }
 
-void Detector::computeChannels(const MatP& Ip, MatP& Ip2, MatLoggerType pLogger)
+void Detector::computeChannels(const MatP& Ip, MatP& Ip2, const MatLoggerType& pLogger)
 {
     // 'pChns',{},'nPerOct',8,'nOctUp',0,'nApprox',-1,'lambdas',[],'pad',[0 0],'minDs',[16 16],'smooth',1,'concat',1,'complete',1};
     Options::Pyramid dfs;
