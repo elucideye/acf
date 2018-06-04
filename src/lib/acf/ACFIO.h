@@ -11,11 +11,14 @@
 #ifndef __acf_ACFIO_h__
 #define __acf_ACFIO_h__
 
-#include <acf/acf_common.h>
 #include <acf/ACFField.h>
+#include <acf/acf_common.h>
+
 #include <util/IndentingOStreamBuffer.h>
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/mat.inl.hpp>
 
 // clang-format off
 #if ACF_SERIALIZE_WITH_CVMATIO
@@ -24,10 +27,14 @@
 #endif
 // clang-format on
 
-#include <string>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <utility>
+
+namespace acf {
+template <typename T> struct Field;
+}  // namespace acf
 
 #define ACF_DO_DEBUG_LOAD 0
 #define ACF_USE_INDENTING_STREAM 0

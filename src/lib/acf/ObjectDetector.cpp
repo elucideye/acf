@@ -9,6 +9,7 @@
 */
 
 #include <acf/ObjectDetector.h>
+#include <acf/acf_common.h>
 
 ACF_NAMESPACE_BEGIN
 

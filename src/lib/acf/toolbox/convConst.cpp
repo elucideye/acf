@@ -7,10 +7,7 @@
 
 #include <acf/toolbox/wrappers.hpp>
 #include <acf/toolbox/sse.hpp>
-
 #include <cstring>
-
-#include <opencv2/core/core.hpp>
 
 // convolve one column of I by a 2rx1 ones filter
 void convBoxY(float* I, float* O, int h, int r, int s)

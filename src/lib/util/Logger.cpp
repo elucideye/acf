@@ -10,8 +10,11 @@
 */
 
 #include <util/Logger.h>
+#include <util/acf_util.h>
 
-#include <spdlog/spdlog.h>
+namespace spdlog {
+class logger;
+}  // namespace spdlog
 
 // clang-format off
 #if defined(__ANDROID__)

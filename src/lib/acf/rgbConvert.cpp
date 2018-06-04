@@ -83,10 +83,13 @@
 // Licensed under the Simplified BSD License [see external/bsd.txt]
 
 #include <acf/ACF.h>
-
+#include <acf/MatP.h>
+#include <acf/acf_common.h>
 #include <util/string_hash.h>
 
-#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core/base.hpp>
+
+#include <iosfwd>
 
 using namespace string_hash;
 

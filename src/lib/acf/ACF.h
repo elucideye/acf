@@ -12,28 +12,39 @@
 #ifndef __acf_ACF_h__
 #define __acf_ACF_h__
 
-#include <cstdio>
+#include <cstdint>
 
-#include <acf/acf_export.h>
-#include <acf/acf_common.h>
-#include <acf/ObjectDetector.h> // interface
 #include <acf/ACFField.h>
 #include <acf/MatP.h>
+#include <acf/ObjectDetector.h> // interface
+#include <acf/acf_common.h>
+#include <acf/acf_export.h>
+#include <acf/ACFIO.h>
+
+#include <opencv2/core.hpp>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/mat.inl.hpp>
+#include <opencv2/core/matx.hpp>
+#include <opencv2/core/types.hpp>
 
 #include <spdlog/spdlog.h>
 
-#include <opencv2/core.hpp>
-
 #include <cassert>
-#include <iostream>
+#include <cstdio>
 #include <functional>
+#include <iostream>
+#include <memory>
 #include <utility>
+
+namespace spdlog {
+class logger;
+}  // namespace spdlog
 
 ACF_NAMESPACE_BEGIN
 
+class DetectionParams;
 // Forward declarations:
 class DetectionSink;
-class DetectionParams;
 template <class _T>
 struct ParserNode;
 

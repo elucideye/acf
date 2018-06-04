@@ -1,16 +1,25 @@
 #include "GPUDetectionPipeline.h"
 #include "lines.h"
 
-#include <ogles_gpgpu/common/proc/fifo.h> // ogles_gpgpu::FifoProc
+#include <acf/MatP.h>
+#include <util/ScopeTimeLogger.h>
+#include <util/make_unique.h>
 
 #include <thread_pool/thread_pool.hpp> // tp::ThreadPool<>
 
-#include <util/make_unique.h>
-#include <util/ScopeTimeLogger.h>
+#include <ogles_gpgpu/common/types.h>
+#include <ogles_gpgpu/platform/opengl/gl_includes.h>
+#include <ogles_gpgpu/common/proc/fifo.h>
 
-#include <thread>
-#include <deque>
+#include <opencv2/core/base.hpp>
+#include <opencv2/core/hal/interface.h>
+
+#include <assert.h>
+#include <limits>
+#include <exception>
+#include <future>
 #include <memory>
+#include <stdexcept>
 
 static void chooseBest(std::vector<cv::Rect>& objects, std::vector<double>& scores);
 
@@ -18,6 +27,7 @@ static void chooseBest(std::vector<cv::Rect>& objects, std::vector<double>& scor
 
 #if ACF_DEBUG_PYRAMIDS
 #include <opencv2/highgui.hpp>
+
 static cv::Mat draw(const acf::Detector::Pyramid& pyramid);
 static void logPyramid(const std::string& filename, const acf::Detector::Pyramid& P);
 #endif
@@ -257,14 +267,6 @@ int GPUDetectionPipeline::computeDetectionWidth(const cv::Size& inputSizeUp) con
 void GPUDetectionPipeline::fill(acf::Detector::Pyramid& P)
 {
     impl->acf->fill(P, impl->P);
-
-#if ACF_DEBUG_PYRAMIDS
-    // One can compare CPU and GPU pyramids using logging like this:
-    //std::string home = ".";
-    //cv::Mat channels = impl->acf->getChannels();
-    //cv::imwrite(home + "/acf_channels.png", channels);
-    //logPyramid(home + "/acf_pyramid.png", P);
-#endif
 }
 
 void GPUDetectionPipeline::computeAcf(const ogles_gpgpu::FrameInput& frame, bool doLuv, bool doDetection)

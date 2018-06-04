@@ -11,10 +11,16 @@
 #ifndef __acf_MatP_h__
 #define __acf_MatP_h__
 
+
 #include <acf/acf_export.h>
 
 #include <opencv2/core.hpp>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/mat.inl.hpp>
+#include <opencv2/core/types.hpp>
 #include <opencv2/imgproc.hpp>
+
+#include <cstdint>
 
 class ACF_EXPORT MatP
 {

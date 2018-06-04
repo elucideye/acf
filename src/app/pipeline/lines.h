@@ -11,10 +11,17 @@
 #ifndef __acf_LineShader_h__
 #define __acf_LineShader_h__
 
+#include <ogles_gpgpu/common/common_includes.h>
+#include <ogles_gpgpu/common/types.h>
 #include <ogles_gpgpu/common/proc/base/filterprocbase.h>
+#include <ogles_gpgpu/platform/opengl/gl_includes.h>
 
 #include <array>
 #include <memory>
+
+namespace ogles_gpgpu {
+class Shader;
+}  // namespace ogles_gpgpu
 
 BEGIN_OGLES_GPGPU
 

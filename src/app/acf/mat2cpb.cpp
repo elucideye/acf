@@ -12,20 +12,14 @@
 #if defined(ACF_ADD_TO_STRING)
 #  include "io/stdlib_string.h"
 #endif
-// clang-format on
-#include "io/cereal_pba.h"
-#include "util/Logger.h"
-#include "util/string_hash.h"
-#include "util/cli.h"
-#include "acf/ACF.h"
+#include <acf/ACF.h>
+#include <io/cereal_pba.h>
+#include <util/Logger.h>
 
-#include <cereal/archives/json.hpp>
+#include <cxxopts.hpp>
 
-#include "cxxopts.hpp"
-
+#include <exception>
 #include <fstream>
-#include <iostream>
-#include <string>
 
 int gauze_main(int argc, char** argv)
 {

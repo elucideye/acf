@@ -8,8 +8,15 @@
 
 */
 
-#include <acf/ACFIO.h>
+
 #include <acf/ACF.h>
+#include <acf/ACFIO.h>
+#include <acf/acf_common.h>
+#include <io/cereal_pba.h>
+
+#include <MatlabIO.hpp>
+
+#include <opencv2/core/hal/interface.h>
 
 ACF_NAMESPACE_BEGIN
 
@@ -193,8 +200,6 @@ ACF_NAMESPACE_END
 #if defined(ACF_ADD_TO_STRING)
 #  include "io/stdlib_string.h"
 #endif
-// clang-format on
-#include "io/cereal_pba.h"
 
 ACF_NAMESPACE_BEGIN
 

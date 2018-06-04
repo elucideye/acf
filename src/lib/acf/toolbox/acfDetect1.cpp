@@ -6,12 +6,18 @@
 *******************************************************************************/
 
 #include <acf/ACF.h>
-#include <util/Parallel.h>
+#include <acf/MatP.h>
+#include <acf/acf_common.h>
 
-#include <vector>
-#include <cmath>
-#include <thread>
-#include <mutex>
+#include <opencv2/core/base.hpp>
+#include <opencv2/core/hal/interface.h>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/mat.inl.hpp>
+#include <opencv2/core/types.hpp>
+#include <opencv2/core/utility.hpp>
+
+#include <cstdint>
+#include <assert.h>
 
 using namespace std;
 

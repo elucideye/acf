@@ -9,16 +9,16 @@
 #include <acf/toolbox/wrappers.hpp>
 #include <acf/toolbox/sse.hpp>
 
-#include <cstring>
+#include <opencv2/core/base.hpp>
+#include <opencv2/core/hal/interface.h>
+#include <opencv2/core/types.hpp>
+
 #include <cmath>
+#include <cstring>
+#include <stdexcept>
 #include <typeinfo>
 
 using uchar = unsigned char;
-
-#include <opencv2/imgproc/imgproc.hpp>
-
-#include <functional>
-#include <iostream>
 
 // compute interpolation values for single column for resapling
 template <class T>

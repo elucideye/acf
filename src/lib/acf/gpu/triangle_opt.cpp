@@ -11,6 +11,9 @@
 */
 
 #include <acf/gpu/triangle_opt.h>
+#include <acf/gpu/multipass/triangle_opt_pass.h>
+
+#include <ogles_gpgpu/common/common_includes.h>
 
 BEGIN_OGLES_GPGPU
 

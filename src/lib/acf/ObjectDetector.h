@@ -11,13 +11,19 @@
 #ifndef __acf_ObjectDetector_h__
 #define __acf_ObjectDetector_h__
 
-#include <acf/acf_export.h>
-#include <acf/acf_common.h>
 #include <acf/MatP.h>
+#include <acf/acf_common.h>
+#include <acf/acf_export.h>
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/core/types.hpp>
 
+#include <stddef.h>
 #include <vector>
+
+namespace cv {
+class Mat;
+}  // namespace cv
 
 ACF_NAMESPACE_BEGIN
 

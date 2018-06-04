@@ -10,15 +10,19 @@
 */
 
 #include <acf/ACF.h>
-#include <acf/ACFIO.h>
+#include <acf/MatP.h>
+#include <acf/acf_common.h>
+#include <acf/acf_export.h>
+#include <util/Parallel.h> // create_random_indices
 
-#include <util/IndentingOStreamBuffer.h>
-#include <util/string_hash.h>
-#include <util/Parallel.h>
+#include <opencv2/core/base.hpp>
+#include <opencv2/core/hal/interface.h>
 
 #include <iomanip>
-#include <numeric> // for iota
-#include <utility>
+
+namespace acf {
+template <typename T> struct Field;
+}  // namespace acf
 
 ACF_NAMESPACE_BEGIN
 

@@ -11,19 +11,27 @@
 #ifndef __acf_GPUACF_h__
 #define __acf_GPUACF_h__
 
-#include <acf/acf_export.h>
-#include <acf/acf_common.h>
 #include <acf/ACF.h>
-
+#include <acf/acf_common.h>
+#include <acf/acf_export.h>
+#include <ogles_gpgpu/common/proc/../gl/memtransfer.h>
+#include <ogles_gpgpu/common/common_includes.h>
 // ogles_gpgpu shader lib:
 #include <ogles_gpgpu/common/proc/video.h>
-
-#include <memory>
+#include <opencv2/core/mat.hpp>
 #include <array>
 #include <functional>
+#include <memory>
 
+class MatP;
+namespace ogles_gpgpu {
+class ProcInterface;
+struct Size2d;
+}  // namespace ogles_gpgpu
 // clang-format off
-namespace spdlog { class logger; }
+namespace spdlog {
+class logger;
+}  // namespace spdlog
 // clang-format on
 
 BEGIN_OGLES_GPGPU
@@ -110,6 +118,7 @@ protected:
     void initLuvTransposeOutput();
 
     struct Impl;
+
     std::unique_ptr<Impl> impl;
 };
 

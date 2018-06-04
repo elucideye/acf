@@ -9,15 +9,21 @@
  */
 
 #include <acf/ACF.h>
-#include "util/Logger.h"
-#include "util/string_utils.h"
+#include <acf/MatP.h>
+#include <util/string_utils.h>
+#include <util/Logger.h>
 
-#include <opencv2/highgui.hpp>
+#include <opencv2/core/cvstd.inl.hpp>
+#include <opencv2/core/hal/interface.h>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/mat.inl.hpp>
+#include <opencv2/imgcodecs.hpp>
 
 #include <cxxopts.hpp>
 
+#include <exception>
 #include <iostream>
-#include <string>
+#include <stdexcept>
 #include <iomanip>
 
 static cv::Mat load_as_float(const std::string& filename)

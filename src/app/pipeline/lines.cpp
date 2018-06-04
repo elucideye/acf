@@ -10,6 +10,12 @@
 
 #include "lines.h"
 
+#include <ogles_gpgpu/common/macros.h>
+#include <ogles_gpgpu/common/tools.h>
+#include <ogles_gpgpu/platform/opengl/gl_includes.h>
+
+#include <stdexcept>
+
 BEGIN_OGLES_GPGPU
 
 // clang-format off

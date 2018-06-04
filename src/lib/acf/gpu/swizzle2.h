@@ -11,7 +11,11 @@
 #ifndef __acf_gpu_swizzle2_h__
 #define __acf_gpu_swizzle2_h__
 
+#include <ogles_gpgpu/common/common_includes.h>
 #include <ogles_gpgpu/common/proc/two.h>
+#include <ogles_gpgpu/platform/opengl/gl_includes.h>
+
+#include <assert.h>
 
 BEGIN_OGLES_GPGPU
 

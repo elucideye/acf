@@ -9,8 +9,9 @@
 */
 
 #include <acf/draw.h>
+#include <acf/ACF.h>
 
-#include <opencv2/imgproc.hpp>
+#include <opencv2/core/mat.inl.hpp>
 
 ACF_NAMESPACE_BEGIN
 

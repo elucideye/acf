@@ -74,8 +74,13 @@
 //gradientMex('gradientMagNorm',M,S,normConst); % operates on M
 
 #include <acf/ACF.h>
+#include <acf/MatP.h>
+#include <acf/acf_common.h>
 
-#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/mat.inl.hpp>
+
+#include <iosfwd>
 
 void grad1(float* I, float* Gx, float* Gy, int h, int w, int x);
 void grad2(float* I, float* Gx, float* Gy, int h, int w, int d);

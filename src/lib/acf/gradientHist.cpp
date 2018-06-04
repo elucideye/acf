@@ -82,7 +82,9 @@
 #include <acf/ACF.h>
 #include <acf/acf_common.h>
 
-#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/mat.hpp>
+
+class MatP;
 
 void gradQuantize(float* O, float* M, int* O0, int* O1, float* M0, float* M1, int nb, int n, float norm, int nOrients, bool full, bool interpolate);
 void gradHist(float* M, float* O, float* H, int h, int w, int bin, int nOrients, int softBin, bool full);

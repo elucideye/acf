@@ -11,6 +11,7 @@
 #ifndef __acf_gpu_binomial_h__
 #define __acf_gpu_binomial_h__
 
+#include <ogles_gpgpu/common/common_includes.h>
 #include <ogles_gpgpu/common/proc/filter3x3.h>
 
 BEGIN_OGLES_GPGPU

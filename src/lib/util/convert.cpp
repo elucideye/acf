@@ -8,16 +8,22 @@
 
 */
 
+
 #include <util/convert.h>
+#include <util/acf_util.h>
+
+#include <opencv2/core/base.hpp>
 
 // clang-format off
 #if defined (__arm__) || defined(__arm64__)
 #  include <arm_neon.h>
+
 #  define USE_SIMD 1
 #elif __APPLE__
 #  include <TargetConditionals.h>
 #  if !TARGET_IPHONE_SIMULATOR
 #    include <NEON_2_SSE.h>
+
 #    define USE_SIMD 1
 #  else
 #    define USE_SIMD 0

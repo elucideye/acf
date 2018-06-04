@@ -12,40 +12,44 @@
 
 // clang-format off
 #if defined(ACF_ADD_TO_STRING)
-#  include "io/stdlib_string.h" // android workaround
+#  include <io/stdlib_string.h> // android workaround
 #endif
 // clang-format on
 
-#include <acf/ACF.h>
+#include "GLDetector.h"
 
-// clang-format off
-#if defined(ACF_DO_GPU)
-#  include <acf/GLDetector.h>
-#endif
-// clang-format on
-
-// Private/internal headers:
-#include <util/LazyParallelResource.h>
-#include <util/Line.h>
 #include <util/Logger.h>
-#include <util/Parallel.h>
-#include <util/make_unique.h>
 #include <util/string_utils.h>
 #include <util/cli.h>
+#include <util/LazyParallelResource.h>
+#include <util/Parallel.h>
 #include <io/cv_cereal.h>
-#include <io/cereal_pba.h> // optional
 
+#include <assert.h>
+#include <cereal/archives/json.hpp>
 // Package includes:
+
 #include <cxxopts.hpp>
 
 #include <opencv2/highgui.hpp>
+#include <opencv2/core/hal/interface.h>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/mat.inl.hpp>
+#include <opencv2/core/types.hpp>
+#include <opencv2/imgproc.hpp>
 
-#include <cereal/types/map.hpp>
-#include <cereal/types/array.hpp>
-#include <cereal/types/string.hpp>
-#include <cereal/archives/json.hpp>
+// Private/internal headers:
+#include <exception>
+#include <iosfwd>
+#include <memory>
+#include <thread>
+#include <stdlib.h>
+#include <math.h>
 
-#include <type_traits>
+namespace acf {
+class Detector;
+class ObjectDetector;
+}  // namespace acf
 
 using ObjectDetectorPtr = std::shared_ptr<acf::ObjectDetector>;
 using AcfPtr = std::shared_ptr<acf::Detector>;

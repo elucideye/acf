@@ -9,12 +9,13 @@
 */
 
 #include <acf/ACF.h>
-#include <util/ordered.h>
+#include <acf/acf_common.h>
 #include <util/string_hash.h>
+#include <util/ordered.h>
 
-#include <vector>
-#include <numeric>
-#include <algorithm>
+#include <opencv2/core/base.hpp>
+
+#include <stddef.h>
 
 // function bbs = bbNms( bbs, varargin )
 //

@@ -10,8 +10,9 @@
 */
 
 #include <acf/ACF.h>
+#include <acf/acf_common.h>
 
-#include <cmath>
+#include <opencv2/core/base.hpp>
 
 //function detector = acfModify( detector, varargin )
 // Modify aggregate channel features object detector.
