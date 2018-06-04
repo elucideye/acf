@@ -17,7 +17,6 @@
 #include <spdlog/spdlog.h>
 
 #include <stddef.h>
-#include <__mutex_base>
 #include <iosfwd>
 #include <memory>
 #include <mutex>
