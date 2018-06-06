@@ -4,10 +4,14 @@
 * Please email me if you find bugs, or have suggestions or questions!
 * Licensed under the Simplified BSD License [see external/bsd.txt]
 *******************************************************************************/
+
+#include <acf/MatP.h>
 #include <acf/toolbox/wrappers.hpp>
 #include <acf/toolbox/sse.hpp>
-#include <acf/MatP.h>
 
+#include <opencv2/core/mat.hpp>
+
+#include <stddef.h>
 #include <cmath>
 #include <typeinfo>
 

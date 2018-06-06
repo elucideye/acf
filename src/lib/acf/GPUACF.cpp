@@ -9,36 +9,47 @@
 */
 
 #include <acf/GPUACF.h>
+#include <acf/ACF.h>
+#include <acf/MatP.h>
 
-#include <ogles_gpgpu/common/proc/grayscale.h>
-#include <ogles_gpgpu/common/proc/pyramid.h>
-#include <ogles_gpgpu/common/proc/grad.h>
-#include <ogles_gpgpu/common/proc/gauss.h>
-#include <ogles_gpgpu/common/proc/gauss_opt.h>
-#include <ogles_gpgpu/common/proc/transform.h>
-#include <ogles_gpgpu/common/proc/gain.h>
-#include <ogles_gpgpu/common/proc/tensor.h>
-#include <ogles_gpgpu/common/proc/nms.h>
-
-// generic shaders
-#include <ogles_gpgpu/common/proc/gain.h>
-#include <ogles_gpgpu/common/proc/swizzle.h>
-#include <ogles_gpgpu/common/proc/rgb2luv.h>
+#include <util/make_unique.h>
+#include <util/Parallel.h>
+#include <util/convert.h>
 
 // acf specific shader
 #include <acf/gpu/swizzle2.h>
 #include <acf/gpu/gradhist.h>
 #include <acf/gpu/triangle_opt.h>
 
-#include <util/convert.h>
-#include <util/timing.h>
-#include <util/Parallel.h>
-#include <util/make_unique.h>
+#include <ogles_gpgpu/platform/opengl/gl_includes.h>
+#include <ogles_gpgpu/common/proc/grayscale.h>
+#include <ogles_gpgpu/common/proc/pyramid.h>
+#include <ogles_gpgpu/common/proc/grad.h>
+#include <ogles_gpgpu/common/proc/gauss.h>
+#include <ogles_gpgpu/common/common_includes.h>
 #include <ogles_gpgpu/common/gl/memtransfer_optimized.h>
+#include <ogles_gpgpu/common/proc/base/procinterface.h>
+#include <ogles_gpgpu/common/types.h>
+#include <ogles_gpgpu/common/core.h>
+#include <ogles_gpgpu/common/proc/gauss_opt.h>
+#include <ogles_gpgpu/common/proc/transform.h>
+#include <ogles_gpgpu/common/proc/gain.h>
+#include <ogles_gpgpu/common/proc/tensor.h>
+#include <ogles_gpgpu/common/proc/nms.h>
+#include <ogles_gpgpu/common/proc/gain.h>
+#include <ogles_gpgpu/common/proc/swizzle.h>
+#include <ogles_gpgpu/common/proc/rgb2luv.h>
 
-#include <iostream>
-#include <chrono>
+// generic shaders
+#include <opencv2/core/base.hpp>
+#include <opencv2/core/hal/interface.h>
+#include <opencv2/core/mat.inl.hpp>
+
+#include <stddef.h>
+#include <cstdint>
 #include <array>
+#include <iostream>
+#include <assert.h>
 
 // clang-format off
 #ifdef ANDROID

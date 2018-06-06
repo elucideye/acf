@@ -1,6 +1,9 @@
 #include "VideoCaptureImage.h"
 
-#include <utility>
+#include <opencv2/core/cvstd.inl.hpp>
+#include <opencv2/core/mat.inl.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/videoio/videoio_c.h>
 
 VideoCaptureImage::VideoCaptureImage(cv::Mat  image, int frames)
     : image(std::move(image))

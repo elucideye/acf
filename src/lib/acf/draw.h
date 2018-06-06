@@ -12,8 +12,11 @@
 #define __acf_draw_h__
 
 #include <acf/ACF.h>
+#include <acf/acf_common.h>
+#include <acf/acf_export.h>
 
 #include <opencv2/core.hpp>
+#include <opencv2/core/mat.hpp>
 
 ACF_NAMESPACE_BEGIN
 

@@ -17,7 +17,12 @@
 #include <acf/acf_common.h>
 
 #include <ogles_gpgpu/common/common_includes.h>
+#include <ogles_gpgpu/common/common_includes.h>
 #include <ogles_gpgpu/common/proc/base/filterprocbase.h>
+#include <ogles_gpgpu/platform/opengl/gl_includes.h>
+
+#include <assert.h>
+#include <iosfwd>
 
 BEGIN_OGLES_GPGPU
 

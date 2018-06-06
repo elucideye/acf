@@ -8,12 +8,13 @@
 
 */
 
+#include <math.h>
 #include <util/arithmetic.h>
-#include <util/acf_math.h>
 
 // clang-format off
 #if defined(__arm__) || defined(__arm64__)
 #  include <arm_neon.h>
+
 #  define DO_ARM_NEON 1
 #endif
 // clang-format on

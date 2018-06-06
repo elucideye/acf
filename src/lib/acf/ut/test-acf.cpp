@@ -8,8 +8,23 @@
 
 */
 
+
+#include <gtest/gtest-message.h>
+#include <gtest/gtest-test-part.h>
 #include <gtest/gtest.h>
+
+#include <ogles_gpgpu/common/proc/video.h>
+#include <ogles_gpgpu/common/types.h>
+
 #include <opencv2/core.hpp>
+#include <opencv2/core/base.hpp>
+#include <opencv2/core/cvstd.inl.hpp>
+#include <opencv2/core/hal/interface.h>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/mat.inl.hpp>
+#include <opencv2/imgcodecs.hpp>
+
+#include <assert.h>
 
 const char* imageFilename;
 const char* truthFilename;
@@ -55,28 +70,14 @@ int gauze_main(int argc, char** argv)
 
 #include <acf/ACF.h>
 #include <acf/MatP.h>
-#include <acf/draw.h>
 #include <acf/gpu/triangle_opt.h>
 #include <util/Logger.h>
 #include <io/cereal_pba.h>
-#include <util/ScopeTimeLogger.h>
-
-// http://uscilab.github.io/cereal/serialization_archives.html
-#include <cereal/archives/portable_binary.hpp>
-#include <cereal/types/vector.hpp>
-
-#include <gtest/gtest.h>
-
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
 
 // clang-format off
 #if defined(ACF_DO_GPU)
 #  include <acf/GPUACF.h>
 #  include <aglet/GLContext.h>
-
 static int gWidth = 640;
 static int gHeight = 480;
 #if defined(OGLES_GPGPU_OPENGL_ES3)
@@ -87,10 +88,15 @@ static aglet::GLContext::GLVersion gVersion = aglet::GLContext::kGLES20;
 #endif // defined(ACF_DO_GPU)
 // clang-format on
 
+#include <ogles_gpgpu/platform/opengl/gl_includes.h>
+
+#include <cmath>
 #include <fstream>
 #include <memory>
-#include <iostream>
-#include <chrono>
+
+namespace spdlog {
+class logger;
+}  // namespace spdlog
 
 // clang-format off
 #ifdef ANDROID
@@ -104,10 +110,6 @@ static aglet::GLContext::GLVersion gVersion = aglet::GLContext::kGLES20;
 #define BEGIN_EMPTY_NAMESPACE namespace {
 #define END_EMPTY_NAMESPACE }
 // clang-format on
-
-#if defined(ACF_DO_GPU)
-
-#endif // defined(ACF_DO_GPU)
 
 BEGIN_EMPTY_NAMESPACE
 

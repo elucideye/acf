@@ -9,6 +9,7 @@
 */
 
 #include <acf/gpu/binomial.h>
+#include <ogles_gpgpu/common/macros.h>
 
 BEGIN_OGLES_GPGPU
 

@@ -123,12 +123,17 @@
 // Licensed under the Simplified BSD License [see external/bsd.txt]
 
 #include <acf/ACF.h>
-
-#include <util/Parallel.h>
+#include <acf/MatP.h>
+#include <acf/acf_common.h>
 #include <util/acf_math.h>
+#include <util/Parallel.h>
 
-#include <opencv2/imgproc/imgproc.hpp>
-#include <random>
+#include <opencv2/core/base.hpp>
+#include <opencv2/core/types.hpp>
+
+#include <cmath>
+#include <iosfwd>
+#include <utility>
 
 ACF_NAMESPACE_BEGIN
 

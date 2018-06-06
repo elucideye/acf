@@ -9,10 +9,9 @@
 */
 
 #include <acf/gpu/multipass/triangle_pass.h>
+#include <ogles_gpgpu/common/tools.h>
 
-#include <ogles_gpgpu/common/common_includes.h>
-
-#include <cmath>
+#include <ogles_gpgpu/platform/opengl/gl_includes.h>
 
 using namespace ogles_gpgpu;
 

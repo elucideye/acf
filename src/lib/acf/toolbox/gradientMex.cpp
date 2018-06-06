@@ -6,13 +6,8 @@
 *******************************************************************************/
 #include <acf/toolbox/wrappers.hpp>
 #include <acf/toolbox/sse.hpp>
-
 #include <cmath>
-#include <iostream>
-#include <fstream>
-#include <iomanip>
 #include <cstring>
-#include <cassert>
 
 #define PI 3.14159265f
 

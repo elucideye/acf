@@ -12,11 +12,19 @@
 #ifndef __util_core_Logger_h__
 #define __util_core_Logger_h__
 
-#include <spdlog/spdlog.h>
-
 #include <util/acf_util.h>
 
+#include <spdlog/spdlog.h>
+
+#include <stddef.h>
+#include <iosfwd>
+#include <memory>
 #include <mutex>
+#include <string>
+
+namespace spdlog {
+class logger;
+}  // namespace spdlog
 
 UTIL_NAMESPACE_BEGIN
 

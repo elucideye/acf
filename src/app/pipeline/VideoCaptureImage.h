@@ -11,7 +11,11 @@
 #ifndef __acf_VideoCaptureImage_h__
 #define __acf_VideoCaptureImage_h__
 
+#include <opencv2/core/cvstd.hpp>
+#include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/videoio.hpp>
+#include <iosfwd>
 
 class VideoCaptureImage : public cv::VideoCapture
 {

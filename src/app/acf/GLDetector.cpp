@@ -1,11 +1,22 @@
 #include <acf/GLDetector.h>
 #include <acf/GPUACF.h>
+#include <acf/ACF.h>
 #include <acf/draw.h>
 #include <util/make_unique.h>
 
+#include <ogles_gpgpu/common/types.h>
+
 #include <aglet/GLContext.h>
 
-#include <opencv2/highgui.hpp>
+#include <opencv2/core/base.hpp>
+#include <opencv2/core/hal/interface.h>
+#include <opencv2/core/types.hpp>
+
+#include <stdexcept>
+
+namespace aglet {
+class GLContext;
+}  // namespace aglet
 
 // clang-format off
 #ifdef ANDROID

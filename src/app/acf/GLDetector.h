@@ -9,7 +9,10 @@
 */
 
 #include <acf/ACF.h>
-
+#include <acf/acf_common.h>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/mat.inl.hpp>
+#include <iosfwd>
 #include <memory>
 
 #ifndef __acf_GLDetector_h__
@@ -44,6 +47,7 @@ protected:
     const acf::Detector::Pyramid& getPyramid(const cv::Mat& input, const cv::Mat& rgb = {});
 
     struct Impl;
+
     std::unique_ptr<Impl> m_impl;
 };
 

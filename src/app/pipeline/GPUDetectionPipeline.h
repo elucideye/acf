@@ -11,9 +11,23 @@
 #ifndef __acf_GPUDetectionPipeline_h__
 #define __acf_GPUDetectionPipeline_h__
 
+#include <acf/ACF.h>
+#include <acf/acf_common.h>
 #include <acf/GPUACF.h>
-#include <memory>
+
+#include <ogles_gpgpu/common/proc/video.h>
+#include <ogles_gpgpu/platform/opengl/gl_includes.h>
+
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/mat.inl.hpp>
+#include <opencv2/core/types.hpp>
+
+#include <cstdint>
+#include <stddef.h>
 #include <chrono>
+#include <functional>
+#include <memory>
+#include <utility>
 
 ACF_NAMESPACE_BEGIN
 
@@ -91,6 +105,7 @@ protected:
     int computeDetectionWidth(const cv::Size& inputSizeUp) const;
 
     struct Impl;
+
     std::unique_ptr<Impl> impl;
 };
 

@@ -63,22 +63,44 @@
 #include <io/stdlib_string.h> // first
 #endif
 
-#include <util/Logger.h>
-#include <util/ScopeTimeLogger.h>
-
 #include "GPUDetectionPipeline.h"
 #include "VideoCaptureImage.h"
 
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
+#include <acf/ACF.h>
+#include <acf/GPUACF.h>
+#include <util/Logger.h>
+#include <util/ScopeTimeLogger.h>
 
 #include <aglet/GLContext.h>
 
+#include <ogles_gpgpu/common/proc/video.h>
 #include <ogles_gpgpu/common/proc/disp.h>
+#include <ogles_gpgpu/platform/opengl/gl_includes.h>
+
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/mat.inl.hpp>
+#include <opencv2/core/types.hpp>
+#include <opencv2/highgui.hpp> // videoio
 
 #include <cxxopts.hpp>
-#include <string>
+
+#include <stddef.h>
+#include <iosfwd>
+#include <memory>
+#include <regex>
+
+namespace acf {
+class GPUDetectionPipeline;
+}  // namespace acf
+namespace cv {
+class VideoCapture;
+}  // namespace cv
+namespace ogles_gpgpu {
+class Disp;
+}  // namespace ogles_gpgpu
+namespace spdlog {
+class logger;
+}  // namespace spdlog
 
 // clang-format off
 #ifdef ANDROID
