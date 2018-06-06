@@ -20,6 +20,7 @@
 #include <future>
 #include <memory>
 #include <stdexcept>
+#include <deque>
 
 static void chooseBest(std::vector<cv::Rect>& objects, std::vector<double>& scores);
 
