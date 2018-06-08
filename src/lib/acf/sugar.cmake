@@ -36,7 +36,7 @@ sugar_files(ACF_SRCS
   toolbox/imResampleMex.cpp
   toolbox/rgbConvertMex.cpp
   toolbox/wrappers.cpp
-  )
+)
 
 sugar_files(ACF_HDRS
   ACFIO.h
