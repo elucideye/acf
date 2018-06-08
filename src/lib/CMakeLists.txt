@@ -14,10 +14,14 @@ sugar_include(.)
 ### acf_util ###
 add_library(acf_util ${ACF_UTIL_SRCS} ${ACF_UTIL_HDRS})
 target_link_libraries(acf_util PUBLIC spdlog::spdlog ${OpenCV_LIBS})
+set(acf_modules acf_util)
 
 ### acf_shaders ###
-add_library(acf_shaders ${ACF_GPU_SRCS} ${ACF_GPU_HDRS})
-target_link_libraries(acf_shaders PUBLIC spdlog::spdlog ${OpenCV_LIBS})
+if(ACF_BUILD_OGLES_GPGPU)
+  add_library(acf_shaders ${ACF_GPU_SRCS} ${ACF_GPU_HDRS})
+  target_link_libraries(acf_shaders PUBLIC spdlog::spdlog ${OpenCV_LIBS})
+  list(APPEND acf_modules acf_shaders)
+endif()
 
 ### acf ###
 if(ACF_BUILD_SHARED_SDK)
@@ -36,7 +40,7 @@ add_library(${PROJECT_NAME}::acf ALIAS acf)
 
 target_link_libraries(acf
   PUBLIC ${ACF_3RDPARTY_PKG_LIBS}
-  PRIVATE ${ACF_3RDPARTY_PKG_LIBS_} acf_util acf_shaders
+  PRIVATE ${ACF_3RDPARTY_PKG_LIBS_} ${acf_modules}
 )
 target_compile_definitions(acf PUBLIC ACF_DO_HALF=1)  # half precision serialization
 if(ACF_SERIALIZE_WITH_CVMATIO)
@@ -49,7 +53,8 @@ target_include_directories(acf
   "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>"
 )
 
-foreach(lib acf_util acf_shaders acf)
+foreach(lib acf ${acf_modules})
+  message("LIB = ${lib} >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
   target_include_directories(${lib} PUBLIC "$<BUILD_INTERFACE:${ACF_ROOT_DIR}/src/lib/>")
   if(MSVC)
     target_compile_definitions(${lib} PUBLIC _USE_MATH_DEFINES) # define M_PI_2 for Visual Studio
@@ -118,7 +123,7 @@ configure_package_config_file(
 #   * header location after install: <prefix>/include/acf/ACF.h
 #   * headers can be included by C++ code `#include <acf/ACF.h>`
 install(
-    TARGETS acf acf_util acf_shaders
+    TARGETS acf ${acf_modules}
     EXPORT "${targets_export_name}"
     LIBRARY DESTINATION "lib"
     ARCHIVE DESTINATION "lib"
