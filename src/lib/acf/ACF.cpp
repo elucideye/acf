@@ -13,7 +13,7 @@
 #include <acf/MatP.h>
 #include <acf/acf_common.h>
 #include <acf/acf_export.h>
-#include <util/Parallel.h> // create_random_indices
+#include <acf/random.h>
 
 #include <opencv2/core/base.hpp>
 #include <opencv2/core/hal/interface.h>
@@ -276,10 +276,11 @@ int Detector::operator()(const Pyramid& P, std::vector<cv::Rect>& objects, std::
     // Here we create random indices so that (on average) for each `const cv::Range &r` slice
     // in the cv::parallel_for_(const cv::Range &r, ...) call, the total ACF Pyramid area
     // for all levels (specified by Range::{start,end}) will be equal for every thread.
-    auto scales = util::create_random_indices(P.nScales);
+    auto scales = acf::create_random_indices(P.nScales);
     std::vector<DetectionVec> bbs_(P.nScales);
 
-    std::function<void(const cv::Range& r)> worker = [&](const cv::Range& r) {
+    std::function<void(const cv::Range& r)> worker = [&](const cv::Range& r)
+    {
         for (int j = r.start; j < r.end; j++)
         {
             int i = scales[j];

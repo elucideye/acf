@@ -44,6 +44,7 @@ sugar_files(ACF_HDRS
   ACFObject.h
   ObjectDetector.h
   draw.h
+  random.h
   #######################
   ### Toolbox headers ###
   #######################  
@@ -57,7 +58,7 @@ sugar_files(ACF_HDRS_PUBLIC
   ObjectDetector.h
   MatP.h
   acf_common.h
-  )
+)
 
 if(ACF_BUILD_OGLES_GPGPU)
   # Public GPUACF classes added to the main library

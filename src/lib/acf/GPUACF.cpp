@@ -13,7 +13,6 @@
 #include <acf/MatP.h>
 
 #include <util/make_unique.h>
-#include <util/Parallel.h>
 #include <util/convert.h>
 
 // acf specific shader
@@ -840,28 +839,34 @@ cv::Mat ACF::getChannelsImpl()
             // TODO: confirm in documentation that ios texture caches can be queried in parallel
             // Experimentally this seems to be the case.
             // clang-format off
-            util::ParallelHomogeneousLambda harness = [&](int i)
+            std::function<void(const cv::Range&)> worker = [&](const cv::Range &r)
             {
-                planeIndex[i].second->getMemTransferObj()->setOutputPixelFormat(TEXTURE_FORMAT);
-                unpackImage(*planeIndex[i].second, planeIndex[i].first);
+                for(auto i = r.start; i < r.end; i++)
+                {
+                    planeIndex[i].second->getMemTransferObj()->setOutputPixelFormat(TEXTURE_FORMAT);
+                    unpackImage(*planeIndex[i].second, planeIndex[i].first);
+                }
             }; // clang-format on
 
 #if OGLES_GPGPU_IOS
             // iOS texture cache can be queried in parallel:
-            cv::parallel_for_({ 0, int(planeIndex.size()) }, harness);
+            cv::parallel_for_({ 0, int(planeIndex.size()) }, worker);
 #else
-            harness({ 0, int(planeIndex.size()) });
+            worker({ 0, int(planeIndex.size()) });
 #endif
         }
         else
         {
             // clang-format off
-            util::ParallelHomogeneousLambda harness = [&](int i)
+            std::function<void(const cv::Range&)> worker = [&](const cv::Range &r)
             {
-                planeIndex[i].second->getMemTransferObj()->setOutputPixelFormat(TEXTURE_FORMAT);
-                unpackImage(getImage(*planeIndex[i].second), planeIndex[i].first);
+                for(auto i = r.start; i < r.end; i++)
+                {
+                    planeIndex[i].second->getMemTransferObj()->setOutputPixelFormat(TEXTURE_FORMAT);
+                    unpackImage(getImage(*planeIndex[i].second), planeIndex[i].first);
+                }
             }; // clang-format on
-            harness({ 0, int(planeIndex.size()) });
+            worker({ 0, int(planeIndex.size()) });
         }
 
         if (impl->m_doAcfTransfer)

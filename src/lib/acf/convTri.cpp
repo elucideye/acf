@@ -147,7 +147,7 @@ void convConst(const MatP& A, MatP& B, const std::string& type, float p, int s)
     int ns[2]{ A.cols(), A.rows() };
     int d = A.channels();
     int m = std::min(ns[0], ns[1]);
-    int r = util::round(p);
+    int r = std::round(p);
 
     auto* a = const_cast<float*>(A.ptr<float>());
     auto* b = B.ptr<float>();

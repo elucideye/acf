@@ -125,8 +125,8 @@
 #include <acf/ACF.h>
 #include <acf/MatP.h>
 #include <acf/acf_common.h>
+#include <acf/random.h>
 #include <util/acf_math.h>
-#include <util/Parallel.h>
 
 #include <opencv2/core/base.hpp>
 #include <opencv2/core/types.hpp>
@@ -140,7 +140,7 @@ ACF_NAMESPACE_BEGIN
 template <typename T>
 cv::Size round(const cv::Size_<T>& size)
 {
-    return cv::Size_<T>(util::round(size.width), util::round(size.height));
+    return cv::Size_<T>(std::round(size.width), std::round(size.height));
 }
 
 /*
@@ -377,7 +377,7 @@ int Detector::chnsPyramid
     // using simple uniform slicing will tend to starve some threads due to the nature of the
     // pyramid layout.  Randomizing the scale indices should do better.  More optimal strategies
     // may exist with further testing (work stealing, etc).
-    const auto scalesIndex = util::create_random_indices(nScales);
+    const auto scalesIndex = acf::create_random_indices(nScales);
 
     auto isAIndex = isA;
     std::shuffle(isAIndex.begin(), isAIndex.end(), std::mt19937(std::random_device()()));
@@ -490,16 +490,16 @@ int Detector::getScales
     for (int i = 0; i < nScales; i++)
     {
         double s = std::pow(2.0, -double(i) / double(nPerOct) + double(nOctUp));
-        double s0 = (util::round(d0 * s / shrink) * shrink - 0.25 * shrink) / d0;
-        double s1 = (util::round(d0 * s / shrink) * shrink + 0.25 * shrink) / d0;
+        double s0 = (std::round(d0 * s / shrink) * shrink - 0.25 * shrink) / d0;
+        double s1 = (std::round(d0 * s / shrink) * shrink + 0.25 * shrink) / d0;
         std::pair<double, double> best(0, std::numeric_limits<double>::max());
         for (double j = 0.0; j < 1.0 - std::numeric_limits<double>::epsilon(); j += 0.01)
         {
             double ss = (j * (s1 - s0) + s0);
             double es0 = d0 * ss;
-            es0 = std::abs(es0 - util::round(es0 / shrink) * shrink);
+            es0 = std::abs(es0 - std::round(es0 / shrink) * shrink);
             double es1 = d1 * ss;
-            es1 = std::abs(es1 - util::round(es1 / shrink) * shrink);
+            es1 = std::abs(es1 - std::round(es1 / shrink) * shrink);
             double es = std::max(es0, es1);
             if (es < best.second)
             {
@@ -519,8 +519,8 @@ int Detector::getScales
             double s = tmp[i - 1];
             scales.push_back(s);
 
-            double x = util::round(double(sz.width) * s / shrink) * shrink / sz.width;
-            double y = util::round(double(sz.height) * s / shrink) * shrink / sz.height;
+            double x = std::round(double(sz.width) * s / shrink) * shrink / sz.width;
+            double y = std::round(double(sz.height) * s / shrink) * shrink / sz.height;
             scaleshw.emplace_back(x, y);
         }
     }
