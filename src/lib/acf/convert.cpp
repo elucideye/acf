@@ -9,8 +9,8 @@
 */
 
 
-#include <util/convert.h>
-#include <util/acf_util.h>
+#include <acf/acf_common.h>
+#include <acf/convert.h>
 
 #include <opencv2/core/base.hpp>
 
@@ -38,7 +38,7 @@
 #endif
 // clang-format on
 
-UTIL_NAMESPACE_BEGIN
+ACF_NAMESPACE_BEGIN
 
 #if USE_SIMD
 
@@ -166,4 +166,4 @@ void unpack(const cv::Mat4b& input, std::vector<PlaneInfo>& planes)
 
 #endif
 
-UTIL_NAMESPACE_END
+ACF_NAMESPACE_END

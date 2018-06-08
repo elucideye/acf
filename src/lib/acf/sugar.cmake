@@ -63,7 +63,8 @@ sugar_files(ACF_HDRS_PUBLIC
 if(ACF_BUILD_OGLES_GPGPU)
   # Public GPUACF classes added to the main library
   sugar_files(ACF_HDRS_PUBLIC GPUACF.h)
-  sugar_files(ACF_SRCS GPUACF.cpp)
+  sugar_files(ACF_HDRS convert.h) 
+  sugar_files(ACF_SRCS GPUACF.cpp convert.cpp)
 
   # All other shaders to in the acf_shaders utility lib for reuse
   sugar_files(ACF_GPU_HDRS

@@ -14,7 +14,6 @@ sugar_files(ACF_UTIL_HDRS
   acf_math.h
   acf_util.h
   cli.h
-  convert.h
   make_unique.h
   ordered.h
   string_hash.h
@@ -24,6 +23,5 @@ sugar_files(ACF_UTIL_HDRS
 
 sugar_files(ACF_UTIL_SRCS
   Logger.cpp
-  convert.cpp
   string_utils.cpp
 )
