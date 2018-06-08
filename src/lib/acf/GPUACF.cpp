@@ -11,10 +11,9 @@
 #include <acf/GPUACF.h>
 #include <acf/ACF.h>
 #include <acf/MatP.h>
+#include <acf/convert.h>
 
 #include <util/make_unique.h>
-#include <util/Parallel.h>
-#include <util/convert.h>
 
 // acf specific shader
 #include <acf/gpu/swizzle2.h>
@@ -65,7 +64,7 @@ BEGIN_OGLES_GPGPU
 
 struct ACF::Impl
 {
-    using PlaneInfoVec = std::vector<util::PlaneInfo>;
+    using PlaneInfoVec = std::vector<acf::PlaneInfo>;
     using ChannelSpecification = std::vector<std::pair<PlaneInfoVec, ProcInterface*>>;
     using SmoothProc = ogles_gpgpu::GaussOptProc;
 
@@ -685,7 +684,7 @@ void ACF::fill(acf::Detector::Pyramid& pyramid)
     }
 }
 
-static void unpackImage(const cv::Mat4b& frame, std::vector<util::PlaneInfo>& dst)
+static void unpackImage(const cv::Mat4b& frame, std::vector<acf::PlaneInfo>& dst)
 {
     switch (dst.front().plane.type())
     {
@@ -693,17 +692,17 @@ static void unpackImage(const cv::Mat4b& frame, std::vector<util::PlaneInfo>& ds
             dst.front().plane = frame.clone(); // deep copy
             break;
         case CV_8UC1:
-            util::unpack(frame, dst);
+            acf::unpack(frame, dst);
             break;
         case CV_32FC1:
-            util::convertU8ToF32(frame, dst);
+            acf::convertU8ToF32(frame, dst);
             break;
         default:
             break;
     }
 }
 
-static void unpackImage(ProcInterface& proc, std::vector<util::PlaneInfo>& dst)
+static void unpackImage(ProcInterface& proc, std::vector<acf::PlaneInfo>& dst)
 {
     MemTransfer::FrameDelegate handler = [&](const Size2d& size, const void* pixels, size_t rowStride) {
         cv::Mat4b frame(size.height, size.width, (cv::Vec4b*)pixels, rowStride);
@@ -713,10 +712,10 @@ static void unpackImage(ProcInterface& proc, std::vector<util::PlaneInfo>& dst)
                 dst.front().plane = frame.clone(); // deep copy
                 break;
             case CV_8UC1:
-                util::unpack(frame, dst);
+                acf::unpack(frame, dst);
                 break;
             case CV_32FC1:
-                util::convertU8ToF32(frame, dst);
+                acf::convertU8ToF32(frame, dst);
                 break;
             default:
                 break;
@@ -778,7 +777,7 @@ std::array<int, 4> ACF::initChannelOrder()
 
 cv::Mat ACF::getChannelsImpl()
 {
-    using util::unpack;
+    using acf::unpack;
 
     // clang-format off
     std::stringstream ss;
@@ -840,28 +839,34 @@ cv::Mat ACF::getChannelsImpl()
             // TODO: confirm in documentation that ios texture caches can be queried in parallel
             // Experimentally this seems to be the case.
             // clang-format off
-            util::ParallelHomogeneousLambda harness = [&](int i)
+            std::function<void(const cv::Range&)> worker = [&](const cv::Range &r)
             {
-                planeIndex[i].second->getMemTransferObj()->setOutputPixelFormat(TEXTURE_FORMAT);
-                unpackImage(*planeIndex[i].second, planeIndex[i].first);
+                for(auto i = r.start; i < r.end; i++)
+                {
+                    planeIndex[i].second->getMemTransferObj()->setOutputPixelFormat(TEXTURE_FORMAT);
+                    unpackImage(*planeIndex[i].second, planeIndex[i].first);
+                }
             }; // clang-format on
 
 #if OGLES_GPGPU_IOS
             // iOS texture cache can be queried in parallel:
-            cv::parallel_for_({ 0, int(planeIndex.size()) }, harness);
+            cv::parallel_for_({ 0, int(planeIndex.size()) }, worker);
 #else
-            harness({ 0, int(planeIndex.size()) });
+            worker({ 0, int(planeIndex.size()) });
 #endif
         }
         else
         {
             // clang-format off
-            util::ParallelHomogeneousLambda harness = [&](int i)
+            std::function<void(const cv::Range&)> worker = [&](const cv::Range &r)
             {
-                planeIndex[i].second->getMemTransferObj()->setOutputPixelFormat(TEXTURE_FORMAT);
-                unpackImage(getImage(*planeIndex[i].second), planeIndex[i].first);
+                for(auto i = r.start; i < r.end; i++)
+                {
+                    planeIndex[i].second->getMemTransferObj()->setOutputPixelFormat(TEXTURE_FORMAT);
+                    unpackImage(getImage(*planeIndex[i].second), planeIndex[i].first);
+                }
             }; // clang-format on
-            harness({ 0, int(planeIndex.size()) });
+            worker({ 0, int(planeIndex.size()) });
         }
 
         if (impl->m_doAcfTransfer)

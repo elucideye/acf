@@ -22,7 +22,6 @@
 #include <util/string_utils.h>
 #include <util/cli.h>
 #include <util/LazyParallelResource.h>
-#include <util/Parallel.h>
 #include <io/cv_cereal.h>
 
 #include <assert.h>
@@ -308,26 +307,29 @@ int gauze_main(int argc, char** argv)
     std::vector<std::pair<std::string, float>> scores;
 
     // Parallel loop:
-    util::ParallelHomogeneousLambda harness = [&](int i) {
-        // Get thread specific segmenter lazily:
-        auto& detector = manager[std::this_thread::get_id()];
-        assert(detector);
-
-        auto winSize = detector->getWindowSize();
-        if (!detector->getIsRowMajor())
+    std::function<void(const cv::Range&)> worker = [&](const cv::Range& r)
+    {
+        for(auto i = r.start; i < r.end; i++)
         {
-            std::swap(winSize.width, winSize.height);
-        }
+            // Get thread specific segmenter lazily:
+            auto& detector = manager[std::this_thread::get_id()];
+            assert(detector);
 
-        // Load current image
-        auto frame = (*video)(i);
-        auto& image = frame.image;
-
-        if (!image.empty())
-        {
-            cv::Mat imageRGB;
-            switch (image.channels())
+            auto winSize = detector->getWindowSize();
+            if (!detector->getIsRowMajor())
             {
+                std::swap(winSize.width, winSize.height);
+            }
+
+            // Load current image
+            auto frame = (*video)(i);
+            auto& image = frame.image;
+
+            if (!image.empty())
+            {
+                cv::Mat imageRGB;
+                switch (image.channels())
+                {
                 case 1:
                     cv::cvtColor(image, imageRGB, cv::COLOR_GRAY2RGB);
                     break;
@@ -337,96 +339,97 @@ int gauze_main(int argc, char** argv)
                 case 4:
                     cv::cvtColor(image, imageRGB, cv::COLOR_BGRA2RGB);
                     break;
-            }
-
-            std::vector<double> scores;
-            std::vector<cv::Rect> objects;
-            if (image.size() == winSize)
-            {
-                const float score = detector->evaluate(imageRGB);
-                scores.push_back(score);
-                objects.push_back(cv::Rect({ 0, 0 }, image.size()));
-            }
-            else
-            {
-                Resizer resizer(imageRGB, detector->getWindowSize(), minWidth);
-                (*detector)(resizer, objects, &scores);
-                resizer(objects);
-
-                if (doSingleDetection)
-                {
-                    chooseBest(objects, scores);
-                }
-            }
-
-            if (!doPositiveOnly || (objects.size() > 0))
-            {
-                // Construct valid filename with no extension:
-                std::string base = util::basename(frame.name);
-                std::string filename = sOutput + "/" + base;
-
-                float maxScore = -1e6f;
-                auto iter = std::max_element(scores.begin(), scores.end());
-                if (iter != scores.end())
-                {
-                    maxScore = *iter;
                 }
 
-                if (doPyramids)
+                std::vector<double> scores;
+                std::vector<cv::Rect> objects;
+                if (image.size() == winSize)
                 {
-                    // The "--pyramid" command line option can be used to visualize the
-                    // CPU and GPU computed ACF pyramids.  This was added to acf-detect
-                    // in order to help reduce differences between the shader and SSE/CPU
-                    // computed features.  If we are in a GPU model (using acf::GLDetector)
-                    // then we dump both the CPU and the GPU pyramids and we use a reset()
-                    // method in order to ensure the CPU pyramid will be computed for each
-                    // frame.
-#if defined(ACF_DO_GPU)
-                    if (auto* handle = dynamic_cast<acf::GLDetector*>(detector.get()))
-                    {
-                        cv::Mat Pcpu = handle->draw(false);
-                        cv::Mat Pgpu = handle->draw(true);
-                        cv::imwrite(filename + "_Pcpu.png", Pcpu);
-                        cv::imwrite(filename + "_Pgpu.png", Pgpu);
-                        handle->clear();
-                    }
-#endif
-                }
-
-                if (doScoreLog)
-                {
-                    logger->info("SCORE: {} = {}", filename, maxScore);
+                    const float score = detector->evaluate(imageRGB);
+                    scores.push_back(score);
+                    objects.push_back(cv::Rect({ 0, 0 }, image.size()));
                 }
                 else
                 {
-                    logger->info("{}/{} {} = {}; score = {}", ++total, video->size(), frame.name, objects.size(), maxScore);
-                }
+                    Resizer resizer(imageRGB, detector->getWindowSize(), minWidth);
+                    (*detector)(resizer, objects, &scores);
+                    resizer(objects);
 
-                // Save detection results in JSON:
-                if (!writeAsJson(filename + ".json", objects))
-                {
-                    logger->error("Failed to write: {}.json", filename);
-                }
-
-                if (doBox && !writeAsText(filename + ".roi", objects))
-                {
-                    logger->error("Failed to write: {}.box", filename);
-                }
-
-                if (doAnnotation || doWindow)
-                {
-                    cv::Mat canvas = image.clone();
-                    drawObjects(canvas, objects);
-
-                    if (doAnnotation)
+                    if (doSingleDetection)
                     {
-                        cv::imwrite(filename + "_objects.jpg", canvas);
+                        chooseBest(objects, scores);
+                    }
+                }
+
+                if (!doPositiveOnly || (objects.size() > 0))
+                {
+                    // Construct valid filename with no extension:
+                    std::string base = util::basename(frame.name);
+                    std::string filename = sOutput + "/" + base;
+
+                    float maxScore = -1e6f;
+                    auto iter = std::max_element(scores.begin(), scores.end());
+                    if (iter != scores.end())
+                    {
+                        maxScore = *iter;
                     }
 
-                    if (doWindow)
+                    if (doPyramids)
                     {
-                        cv::imshow("acf", canvas);
-                        cv::waitKey(1);
+                        // The "--pyramid" command line option can be used to visualize the
+                        // CPU and GPU computed ACF pyramids.  This was added to acf-detect
+                        // in order to help reduce differences between the shader and SSE/CPU
+                        // computed features.  If we are in a GPU model (using acf::GLDetector)
+                        // then we dump both the CPU and the GPU pyramids and we use a reset()
+                        // method in order to ensure the CPU pyramid will be computed for each
+                        // frame.
+#if defined(ACF_DO_GPU)
+                        if (auto* handle = dynamic_cast<acf::GLDetector*>(detector.get()))
+                        {
+                            cv::Mat Pcpu = handle->draw(false);
+                            cv::Mat Pgpu = handle->draw(true);
+                            cv::imwrite(filename + "_Pcpu.png", Pcpu);
+                            cv::imwrite(filename + "_Pgpu.png", Pgpu);
+                            handle->clear();
+                        }
+#endif
+                    }
+
+                    if (doScoreLog)
+                    {
+                        logger->info("SCORE: {} = {}", filename, maxScore);
+                    }
+                    else
+                    {
+                        logger->info("{}/{} {} = {}; score = {}", ++total, video->size(), frame.name, objects.size(), maxScore);
+                    }
+
+                    // Save detection results in JSON:
+                    if (!writeAsJson(filename + ".json", objects))
+                    {
+                        logger->error("Failed to write: {}.json", filename);
+                    }
+
+                    if (doBox && !writeAsText(filename + ".roi", objects))
+                    {
+                        logger->error("Failed to write: {}.box", filename);
+                    }
+
+                    if (doAnnotation || doWindow)
+                    {
+                        cv::Mat canvas = image.clone();
+                        drawObjects(canvas, objects);
+
+                        if (doAnnotation)
+                        {
+                            cv::imwrite(filename + "_objects.jpg", canvas);
+                        }
+
+                        if (doWindow)
+                        {
+                            cv::imshow("acf", canvas);
+                            cv::waitKey(1);
+                        }
                     }
                 }
             }
@@ -439,12 +442,12 @@ int gauze_main(int argc, char** argv)
         for (int i = 0; (i < count); i++)
         {
             // Increment manually, to check for end of file:
-            harness({ i, i + 1 });
+            worker({ i, i + 1 });
         }
     }
     else
     {
-        cv::parallel_for_({ 0, count }, harness, std::max(threads, -1));
+        cv::parallel_for_({ 0, count }, worker, std::max(threads, -1));
     }
 
     return 0;
