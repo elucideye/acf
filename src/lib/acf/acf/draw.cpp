@@ -31,9 +31,6 @@ cv::Mat draw(acf::Detector::Pyramid& pyramid)
         }
         cv::vconcat(images, Ccpu);
 
-        // Instead of upright:
-        //cv::vconcat(pyramid.data[i][0].get(), Ccpu);
-
         if (levels.size())
         {
             cv::copyMakeBorder(Ccpu, Ccpu, 0, levels.front().rows - Ccpu.rows, 0, 0, cv::BORDER_CONSTANT);

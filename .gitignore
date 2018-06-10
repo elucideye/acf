@@ -29,13 +29,7 @@
 *.app
 
 # Hunter/polly 
-_logs/*
-_builds/*
-_install/*
-_framework/*
-_os/*
-_archives/*
-_assets/*
+_*/
 
 # Stored releases
 releases/*

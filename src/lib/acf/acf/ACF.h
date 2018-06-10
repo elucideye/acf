@@ -19,7 +19,6 @@
 #include <acf/ObjectDetector.h> // interface
 #include <acf/acf_common.h>
 #include <acf/acf_export.h>
-#include <acf/ACFIO.h>
 
 #include <opencv2/core.hpp>
 #include <opencv2/core/mat.hpp>

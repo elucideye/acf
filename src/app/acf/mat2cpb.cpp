@@ -13,8 +13,10 @@
 #  include "io/stdlib_string.h"
 #endif
 #include <acf/ACF.h>
-#include <io/cereal_pba.h>
 #include <util/Logger.h>
+
+#include <cereal/cereal.hpp>
+#include <cereal/archives/portable_binary.hpp>
 
 #include <cxxopts.hpp>
 
@@ -43,9 +45,9 @@ int gauze_main(int argc, char** argv)
         ("h,help", "Print help message");
     // clang-format on
 
-    options.parse(argc, argv);
+    auto cli = options.parse(argc, argv);
 
-    if ((argumentCount <= 1) || options.count("help"))
+    if ((argumentCount <= 1) || cli.count("help"))
     {
         logger->info("{}", options.help({ "" }));
         return 0;
@@ -76,7 +78,15 @@ int gauze_main(int argc, char** argv)
 
     acf::Detector acf(sInput);
 
-    save_cpb(sOutput, acf);
+    // Serialize:
+    std::ofstream ofs(sOutput, std::ios::binary);
+    if(!ofs)
+    {
+        logger->error("Failed to open {}", sOutput);
+        return 1;
+    }
+    cereal::PortableBinaryOutputArchive oa(ofs);
+    oa << acf;
 
     return 0;
 }
