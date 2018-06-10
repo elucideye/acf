@@ -11,6 +11,7 @@ sugar_files(ACF_UTIL_HDRS
   LazyParallelResource.h
   Line.h
   Logger.h
+  ScopeTimeLogger.h
   acf_math.h
   acf_util.h
   cli.h
@@ -18,10 +19,8 @@ sugar_files(ACF_UTIL_HDRS
   ordered.h
   string_hash.h
   string_utils.h
-  timing.h
 )
 
 sugar_files(ACF_UTIL_SRCS
   Logger.cpp
-  string_utils.cpp
 )

@@ -11,6 +11,7 @@
 
 #include <acf/ACF.h>
 #include <acf/MatP.h>
+#include <acf/ACFIO.h>
 #include <acf/acf_common.h>
 #include <acf/acf_export.h>
 #include <acf/random.h>

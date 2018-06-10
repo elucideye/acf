@@ -383,10 +383,10 @@ int gauze_main(int argc, char** argv)
         ;
     // clang-format on
 
-    options.parse(argc, argv);
-    if ((argumentCount <= 1) || options.count("help"))
+    auto cli = options.parse(argc, argv);
+    if ((argumentCount <= 1) || cli.count("help"))
     {
-        std::cout << options.help({ "" }) << std::endl;
+        logger->info("{}", options.help({""}));
         return 0;
     }
 

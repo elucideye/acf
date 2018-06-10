@@ -19,7 +19,7 @@ set(acf_srcs
 )
 
 add_executable(${test_app} ${acf_srcs})
-target_link_libraries(${test_app} PUBLIC acf acf_util cxxopts::cxxopts ${OpenCV_LIBS})
+target_link_libraries(${test_app} PUBLIC acf::acf acf_util cxxopts::cxxopts ${OpenCV_LIBS})
 
 # cross platform testing
 hunter_add_package(gauze)
