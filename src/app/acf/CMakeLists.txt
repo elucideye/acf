@@ -17,7 +17,7 @@ if(${ACF_DO_GPU})
 endif()
 
 add_executable(${test_app} ${acf_srcs})
-target_link_libraries(${test_app} PUBLIC acf::acf acf_util cxxopts::cxxopts)
+target_link_libraries(${test_app} PUBLIC acf::acf acf_common cxxopts::cxxopts)
 
 if(${ACF_DO_GPU})
   target_include_directories(${test_app} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../>")
@@ -46,7 +46,7 @@ set(conv_app acf-mat2cpb)
 
 if(ACF_SERIALIZE_WITH_CVMATIO)
   add_executable(${conv_app} mat2cpb.cpp)
-  target_link_libraries(${conv_app} PUBLIC acf::acf acf_util cxxopts::cxxopts cereal::cereal)
+  target_link_libraries(${conv_app} PUBLIC acf::acf acf_common cxxopts::cxxopts cereal::cereal)
   set_property(TARGET ${conv_app} PROPERTY FOLDER "app/console")
   install(TARGETS ${conv_app} DESTINATION bin)
 endif()

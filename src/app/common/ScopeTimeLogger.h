@@ -1,5 +1,5 @@
 /*! -*-c++-*-
-  @file   timing.h
+  @file   ScopeTimeLogger.h
   @author David Hirvonen
   @brief  Scope based timing macro.
 
@@ -8,15 +8,15 @@
 
 */
 
-#ifndef __util_core_ScopeTimeLogger_h__
-#define __util_core_ScopeTimeLogger_h__
+#ifndef __common_ScopeTimeLogger_h__
+#define __common_ScopeTimeLogger_h__
 
-#include "util/acf_util.h"
+#include <common/acf_common.h>
 
 #include <chrono>
 #include <functional>
 
-UTIL_NAMESPACE_BEGIN
+COMMON_NAMESPACE_BEGIN
 
 class ScopeTimeLogger
 {
@@ -58,6 +58,6 @@ protected:
     TimePoint m_tic;
 };
 
-UTIL_NAMESPACE_END
+COMMON_NAMESPACE_END
 
-#endif // __util_core_ScopeTimeLogger_h__
+#endif // __common_ScopeTimeLogger_h__

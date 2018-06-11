@@ -9,8 +9,8 @@
 
 */
 
-#include <util/Logger.h>
-#include <util/acf_util.h>
+#include <common/Logger.h>
+#include <common/acf_common.h>
 
 namespace spdlog {
 class logger;
@@ -22,7 +22,7 @@ class logger;
 #endif
 // clang-format on
 
-UTIL_NAMESPACE_BEGIN
+COMMON_NAMESPACE_BEGIN
 
 std::mutex Logger::m_mutex;
 int Logger::m_count = 0;
@@ -73,4 +73,4 @@ void Logger::drop(const char* name)
     spdlog::drop(name);
 }
 
-UTIL_NAMESPACE_END
+COMMON_NAMESPACE_END

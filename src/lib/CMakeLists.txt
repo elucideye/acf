@@ -10,10 +10,6 @@
 find_package(sugar CONFIG REQUIRED)
 sugar_include(.)
 
-### acf_util ### : for console apps
-add_library(acf_util ${ACF_UTIL_SRCS} ${ACF_UTIL_HDRS})
-target_link_libraries(acf_util PUBLIC spdlog::spdlog)
-
 ### acf_shaders ### : for acf lib and tests
 if(ACF_BUILD_OGLES_GPGPU)
   add_library(acf_shaders ${ACF_GPU_SRCS} ${ACF_GPU_HDRS})
@@ -53,19 +49,15 @@ target_include_directories(acf
   "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>" # generated acf_export.h
 )
 
-foreach(lib acf ${acf_modules} acf_util)
+foreach(lib acf ${acf_modules})
   message("LIB = ${lib} >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
   target_include_directories(${lib}
     PUBLIC
-    "$<BUILD_INTERFACE:${ACF_ROOT_DIR}/src/lib/>" # for util
     "$<BUILD_INTERFACE:${ACF_ROOT_DIR}/src/lib/acf>" # for io, acf
   )
   if(MSVC)
     target_compile_definitions(${lib} PUBLIC _USE_MATH_DEFINES) # define M_PI_2 for Visual Studio
     target_compile_definitions(${lib} PUBLIC NOMINMAX=1) # avoid std::{min,max}() conflicts
-  endif()
-  if(NOT ACF_HAVE_TO_STRING)
-    target_compile_definitions(${lib} PUBLIC ACF_ADD_TO_STRING=1)
   endif()
 endforeach()
 
@@ -117,7 +109,7 @@ write_basic_package_version_file(
 #   * targets_export_name
 #   * PROJECT_NAME
 configure_package_config_file(
-    "${ACF_ROOT_DIR}/cmake/Config.cmake.in"
+    "${CMAKE_TOP_DIR}/Config.cmake.in"
     "${project_config}"
     INSTALL_DESTINATION "${config_install_dir}"
 )
@@ -169,9 +161,4 @@ install(
 )
 
 # }
-
-# unit tests:
-if(ACF_BUILD_TESTS)
-    add_subdirectory(acf/acf/ut)
-endif()
 

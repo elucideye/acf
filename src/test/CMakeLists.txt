@@ -8,7 +8,7 @@ set(acf_ut_srcs test-acf.cpp)
 
 add_executable(${test_app} ${acf_ut_srcs})
 set_property(TARGET ${test_app} PROPERTY FOLDER "app/tests")
-target_link_libraries(${test_app} PUBLIC acf::acf acf_util acf_shaders GTest::gtest ${OpenCV_LIBS})
+target_link_libraries(${test_app} PUBLIC acf::acf acf_common acf_shaders GTest::gtest ${OpenCV_LIBS})
 
 if (ACF_BUILD_OGLES_GPGPU AND TARGET aglet::aglet)
   target_link_libraries(${test_app} PUBLIC aglet::aglet)

@@ -13,11 +13,11 @@
 #ifndef __acf_string_hash_h__
 #define __acf_string_hash_h__
 
-#include <acf/acf_common.h>
+#include <util/acf_util.h>
 
 #include <string>
 
-ACF_BEGIN_NAMESPACE(string_hash)
+UTIL_BEGIN_NAMESPACE(string_hash)
 
 template <class>
 struct hasher;
@@ -41,15 +41,15 @@ std::size_t constexpr hash(T&& t)
 
 // clang-format off
 inline /* inline namespace */
-ACF_BEGIN_NAMESPACE(literals)
+UTIL_BEGIN_NAMESPACE(literals)
     std::size_t constexpr
     operator"" _hash(const char* s, size_t)
 {
     return hasher<std::string>()(s);
 }
-ACF_END_NAMESPACE(literals)
+UTIL_END_NAMESPACE(literals)
 // clang-format on
 
-ACF_END_NAMESPACE(string_hash)
+UTIL_END_NAMESPACE(string_hash)
 
 #endif

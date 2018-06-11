@@ -8,14 +8,14 @@
 
 */
 
-#ifndef __util_string_utils_h__
-#define __util_string_utils_h__
+#ifndef __common_string_utils_h__
+#define __common_string_utils_h__
 
-#include <util/acf_util.h>
+#include <common/acf_common.h>
 
 #include <string>
 
-UTIL_NAMESPACE_BEGIN
+COMMON_NAMESPACE_BEGIN
 
 inline std::string basename(const std::string& name, const std::string& ext=".")
 {
@@ -34,6 +34,6 @@ inline std::string basename(const std::string& name, const std::string& ext=".")
     return base.substr(0, std::min(base.size(), base.rfind(ext)));
 };
 
-UTIL_NAMESPACE_END
+COMMON_NAMESPACE_END
 
-#endif /* __util_string_utils_h___ */
+#endif /* __common_string_utils_h___ */

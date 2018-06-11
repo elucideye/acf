@@ -8,12 +8,8 @@
  
  */
 
-// clang-format off
-#if defined(ACF_ADD_TO_STRING)
-#  include "io/stdlib_string.h"
-#endif
 #include <acf/ACF.h>
-#include <util/Logger.h>
+#include <common/Logger.h>
 
 #include <cereal/cereal.hpp>
 #include <cereal/archives/portable_binary.hpp>

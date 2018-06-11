@@ -1,5 +1,5 @@
 /*! -*-c++-*-
-  @file   acf_util.h
+  @file   acf_common.h
   @author David Hirvonen
   @brief  Declaration of internal util namespace.
 
@@ -8,17 +8,17 @@
 
 */
 
-#ifndef __acf_util_h__
-#define __acf_util_h__
+#ifndef __common_acf_common_h__
+#define __common_acf_common_h__
 
 // clang-format off
-#define UTIL_BEGIN_NAMESPACE(XYZ) namespace XYZ {
-#define UTIL_END_NAMESPACE(XYZ) }
+#define COMMON_BEGIN_NAMESPACE(XYZ) namespace XYZ {
+#define COMMON_END_NAMESPACE(XYZ) }
 // clang-format on
 
 // clang-format off
-#define UTIL_NAMESPACE_BEGIN namespace util {
-#define UTIL_NAMESPACE_END }
+#define COMMON_NAMESPACE_BEGIN namespace util {
+#define COMMON_NAMESPACE_END }
 // clang-format on
 
 #endif

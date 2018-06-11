@@ -2,7 +2,7 @@
 #include <acf/GPUACF.h>
 #include <acf/ACF.h>
 #include <acf/draw.h>
-#include <util/make_unique.h>
+#include <common/make_unique.h>
 
 #include <ogles_gpgpu/common/types.h>
 

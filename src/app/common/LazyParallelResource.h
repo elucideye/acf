@@ -8,15 +8,15 @@
 
 */
 
-#ifndef __util_LazyParallelResource_h__
-#define __util_LazyParallelResource_h__
+#ifndef __common_LazyParallelResource_h__
+#define __common_LazyParallelResource_h__
 
-#include <util/acf_util.h>
+#include <common/acf_common.h>
 
 #include <functional>
 #include <map>
 
-UTIL_NAMESPACE_BEGIN
+COMMON_NAMESPACE_BEGIN
 
 template <typename Key, typename Value>
 struct LazyParallelResource
@@ -51,6 +51,6 @@ struct LazyParallelResource
     std::function<Value()> m_alloc; // default allocator
 };
 
-UTIL_NAMESPACE_END
+COMMON_NAMESPACE_END
 
 #endif

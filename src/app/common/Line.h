@@ -8,10 +8,10 @@
 
 */
 
-#ifndef __util_Line_h__
-#define __util_Line_h__
+#ifndef __common_Line_h__
+#define __common_Line_h__
 
-#include <util/acf_util.h>
+#include <common/acf_common.h>
 
 #include <sstream>
 #include <algorithm>
@@ -23,7 +23,7 @@
 #include <memory>
 #include <iomanip>
 
-UTIL_NAMESPACE_BEGIN
+COMMON_NAMESPACE_BEGIN
 
 // For use with istream_iterator to read complete lines (new line delimiter)
 // std::vector<std::string> lines;
@@ -65,6 +65,6 @@ struct csv_reader : std::ctype<char>
     }
 };
 
-UTIL_NAMESPACE_END
+COMMON_NAMESPACE_END
 
-#endif // __util_Line_h__
+#endif // __common_Line_h__
