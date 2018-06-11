@@ -10,8 +10,8 @@
 
 #include <acf/ACF.h>
 #include <acf/MatP.h>
-#include <util/string_utils.h>
-#include <util/Logger.h>
+#include <common/string_utils.h>
+#include <common/Logger.h>
 
 #include <opencv2/core/cvstd.inl.hpp>
 #include <opencv2/core/hal/interface.h>

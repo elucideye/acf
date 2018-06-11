@@ -74,3 +74,13 @@ add_subdirectory(lib)
 if (ACF_BUILD_EXAMPLES)
   add_subdirectory(app)
 endif()
+
+# unit tests:
+if(ACF_BUILD_TESTS)
+
+  if(NOT TARGET acf_common)
+    add_subdirectory(app/common)
+  endif()
+  
+  add_subdirectory(test)
+endif()

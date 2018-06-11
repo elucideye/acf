@@ -8,12 +8,6 @@
 
 */
 
-// clang-format off
-#if defined(ACF_ADD_TO_STRING)
-#  include <io/stdlib_string.h>
-#endif
-// clang-format on
-
 #include <acf/ACF.h>
 #include <acf/ACFIO.h>
 #include <acf/acf_common.h>
@@ -200,11 +194,6 @@ int Detector::deserialize(ParserNodeDetector& detector_) { return -1; }
 #endif // ACF_SERIALIZE_WITH_CVMATIO
 
 ACF_NAMESPACE_END
-
-// clang-format off
-#if defined(ACF_ADD_TO_STRING)
-#  include "io/stdlib_string.h"
-#endif
 
 ACF_NAMESPACE_BEGIN
 

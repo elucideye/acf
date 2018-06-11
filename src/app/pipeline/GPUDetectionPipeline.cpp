@@ -2,8 +2,8 @@
 #include "lines.h"
 
 #include <acf/MatP.h>
-#include <util/ScopeTimeLogger.h>
-#include <util/make_unique.h>
+#include <common/ScopeTimeLogger.h>
+#include <common/make_unique.h>
 
 #include <thread_pool/thread_pool.hpp> // tp::ThreadPool<>
 

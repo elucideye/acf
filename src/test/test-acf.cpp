@@ -62,16 +62,10 @@ int gauze_main(int argc, char** argv)
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// clang-format off
-#if defined(ACF_ADD_TO_STRING)
-#  include <io/stdlib_string.h>
-#endif
-// clang-format on
-
 #include <acf/ACF.h>
 #include <acf/MatP.h>
 #include <acf/gpu/triangle_opt.h>
-#include <util/Logger.h>
+#include <common/Logger.h>
 #include <io/cereal_pba.h>
 
 // clang-format off

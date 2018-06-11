@@ -59,17 +59,13 @@
 
 */
 
-#if defined(ACF_ADD_TO_STRING)
-#include <io/stdlib_string.h> // first
-#endif
-
 #include "GPUDetectionPipeline.h"
 #include "VideoCaptureImage.h"
 
 #include <acf/ACF.h>
 #include <acf/GPUACF.h>
-#include <util/Logger.h>
-#include <util/ScopeTimeLogger.h>
+#include <common/Logger.h>
+#include <common/ScopeTimeLogger.h>
 
 #include <aglet/GLContext.h>
 

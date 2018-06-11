@@ -41,62 +41,46 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules")
 ### HunterGate and cache ###
 ############################
 
-option(ACF_USE_DRISHTI_UPLOAD "Use drishti upload configuration" OFF)
 option(DRISHTI_UPLOAD_IGNORE_SUBMODULES "Ignore submodules" ON) # override
+
 set(drishti_upload_init "${CMAKE_CURRENT_LIST_DIR}/drishti-upload/init.cmake") # cache upload
 
-if(ACF_USE_DRISHTI_UPLOAD)
-  if(EXISTS "${drishti_upload_init}")
-    # CI: Locked CI build configuration
-    include("cmake/HunterGate.cmake") # HUNTER_ENABLED
-    include("${drishti_upload_init}")
-  else()
-    # FAILURE:
+include("src/app/cmake/HunterGate.cmake")
+
+if(HUNTER_PACKAGE_BUILD)
+  # URL/SHA1 will not be used actually, settings will be inherited
+  HunterGate(URL "${HUNTER_URL}" SHA1 "${HUNTER_SHA1}")
+else()
+  if(NOT EXISTS "${drishti_upload_init}")
     message(
       FATAL_ERROR
       "File does not exist:\n"
       "  ${drishti_upload_init}\n"
       "Run this command if submodule is not initialized:\n"
       "  git submodule update --init --recursive ."
-  )
-  endif()
-else()
-  set(ACF_HUNTER_GATE_URL "https://github.com/ruslo/hunter/archive/v0.22.8.tar.gz")
-  set(ACF_HUNTER_GATE_SHA1 "e7fe3f0b61b1b4844d440ec0a02ac73ddc5f0bb2")
-  if(HUNTER_ENABLED AND NOT ACF_IS_REPO_BUILD)
-    # DEPENDENCY: if(HUNTER_ENABLE): we are being used as a dependency from
-    # another project and we will use the config.cmake from the parent project.
-    message(STATUS "ACF Hunter package build detected")
-    include("cmake/HunterGate.cmake") # HUNTER_ENABLED
-    HunterGate(
-      URL "${ACF_HUNTER_GATE_URL}"
-      SHA1 "${ACF_HUNTER_GATE_SHA1}"
-    )
-  else()
-    # LOCAL: This is a local repository build and we are relying on a local
-    # config (instead of CI friendly drishti-upload) that is closer to the
-    # current default versions in ${HUNTER_ROOT}/cmake/configs/default.cmake
-    # *IF* we want to enable local project defaults then they would go in
-    # "${CMAKE_CURRENT_LIST_DIR}/cmake/Hunter/config.cmake"
-    message(STATUS "ACF in-repository build detected")
-    set(ACF_IS_REPO_BUILD TRUE CACHE STRING "Is a build from the local repository")
-    include("cmake/HunterGate.cmake") # HUNTER_ENABLED
-    HunterGate(
-      URL "${ACF_HUNTER_GATE_URL}"
-      SHA1 "${ACF_HUNTER_GATE_SHA1}"
-      FILEPATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Hunter/config.cmake"
     )
   endif()
+
+  # CI: Locked CI build configuration
+  include("${drishti_upload_init}")
 endif()
+
+# NOTE: The cmake source is maintained under the app directory
+# in order to provide a relocatable build tree that can link
+# to acf using:
+#
+#    hunter_config(acf GIT_SELF CMAKE_ARGS ...)
+#
 
 ###################
 ### ACF project ###
 ###################
 
 # See https://github.com/hunter-packages/check_ci_tag when changing VERSION
-project(acf VERSION 0.1.13)
+project(acf VERSION 0.1.14)
 
 set(ACF_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}")
+set(CMAKE_TOP_DIR "${PROJECT_SOURCE_DIR}/src/app/cmake")
 
 if(CMAKE_INTERPROCEDURAL_OPTIMIZATION)
   set(CMAKE_POLICY_DEFAULT_CMP0069 NEW) # for 3rd parties added by add_subdirectory
@@ -121,7 +105,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 ###############
 
 # make sure these are before first hunter_add_package() call
-include(cmake/default_options.cmake)
+include(${CMAKE_TOP_DIR}/default_options.cmake)
 
 ####################
 ## Version check ###
@@ -138,7 +122,7 @@ check_ci_tag()
 # see https://github.com/forexample/github-binary-release/blob/master/CMakeLists.txt
 
 include(InstallRequiredSystemLibraries)
-include("cmake/pack.cmake") # includes Cpack
+include("${CMAKE_TOP_DIR}/pack.cmake") # includes Cpack
 
 string(COMPARE NOTEQUAL "$ENV{TRAVIS_TAG}" "" travis_deploy)
 string(COMPARE EQUAL "$ENV{APPVEYOR_REPO_TAG}" "true" appveyor_deploy)
@@ -192,11 +176,6 @@ if(ACF_BUILD_TESTS)
   find_package(drishti_faces CONFIG REQUIRED)
 
 endif()
-
-if(ACF_SERIALIZE_WITH_CEREAL)
-  #### std::to_string ####
-  try_compile(ACF_HAVE_TO_STRING "${CMAKE_BINARY_DIR}/compile_tests" "${PROJECT_SOURCE_DIR}/cmake/to_string.cpp")
-endif(ACF_SERIALIZE_WITH_CEREAL)
 
 ################
 ## TEST DATA ###

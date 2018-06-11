@@ -13,18 +13,18 @@
 
 */
 
-#ifndef __util_cli_h__
-#define __util_cli_h__
+#ifndef __common_cli_h__
+#define __common_cli_h__
 
-#include <util/acf_util.h>
-#include <util/Line.h>
+#include <common/acf_common.h>
+#include <common/Line.h>
 
 #include <fstream>
 #include <vector>
 #include <string>
 
-UTIL_BEGIN_NAMESPACE(util) // namespace util {
-UTIL_BEGIN_NAMESPACE(cli)  // namespace cli {
+COMMON_BEGIN_NAMESPACE(util) // namespace util {
+COMMON_BEGIN_NAMESPACE(cli)  // namespace cli {
 
 // For use with istream_iterator to read complete lines (new line delimiter)
 // std::vector<std::string> lines;
@@ -71,15 +71,15 @@ expand(const std::string& filename, const std::string& ext = ".txt")
 }
 
 // util::cli::file::
-UTIL_BEGIN_NAMESPACE(file) // namespace file {
+COMMON_BEGIN_NAMESPACE(file) // namespace file {
 inline bool exists(const std::string& filename)
 {
     return std::ifstream(filename).good();
 }
-UTIL_END_NAMESPACE(file) // }
+COMMON_END_NAMESPACE(file) // }
 
 // util::cli::directory
-UTIL_BEGIN_NAMESPACE(directory) // namespace directory {
+COMMON_BEGIN_NAMESPACE(directory) // namespace directory {
 // Options:
 // * c++17 std::filesystem (not adopted yet)
 // * experimental c++14 (not adopted yet)
@@ -91,8 +91,8 @@ inline bool exists(const std::string& dir, const std::string& tag = ".acf")
 {
     return std::ofstream(dir + "/" + tag).good();
 }
-UTIL_END_NAMESPACE(directory) // }
-UTIL_END_NAMESPACE(cli)       // }
-UTIL_END_NAMESPACE(util)      // }
+COMMON_END_NAMESPACE(directory) // }
+COMMON_END_NAMESPACE(cli)       // }
+COMMON_END_NAMESPACE(util)      // }
 
 #endif // util_cli_h

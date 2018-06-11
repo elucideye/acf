@@ -9,10 +9,10 @@
 
 */
 
-#ifndef __util_core_Logger_h__
-#define __util_core_Logger_h__
+#ifndef __common_Logger_h__
+#define __common_Logger_h__
 
-#include <util/acf_util.h>
+#include <common/acf_common.h>
 
 #include <spdlog/spdlog.h>
 
@@ -26,7 +26,7 @@ namespace spdlog {
 class logger;
 }  // namespace spdlog
 
-UTIL_NAMESPACE_BEGIN
+COMMON_NAMESPACE_BEGIN
 
 class Logger
 {
@@ -131,6 +131,6 @@ inline std::string className(const std::string& prettyFunction)
 #define ACF_LOCATION_SIMPLE __CLASS_NAME__ + "::" + __METHOD_NAME__
 // clang-format on
 
-UTIL_NAMESPACE_END
+COMMON_NAMESPACE_END
 
-#endif // __util_core_Logger_h__
+#endif // __common_Logger_h__

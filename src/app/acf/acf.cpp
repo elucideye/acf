@@ -10,22 +10,15 @@
 
 // Local includes:
 
-// clang-format off
-#if defined(ACF_ADD_TO_STRING)
-#  include <io/stdlib_string.h> // android workaround
-#endif
-// clang-format on
-
 #include "GLDetector.h"
 
-#include <util/Logger.h>
-#include <util/string_utils.h>
-#include <util/cli.h>
-#include <util/LazyParallelResource.h>
-#include <io/cv_cereal.h>
+#include <common/Logger.h>
+#include <common/string_utils.h>
+#include <common/cli.h>
+#include <common/LazyParallelResource.h>
 
 #include <assert.h>
-#include <cereal/archives/json.hpp>
+
 // Package includes:
 
 #include <cxxopts.hpp>
@@ -488,22 +481,7 @@ int main(int argc, char** argv)
 
 // utility
 
-static void chooseBest(std::vector<cv::Rect>& objects, std::vector<double>& scores)
-{
-    if (objects.size() > 1)
-    {
-        int best = 0;
-        for (int i = 1; i < objects.size(); i++)
-        {
-            if (scores[i] > scores[best])
-            {
-                best = i;
-            }
-        }
-        objects = { objects[best] };
-        scores = { scores[best] };
-    }
-}
+#include <common/cv_cereal.h>
 
 static bool writeAsJson(const std::string& filename, const std::vector<cv::Rect>& objects)
 {
@@ -529,6 +507,23 @@ static bool writeAsText(const std::string& filename, const std::vector<cv::Rect>
         }
     }
     return ofs.good();
+}
+
+static void chooseBest(std::vector<cv::Rect>& objects, std::vector<double>& scores)
+{
+    if (objects.size() > 1)
+    {
+        int best = 0;
+        for (int i = 1; i < objects.size(); i++)
+        {
+            if (scores[i] > scores[best])
+            {
+                best = i;
+            }
+        }
+        objects = { objects[best] };
+        scores = { scores[best] };
+    }
 }
 
 static void drawObjects(cv::Mat& canvas, const std::vector<cv::Rect>& objects)
