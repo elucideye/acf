@@ -47,11 +47,19 @@ install(TARGETS ${test_app} DESTINATION bin)
 set(test_name AcfPipelineTest)
 message("test_app ${test_app} test_name ${test_name}")
 
+string(COMPARE EQUAL "$ENV{TRAVIS}" "true" travis_ci)
+string(COMPARE EQUAL "$ENV{APPVEYOR}" "True" appveyor_ci)
+if(travis_ci OR appveyor_ci)
+  set(acf_repeat 5) # using emulator is slow!
+else()
+  set(acf_repeat 256) # provide a meaningful frame rate estimate
+endif()
+
 gauze_add_test(
   NAME ${test_name}
   COMMAND ${test_app}
       --input=$<GAUZE_RESOURCE_FILE:${DRISHTI_FACES_FACE_IMAGE}>
-      --repeat=5
+      --repeat=${acf_repeat}
       --model=$<GAUZE_RESOURCE_FILE:${DRISHTI_ASSETS_FACE_DETECTOR}>
       --minimum=128
       --calibration=0.01

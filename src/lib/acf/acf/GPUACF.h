@@ -14,7 +14,7 @@
 #include <acf/ACF.h>
 #include <acf/acf_common.h>
 #include <acf/acf_export.h>
-#include <ogles_gpgpu/common/proc/../gl/memtransfer.h>
+#include <ogles_gpgpu/common/gl/memtransfer.h>
 #include <ogles_gpgpu/common/common_includes.h>
 // ogles_gpgpu shader lib:
 #include <ogles_gpgpu/common/proc/video.h>
@@ -76,8 +76,6 @@ public:
 
     void preConfig() override;
     void postConfig() override;
-    static cv::Mat getImage(ProcInterface& proc);
-    static cv::Mat getImage(ProcInterface& proc, cv::Mat& frame);
 
     virtual void operator()(const FrameInput& frame);
 

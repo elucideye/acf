@@ -17,7 +17,6 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/mat.inl.hpp>
 
-
 ACF_NAMESPACE_BEGIN
 
 struct PlaneInfo

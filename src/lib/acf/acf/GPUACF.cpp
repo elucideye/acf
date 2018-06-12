@@ -12,6 +12,7 @@
 #include <acf/ACF.h>
 #include <acf/MatP.h>
 #include <acf/convert.h>
+#include <acf/transfer.h>
 
 #include <util/make_unique.h>
 
@@ -534,29 +535,6 @@ void ACF::postConfig()
         // TODO: check rounding error (add clipping)?
         impl->m_crops.emplace_back(r.x / s, r.y / s, r.width / s, r.height / s);
     }
-}
-
-cv::Mat ACF::getImage(ProcInterface& proc, cv::Mat& frame)
-{
-    if (dynamic_cast<MemTransferOptimized*>(proc.getMemTransferObj()))
-    {
-        MemTransfer::FrameDelegate delegate = [&](const Size2d& size, const void* pixels, size_t bytesPerRow) {
-            frame = cv::Mat(size.height, size.width, CV_8UC4, const_cast<void*>(pixels), bytesPerRow).clone();
-        };
-        proc.getResultData(delegate);
-    }
-    else
-    {
-        frame.create(proc.getOutFrameH(), proc.getOutFrameW(), CV_8UC4); // noop if preallocated
-        proc.getResultData(frame.ptr());
-    }
-    return frame;
-}
-
-cv::Mat ACF::getImage(ProcInterface& proc)
-{
-    cv::Mat frame;
-    return getImage(proc, frame);
 }
 
 bool ACF::processImage(ProcInterface& proc, MemTransfer::FrameDelegate& delegate)
