@@ -60,7 +60,7 @@ if (ACF_BUILD_OGLES_GPGPU)
     # Only link aglet if we are actually going to run the tests
     target_link_libraries(${test_unit_app} PUBLIC aglet::aglet)
     target_compile_definitions(${test_unit_app} PUBLIC ACF_DO_GPU=1)
-    )
+  endif()
 endif()
 
 # GTest + CTest
