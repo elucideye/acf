@@ -67,4 +67,5 @@ endif()
 gauze_add_test(
   NAME ${test_unit_name}
   COMMAND ${test_unit_app}
+  "$<GAUZE_RESOURCE_FILE:${DRISHTI_FACES_FACE_IMAGE}>"  
 )
