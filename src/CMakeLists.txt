@@ -64,7 +64,10 @@ if((ACF_BUILD_TESTS OR ACF_BUILD_EXAMPLES) AND ACF_HAS_GPU AND ACF_BUILD_OGLES_G
 endif()
 
 hunter_add_package(sugar)
+find_package(sugar CONFIG REQUIRED)
 
+# Include sources from here so they will be visible for tests
+sugar_include(.)
 add_subdirectory(lib)
 
 ##################

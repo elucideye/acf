@@ -26,6 +26,7 @@ sugar_files(ACF_SRCS
   gradientHist.cpp
   gradientMag.cpp
   rgbConvert.cpp
+  transfer.cpp
   #######################
   ### Toolbox sources ###
   #######################  
@@ -44,6 +45,7 @@ sugar_files(ACF_HDRS
   ACFObject.h
   ObjectDetector.h
   random.h
+  transfer.h
   #######################
   ### Toolbox headers ###
   #######################  
@@ -58,6 +60,12 @@ sugar_files(ACF_HDRS_PUBLIC
   MatP.h
   acf_common.h
   draw.h
+)
+
+# Collect sources for testing
+sugar_files(ACF_TEST_SRCS
+  convert.cpp
+  convert.h
 )
 
 if(ACF_BUILD_OGLES_GPGPU)
@@ -85,4 +93,15 @@ if(ACF_BUILD_OGLES_GPGPU)
     gpu/triangle_opt.cpp
     gpu/binomial.cpp
   )
+
+  # Collect private unit test sources
+  sugar_Files(ACF_TEST_SRCS
+    transfer.cpp
+    transfer.h    
+    gpu/triangle_opt.h
+    gpu/triangle_opt.cpp
+    gpu/multipass/triangle_opt_pass.h
+    gpu/multipass/triangle_opt_pass.cpp
+  )
+  
 endif()

@@ -7,9 +7,6 @@
 #
 # Note that requirements propagated automatically, for example:
 
-find_package(sugar CONFIG REQUIRED)
-sugar_include(.)
-
 ### acf_shaders ### : for acf lib and tests
 if(ACF_BUILD_OGLES_GPGPU)
   add_library(acf_shaders ${ACF_GPU_SRCS} ${ACF_GPU_HDRS})
@@ -46,6 +43,14 @@ endif()
 
 target_include_directories(acf
   PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>" # generated acf_export.h
+  )
+
+# Create a convenience INTERFACE lib for testing
+add_library(acf_headers INTERFACE)
+target_include_directories(acf_headers
+  INTERFACE
+  "$<BUILD_INTERFACE:${ACF_ROOT_DIR}/src/lib/acf>" # for io, acf  
   "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>" # generated acf_export.h
 )
 
