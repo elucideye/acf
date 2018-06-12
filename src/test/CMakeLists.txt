@@ -53,9 +53,14 @@ add_executable(${test_unit_app} ${acf_ut_srcs})
 set_property(TARGET ${test_unit_app} PROPERTY FOLDER "app/tests")
 target_link_libraries(${test_unit_app} PUBLIC acf_headers acf_common GTest::gtest ${OpenCV_LIBS})
 
-if (ACF_BUILD_OGLES_GPGPU AND TARGET aglet::aglet)
-  target_link_libraries(${test_unit_app} PUBLIC aglet::aglet ogles_gpgpu::ogles_gpgpu)
-  target_compile_definitions(${test_unit_app} PUBLIC ACF_DO_GPU=1)
+if (ACF_BUILD_OGLES_GPGPU)
+  # Always link ogles_gpgpu in such cases to make sure the GPGPU test code builds.
+  target_link_libraries(${test_unit_app} PUBLIC ogles_gpgpu::ogles_gpgpu)
+  if(TARGET aglet::aglet)
+    # Only link aglet if we are actually going to run the tests
+    target_link_libraries(${test_unit_app} PUBLIC aglet::aglet)
+    target_compile_definitions(${test_unit_app} PUBLIC ACF_DO_GPU=1)
+    )
 endif()
 
 # GTest + CTest
