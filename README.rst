@@ -113,7 +113,7 @@ After the environment is configured, you can build for any supported
 
 ::
 
-    polly.py --toolchain ${TOOLCHAIN} --config ${CONFIG} --fwd HUNTER_CONFIGURATION_TYPES=${CONFIG} --install --verbose
+    polly.py --toolchain ${TOOLCHAIN} --config-all ${CONFIG} --install --verbose
 
 ========
 Training
@@ -129,13 +129,13 @@ If you would like to integrate the library in another project, the easiest thing
 
 ::
 
-    polly.py --toolchain ${TOOLCHAIN} --config ${CONFIG} --fwd HUNTER_CONFIGURATION_TYPES=${CONFIG} ACF_BUILD_SHARED_SDK=ON --install --verbose
+    polly.py --toolchain ${TOOLCHAIN} --config-all ${CONFIG} --fwd ACF_BUILD_SHARED_SDK=ON --install --verbose
 
 For iOS, you can use `polly` to create a dynamic framework from the generated `libacf.dylib` (see command line options) as a post build step, note the additional `--framework` and `--framework-lib` options in the build command below:
 
 ::
 
-    polly.py --toolchain ${TOOLCHAIN} --config ${CONFIG} --fwd HUNTER_CONFIGURATION_TYPES=${CONFIG} ACF_BUILD_SHARED_SDK=ON --install --verbose --framework --framework-lib libacf.dylib
+    polly.py --toolchain ${TOOLCHAIN} --config-all ${CONFIG} --fwd ACF_BUILD_SHARED_SDK=ON --install --verbose --framework --framework-lib libacf.dylib
     
 The resulting framework will be generated in the `_framework` directory as shown below:    
    
