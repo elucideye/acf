@@ -278,7 +278,7 @@ void GPUDetectionPipeline::computeAcf(const ogles_gpgpu::FrameInput& frame, bool
     glDepthMask(GL_FALSE);
 
     impl->acf->setDoLuvTransfer(doLuv);
-    impl->acf->setDoAcfTrasfer(doDetection);
+    impl->acf->setDoAcfTransfer(doDetection);
 
     (*impl->acf)(frame);
 }
