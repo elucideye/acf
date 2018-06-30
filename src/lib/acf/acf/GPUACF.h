@@ -67,7 +67,7 @@ public:
     bool getChannelStatus();
     bool getFlowStatus();
     void setDoLuvTransfer(bool flag);
-    void setDoAcfTrasfer(bool flag);
+    void setDoAcfTransfer(bool flag);
 
     // ACF base resolution to Grayscale image
     float getGrayscaleScale() const;

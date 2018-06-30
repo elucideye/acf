@@ -372,7 +372,7 @@ void ACF::setDoLuvTransfer(bool flag)
     impl->m_doLuvTransfer = flag;
 }
 
-void ACF::setDoAcfTrasfer(bool flag)
+void ACF::setDoAcfTransfer(bool flag)
 {
     impl->m_doAcfTransfer = flag;
 }
