@@ -67,8 +67,9 @@ struct GPUDetectionPipeline::Impl
 {
     using time_point = std::chrono::high_resolution_clock::time_point;
 
-    Impl(GPUDetectionPipeline::DetectionPtr& detector)
+    Impl(GPUDetectionPipeline::DetectionPtr& detector, void *glContext=nullptr)
         : detector(detector)
+        , glContext(glContext)
     {
         threads = util::make_unique<tp::ThreadPool<>>();
     }
@@ -128,10 +129,11 @@ GPUDetectionPipeline::GPUDetectionPipeline
     int rotation,
     int minObjectWidth,
     bool useLatency,
-    bool doCpuACF
+    bool doCpuACF,
+    void *glContext
 )
 {
-    impl = util::make_unique<Impl>(detector);
+    impl = util::make_unique<Impl>(detector, glContext);
     impl->minObjectWidth = minObjectWidth;
     impl->doOptimizedPipeline = useLatency;
     impl->doCpuACF = doCpuACF;

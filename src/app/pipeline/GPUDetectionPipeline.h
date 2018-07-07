@@ -63,7 +63,8 @@ public:
         int rotation,
         int minObjectWidth,
         bool useLatency = true,
-        bool doCpuACF = false
+        bool doCpuACF = false,
+        void *glContext = nullptr
     );
     virtual ~GPUDetectionPipeline();
 

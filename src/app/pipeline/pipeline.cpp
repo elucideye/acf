@@ -106,6 +106,13 @@ class logger;
 #endif
 // clang-format on
 
+#if __APPLE__
+#  include "TargetConditionals.h"
+#  if (TARGET_OS_IPHONE && TARGET_IPHONE_SIMULATOR) || TARGET_OS_IPHONE
+#    define IS_IOS 1
+#  endif
+#endif
+
 template <typename T>
 void* void_ptr(const T* ptr)
 {
@@ -165,6 +172,8 @@ struct Application
 
         ogles_gpgpu::ACF::updateGL();
 
+        ogles_gpgpu::ACF::tryEnablePlatformOptimizations();
+
         // Create an object detector:
         detector = std::make_shared<acf::Detector>(model);
         detector->setDoNonMaximaSuppression(true);
@@ -176,6 +185,11 @@ struct Application
             detector->acfModify(dflt);
         }
 
+        void *glContext = nullptr;
+#if defined(IS_IOS)
+        glContext = ogles_gpgpu::Core::getCurrentEAGLContext();
+#endif
+        
         // Create the asynchronous scheduler:
         pipeline = std::make_shared<acf::GPUDetectionPipeline>
         (
@@ -185,7 +199,8 @@ struct Application
             0,
             minWidth,
             useLatency,
-            doCpuAcf
+            doCpuAcf,
+            glContext
         );
 
         // Instantiate an ogles_gpgpu display class that will draw to the
