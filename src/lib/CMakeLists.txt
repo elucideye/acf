@@ -9,9 +9,25 @@
 
 ### acf_shaders ### : for acf lib and tests
 if(ACF_BUILD_OGLES_GPGPU)
+
   add_library(acf_shaders ${ACF_GPU_SRCS} ${ACF_GPU_HDRS})
   target_link_libraries(acf_shaders PUBLIC ogles_gpgpu::ogles_gpgpu)
   set(acf_modules acf_shaders)
+
+  # Allow parallel texture fetches on iOS by default, but allow
+  # the user to disable.  This is a hedge as iOS texture cache
+  # stuff has almost no documentation.
+  if(IOS)
+    set(acf_parallel_textures ON)
+  else()
+    set(acf_parallel_textures OFF)
+  endif()
+  option(ACF_PARALLEL_TEXTURE_FETCH "Fetch textures in parallel" ${acf_parallel_textures})
+
+  if(ACF_PARALLEL_TEXTURE_FETCH)
+    target_compile_definitions(acf_shaders PUBLIC ACF_PARALLEL_TEXTURE_FETCH=1)
+  endif()
+
 endif()
 
 ### acf ###
