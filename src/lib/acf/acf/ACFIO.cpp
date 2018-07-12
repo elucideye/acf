@@ -13,7 +13,9 @@
 #include <acf/acf_common.h>
 #include <io/cereal_pba.h>
 
-#include <MatlabIO.hpp>
+#if defined(ACF_SERIALIZE_WITH_CVMATIO)
+#  include <MatlabIO.hpp>
+#endif 
 
 #include <opencv2/core/hal/interface.h>
 
