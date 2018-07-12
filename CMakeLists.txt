@@ -77,7 +77,7 @@ endif()
 ###################
 
 # See https://github.com/hunter-packages/check_ci_tag when changing VERSION
-project(acf VERSION 0.1.15)
+project(acf VERSION 0.1.16)
 
 set(ACF_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}")
 set(CMAKE_TOP_DIR "${PROJECT_SOURCE_DIR}/src/app/cmake")
