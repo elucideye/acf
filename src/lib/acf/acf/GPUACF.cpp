@@ -826,8 +826,8 @@ cv::Mat ACF::getChannelsImpl()
                 }
             }; // clang-format on
 
-#if OGLES_GPGPU_IOS
-            // iOS texture cache can be queried in parallel:
+#if defined(ACF_PARALLEL_TEXTURE_FETCH)
+            // iOS texture cache can be queried in parallel (at least):
             cv::parallel_for_({ 0, int(planeIndex.size()) }, worker);
 #else
             worker({ 0, int(planeIndex.size()) });
