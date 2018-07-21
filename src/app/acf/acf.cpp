@@ -172,6 +172,7 @@ int gauze_main(int argc, char** argv)
     bool doRandom = false;
     double cascCal = 0.0;
     int minWidth = -1; // minimum object width
+    float overlap = -1.f;
     //int maxWidth = -1; /* maximum object width TODO */
 
     cxxopts::Options options("acf-detect", "Command line interface for ACF object detection (see Piotr's toolbox)");
@@ -194,6 +195,7 @@ int gauze_main(int argc, char** argv)
         ("g,gpu", "Use gpu pyramid processing", cxxopts::value<bool>(doGpu))
         ("pyramids", "Dump pyramids", cxxopts::value<bool>(doPyramids))
         ("random", "Random frames", cxxopts::value<bool>(doRandom))
+        ("overlap", "NMS overlap", cxxopts::value<float>(overlap))
         ("h,help", "Print help message");
     // clang-format on
 
@@ -286,6 +288,15 @@ int gauze_main(int argc, char** argv)
                 dflt.cascThr = { "cascThr", -1.0 };
                 dflt.cascCal = { "cascCal", cascCal };
                 acf->acfModify(dflt);
+            }
+            
+            if (cli.count("overlap"))
+            {
+                if (overlap <= 0.f || overlap > 1.0)
+                {
+                    throw std::runtime_error("Invalid overlap specified in " + std::to_string(overlap));
+                }
+                acf->opts.pNms->overlap = overlap;
             }
         }
         else

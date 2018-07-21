@@ -234,3 +234,22 @@ endif()
 ##############
 
 add_subdirectory(src)
+
+
+set(acf_asset_release_url "https://github.com/elucideye/acf/releases/download/v0.0.0")
+
+hunter_private_data(
+  URL "${acf_asset_release_url}/acf_unsplash_60x40_eye_any_color_d4.cpb"
+  SHA1 "063605f07fde62322003690a1bc8d6323025f088"
+  FILE "acf_unsplash_60x40_eye_any_color_d4.cpb"
+  LOCATION ACF_64x40_EYE_ANY_COLOR_D4
+)
+
+hunter_private_data(
+  URL "${acf_asset_release_url}/acf_unsplash_60x40_eye_any_gray_d4.cpb"
+  SHA1 "66a9ed85cc46c1ef193c27e403aae9679114e743"
+  FILE "acf_unsplash_60x40_eye_any_gray_d4.cpb"
+  LOCATION ACF_64x40_EYE_ANY_GRAY_D4
+)
+
+install(FILES ${ACF_64x40_EYE_ANY_GRAY_D4} ${ACF_64x40_EYE_ANY_COLOR_D4} DESTINATION share)
