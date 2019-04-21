@@ -1,9 +1,6 @@
 #include "VideoCaptureImage.h"
 
-#include <opencv2/core/cvstd.inl.hpp>
-#include <opencv2/core/mat.inl.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/videoio/videoio_c.h>
+#include <opencv2/videoio.hpp>
 
 VideoCaptureImage::VideoCaptureImage(cv::Mat  image, int frames)
     : image(std::move(image))
@@ -39,7 +36,7 @@ void VideoCaptureImage::release()
     image.release();
 }
 
-bool VideoCaptureImage::open(const cv::String& filename)
+bool VideoCaptureImage::open(const cv::String& filename, int apiPreference)
 {
     image = cv::imread(filename);
     return !image.empty();
@@ -59,11 +56,11 @@ double VideoCaptureImage::get(int propId) const
 {
     switch (propId)
     {
-        case CV_CAP_PROP_FRAME_WIDTH:
+        case cv::CAP_PROP_FRAME_WIDTH:
             return static_cast<double>(image.cols);
-        case CV_CAP_PROP_FRAME_HEIGHT:
+        case cv::CAP_PROP_FRAME_HEIGHT:
             return static_cast<double>(image.rows);
-        case CV_CAP_PROP_FRAME_COUNT:
+        case cv::CAP_PROP_FRAME_COUNT:
             return static_cast<double>(frames);
         default:
             return 0.0;

@@ -504,8 +504,8 @@ static cv::Size getSize(cv::VideoCapture& video)
     // clang-format off
     return
     {
-        static_cast<int>(video.get(CV_CAP_PROP_FRAME_WIDTH)),
-        static_cast<int>(video.get(CV_CAP_PROP_FRAME_HEIGHT))
+        static_cast<int>(video.get(cv::CAP_PROP_FRAME_WIDTH)),
+        static_cast<int>(video.get(cv::CAP_PROP_FRAME_HEIGHT))
     };
     // clang-format on
 }
