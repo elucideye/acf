@@ -59,7 +59,7 @@ matrix:
 
     - os: linux
       env: >
-        TOOLCHAIN=android-ndk-r17-api-24-arm64-v8a-clang-libcxx14
+        TOOLCHAIN=android-ndk-r18b-api-24-arm64-v8a-clang-libcxx11
         CONFIG=Release
         INSTALL=--strip
         TEST=--test
@@ -90,19 +90,19 @@ matrix:
         GPU=OFF
         BUILD_SHARED=ON
 
-    - os: osx
-      osx_image: xcode8.3
-      env: >
-        TOOLCHAIN=osx-10-12-sanitize-address-hid-sections
-        CONFIG=Release
-        INSTALL=--install
-        TEST=--test
-        GPU=OFF
-        BUILD_SHARED=ON
+    # - os: osx
+    #   osx_image: xcode8.3
+    #   env: >
+    #     TOOLCHAIN=osx-10-12-sanitize-address-hid-sections
+    #     CONFIG=Release
+    #     INSTALL=--install
+    #     TEST=--test
+    #     GPU=OFF
+    #     BUILD_SHARED=ON
 
     - os: osx
       env: >
-        TOOLCHAIN=android-ndk-r17-api-19-armeabi-v7a-neon-clang-libcxx        
+        TOOLCHAIN=android-ndk-r18b-api-24-arm64-v8a-clang-libcxx11
         CONFIG=MinSizeRel
         INSTALL=--strip
         TEST=--test
