@@ -26,7 +26,6 @@ sugar_files(ACF_SRCS
   gradientHist.cpp
   gradientMag.cpp
   rgbConvert.cpp
-  transfer.cpp
   #######################
   ### Toolbox sources ###
   #######################  
@@ -45,7 +44,6 @@ sugar_files(ACF_HDRS
   ACFObject.h
   ObjectDetector.h
   random.h
-  transfer.h
   #######################
   ### Toolbox headers ###
   #######################  
