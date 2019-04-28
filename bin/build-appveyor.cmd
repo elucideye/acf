@@ -15,6 +15,8 @@ python %POLLY_ROOT%\bin\polly.py ^
 --toolchain "%2%" ^
 --test ^
 --fwd ^
+ACF_OPENGL_ES2=OFF ^
+ACF_OPENGL_ES3=OFF ^
 ACF_USE_DRISHTI_UPLOAD=YES ^
 ACF_BUILD_SHARED_SDK="%3" ^
 ACF_COPY_3RDPARTY_LICENSES=ON ^
