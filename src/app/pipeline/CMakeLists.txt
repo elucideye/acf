@@ -38,6 +38,12 @@ target_link_libraries(${test_app} PUBLIC aglet::aglet)
 target_include_directories(${test_app} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../>")
 target_compile_definitions(${test_app} PUBLIC ACF_DO_GPU=1)
 
+if(ACF_OPENGL_ES2)
+  target_compile_definitions(${test_app} PUBLIC ACF_OPENGL_ES2=ON)
+elseif(ACF_OPENGL_ES3)
+  target_compile_definitions(${test_app} PUBLIC ACF_OPENGL_ES3=ON)
+endif()
+
 set_property(TARGET ${test_app} PROPERTY FOLDER "app/console")
 install(TARGETS ${test_app} DESTINATION bin)
 

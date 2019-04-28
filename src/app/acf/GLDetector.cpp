@@ -19,7 +19,7 @@ class GLContext;
 }  // namespace aglet
 
 // clang-format off
-#ifdef ANDROID
+#if defined(ANDROID) || defined(OGLES_GPGPU_NIX)
 #  define DFLT_TEXTURE_FORMAT GL_RGBA
 #else
 #  define DFLT_TEXTURE_FORMAT GL_BGRA
@@ -52,8 +52,16 @@ GLDetector::GLDetector(const std::string& filename, int maxSize)
     m_impl->featureKind = ogles_gpgpu::getFeatureKind(opts.pPyramid->pChns.get());
     CV_Assert(m_impl->featureKind != ogles_gpgpu::ACF::FeatureKind::kUnknown);
 
+#if defined(ACF_OPENGL_ES2)
+    static const auto glType = aglet::GLContext::kGLES20;
+#elif defined(ACF_OPENGL_ES3)
+    static const auto glType = aglet::GLContext::kGLES30;
+#else
+    static const auto glType = aglet::GLContext::kGL;
+#endif
+
     // Iniialize the OpenGL context:
-    m_impl->context = aglet::GLContext::create(aglet::GLContext::kAuto);
+    m_impl->context = aglet::GLContext::create(aglet::GLContext::kAuto, "", 640, 480, glType);
     CV_Assert(m_impl->context && (*m_impl->context));
     ogles_gpgpu::ACF::updateGL();
 

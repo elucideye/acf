@@ -99,7 +99,7 @@ class logger;
 }  // namespace spdlog
 
 // clang-format off
-#ifdef ANDROID
+#if defined(ANDROID) || defined(OGLES_GPGPU_NIX)
 #  define TEXTURE_FORMAT GL_RGBA
 #else
 #  define TEXTURE_FORMAT GL_BGRA
@@ -154,15 +154,22 @@ struct Application
         }
 
         // Create an OpenGL context:
+#if defined(ACF_OPENGL_ES2)
+        static const auto glType = aglet::GLContext::kGLES20;
+#elif defined(ACF_OPENGL_ES3)
+        static const auto glType = aglet::GLContext::kGLES30;
+#else
+        static const auto glType = aglet::GLContext::kGL;
+#endif
         const auto size = getSize(*video);
-        context = aglet::GLContext::create
-        (
+        context = aglet::GLContext::create(
             aglet::GLContext::kAuto,
             window ? "acf" : "",
             size.width,
-            size.height
-        ); 
-
+            size.height,
+            glType
+        );
+        
         ogles_gpgpu::ACF::updateGL();
 
         // Create an object detector:
