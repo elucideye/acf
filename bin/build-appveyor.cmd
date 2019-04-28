@@ -11,7 +11,7 @@ echo POLLY_ROOT %POLLY_ROOT%
 python %POLLY_ROOT%\bin\polly.py ^
 --verbose ^
 --archive acf ^
---config "%1%" ^
+--config-all "%1%" ^
 --toolchain "%2%" ^
 --test ^
 --fwd ^
