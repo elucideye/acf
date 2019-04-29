@@ -12,9 +12,6 @@
 #include <gtest/gtest-test-part.h>
 #include <gtest/gtest.h>
 
-#include <ogles_gpgpu/common/proc/video.h>
-#include <ogles_gpgpu/common/types.h>
-#include <ogles_gpgpu/platform/opengl/gl_includes.h>
 
 #include <opencv2/core.hpp>
 #include <opencv2/core/base.hpp>
@@ -64,7 +61,6 @@ int gauze_main(int argc, char** argv)
 
 #include <acf/ACF.h>
 #include <acf/MatP.h>
-#include <acf/gpu/triangle_opt.h> // private
 #include <acf/convert.h> // private
 #include <io/cereal_pba.h> // private
 #include <common/Logger.h> 
@@ -72,7 +68,14 @@ int gauze_main(int argc, char** argv)
 // clang-format off
 #if defined(ACF_DO_GPU)
 #  include <acf/GPUACF.h>
+#  include <acf/gpu/triangle_opt.h> // private
+
 #  include <aglet/GLContext.h>
+
+#  include <ogles_gpgpu/common/proc/video.h>
+#  include <ogles_gpgpu/common/types.h>
+#  include <ogles_gpgpu/platform/opengl/gl_includes.h>
+
 static int gWidth = 640;
 static int gHeight = 480;
 #  if defined(ACF_OPENGL_ES2)

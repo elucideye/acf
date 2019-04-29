@@ -27,7 +27,6 @@ int gauze_main(int argc, char** argv)
 }
 
 #include <acf/convert.h> // private
-#include <acf/transfer.h>
 
 #include <opencv2/core/base.hpp>
 #include <opencv2/core/cvstd.inl.hpp>
@@ -47,6 +46,7 @@ int gauze_main(int argc, char** argv)
 #include <ogles_gpgpu/platform/opengl/gl_includes.h>
 
 #include <acf/gpu/triangle_opt.h> // private
+#include <acf/transfer.h>
 
 // clang-format off
 #if defined(ANDROID) || defined(OGLES_GPGPU_NIX)
