@@ -17,6 +17,11 @@ target_link_libraries(${test_api_app} PUBLIC acf::acf acf_common GTest::gtest ${
 if (ACF_BUILD_OGLES_GPGPU AND TARGET aglet::aglet)
   target_link_libraries(${test_api_app} PUBLIC aglet::aglet)
   target_compile_definitions(${test_api_app} PUBLIC ACF_DO_GPU=1)
+  if(ACF_OPENGL_ES2)
+    target_compile_definitions(${test_api_app} PUBLIC ACF_OPENGL_ES2=ON)
+  elseif(ACF_OPENGL_ES3)
+    target_compile_definitions(${test_api_app} PUBLIC ACF_OPENGL_ES3=ON)
+  endif()
 endif()
 
 # GTest + CTest
@@ -60,6 +65,11 @@ if (ACF_BUILD_OGLES_GPGPU)
     # Only link aglet if we are actually going to run the tests
     target_link_libraries(${test_unit_app} PUBLIC aglet::aglet)
     target_compile_definitions(${test_unit_app} PUBLIC ACF_DO_GPU=1)
+    if(ACF_OPENGL_ES2)
+      target_compile_definitions(${test_unit_app} PUBLIC ACF_OPENGL_ES2=ON)
+    elseif(ACF_OPENGL_ES3)
+      target_compile_definitions(${test_unit_app} PUBLIC ACF_OPENGL_ES3=ON)
+    endif()
   endif()
 endif()
 

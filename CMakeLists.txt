@@ -77,7 +77,7 @@ endif()
 ###################
 
 # See https://github.com/hunter-packages/check_ci_tag when changing VERSION
-project(acf VERSION 0.1.16)
+project(acf VERSION 0.1.17)
 
 set(ACF_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}")
 set(CMAKE_TOP_DIR "${PROJECT_SOURCE_DIR}/src/app/cmake")
@@ -103,6 +103,8 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 ###############
 ### Options ###
 ###############
+
+set(HUNTER_PROJECT_NAME ACF)
 
 # make sure these are before first hunter_add_package() call
 include(${CMAKE_TOP_DIR}/default_options.cmake)

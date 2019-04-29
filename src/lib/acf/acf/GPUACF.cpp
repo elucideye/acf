@@ -41,9 +41,7 @@
 #include <ogles_gpgpu/common/proc/rgb2luv.h>
 
 // generic shaders
-#include <opencv2/core/base.hpp>
-#include <opencv2/core/hal/interface.h>
-#include <opencv2/core/mat.inl.hpp>
+#include <opencv2/core.hpp>
 
 #include <stddef.h>
 #include <cstdint>
@@ -52,7 +50,7 @@
 #include <assert.h>
 
 // clang-format off
-#ifdef ANDROID
+#if defined(ANDROID) || defined(OGLES_GPGPU_NIX)
 #  define TEXTURE_FORMAT GL_RGBA
 #  define TEXTURE_FORMAT_IS_RGBA 1
 #else

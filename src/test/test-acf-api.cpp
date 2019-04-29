@@ -14,6 +14,7 @@
 
 #include <ogles_gpgpu/common/proc/video.h>
 #include <ogles_gpgpu/common/types.h>
+#include <ogles_gpgpu/platform/opengl/gl_includes.h>
 
 #include <opencv2/core.hpp>
 #include <opencv2/core/base.hpp>
@@ -74,15 +75,15 @@ int gauze_main(int argc, char** argv)
 #  include <aglet/GLContext.h>
 static int gWidth = 640;
 static int gHeight = 480;
-#if defined(OGLES_GPGPU_OPENGL_ES3)
-static aglet::GLContext::GLVersion gVersion = aglet::GLContext::kGLES30;
-#else // defined(OGLES_GPGPU_OPENGL_ES3)
-static aglet::GLContext::GLVersion gVersion = aglet::GLContext::kGLES20;
-#endif // defined(OGLES_GPGPU_OPENGL_ES3)
+#  if defined(ACF_OPENGL_ES2)
+static const auto gVersion = aglet::GLContext::kGLES20;
+#  elif defined(ACF_OPENGL_ES3)
+static const auto gVersion = aglet::GLContext::kGLES30;
+#  else
+static const auto gVersion = aglet::GLContext::kGL;
+#  endif // defined(OGLES_GPGPU_OPENGL_ES3)
 #endif // defined(ACF_DO_GPU)
 // clang-format on
-
-#include <ogles_gpgpu/platform/opengl/gl_includes.h>
 
 #include <cmath>
 #include <fstream>
@@ -93,7 +94,7 @@ class logger;
 }  // namespace spdlog
 
 // clang-format off
-#ifdef ANDROID
+#if defined(ANDROID) || defined(OGLES_GPGPU_NIX)
 #  define DFLT_TEXTURE_FORMAT GL_RGBA
 #else
 #  define DFLT_TEXTURE_FORMAT GL_BGRA
@@ -138,7 +139,7 @@ protected:
 // (some combinations could be tested, but that is probably excessive!)
 // truth = loadImage(truthFilename);
 #if defined(ACF_DO_GPU)
-        m_context = aglet::GLContext::create(aglet::GLContext::kAuto);
+        m_context = aglet::GLContext::create(aglet::GLContext::kAuto, "", 640, 480, gVersion);
         CV_Assert(m_context && (*m_context));
         ogles_gpgpu::ACF::updateGL();
 #endif

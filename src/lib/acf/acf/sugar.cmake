@@ -26,7 +26,6 @@ sugar_files(ACF_SRCS
   gradientHist.cpp
   gradientMag.cpp
   rgbConvert.cpp
-  transfer.cpp
   #######################
   ### Toolbox sources ###
   #######################  
@@ -45,7 +44,6 @@ sugar_files(ACF_HDRS
   ACFObject.h
   ObjectDetector.h
   random.h
-  transfer.h
   #######################
   ### Toolbox headers ###
   #######################  
@@ -71,8 +69,8 @@ sugar_files(ACF_TEST_SRCS
 if(ACF_BUILD_OGLES_GPGPU)
   # Public GPUACF classes added to the main library
   sugar_files(ACF_HDRS_PUBLIC GPUACF.h)
-  sugar_files(ACF_HDRS convert.h) 
-  sugar_files(ACF_SRCS GPUACF.cpp convert.cpp)
+  sugar_files(ACF_HDRS convert.h transfer.h)
+  sugar_files(ACF_SRCS GPUACF.cpp convert.cpp transfer.cpp)
 
   # All other shaders to in the acf_shaders utility lib for reuse
   sugar_files(ACF_GPU_HDRS
